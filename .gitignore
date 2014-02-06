@@ -1,13 +1,7 @@
-# Compiled Object files
-*.slo
-*.lo
-*.o
+# Build and Release Folders
+bin/
+lib/
+build/
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
+# temp files
+.*~
