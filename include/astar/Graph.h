@@ -1,4 +1,13 @@
-
+/**
+* \file Graph.h
+* \brief Description of an undirected generic Graph
+* \author Steve T.
+* \version 0.1
+* \date 07/02/2014
+*
+* A generic template class for undirected Graphs.
+* 
+*/
 #ifndef _CLASS_GRAPH
 #define _CLASS_GRAPH
 
@@ -9,23 +18,25 @@
 namespace astar
 {
 	
-/* Generates root positions compatible with existing contact constraints*/
-template<typename Numeric=float, int Dim=10000, typename Index = int, typename NodeContent = int>
+/// \class Graph
+/// \brief A generic template class for undirected Graphs. AllowCycles template parameter
+/// indicates whether cycles are allowed or not in the graph.
+template<class NodeContent, typename Numeric=float, int Dim=10000, typename Index=int, bool AllowCycles=false>
 class Graph
 {
-	// friend class AStar; TODO Investigate this
+	template<class NodeContent, typename Numeric, int Dim, typename Index, bool AllowCycles> friend class AStar;
+
 public:
 	typedef std::vector<Index> T_Connexion;
 	typedef std::array<T_Connexion, Dim> T_Edges;
 	typedef std::array<NodeContent*, Dim> T_NodeContentPtr;
 
 public:
+	///\brief Constructor
 	 Graph()
-		 : currentIndex_(-1)
-	 {
-		 // NOTHING
-	 }
-
+		 : currentIndex_(-1) {}
+		 
+	///\brief Destructor
 	~Graph()
 	{
 		for(int i=0; i <= currentIndex_; ++i)
@@ -34,35 +45,45 @@ public:
 		}
 	}
 
-private:
-	Graph(const Graph&);
-	Graph& operator=(const Graph&);
-
 public:
+	///  \brief Adds a NodeContent to the graph, if the graph does not alreay contain
+	///  Dim nodes.
+	///  \param node the NodeContent to be added to the graph
+	///  \param return : the index of the added NodeContent, which is equal to the total number of nodes -1
 	Index AddNode(NodeContent* node)
 	{
 		if(++currentIndex_ < Dim)
 		{
 			nodeContents_[currentIndex_] = node;
 		}
-		return currentIndex_ < Dim ? currentIndex_ : -1;
+		return currentIndex_ < Dim ? currentIndex_ : currentIndex_ - 1;
 	}
 
-	// No cycle allowed
-	void AddEdge(Index a, Index b, bool checkForCycles = true)
+	///  \brief Adds an Edge between indicated nodes, if it does not already exist.
+	///  If AllowCycles is set to false, then the edge is not added if it indtroduces a cycle 
+	///  \param a index of one connected node
+	///  \param b index of the other connected node
+	///  \param return : true if the insertion was successful, false otherwise
+	bool AddEdge(Index a, Index b)
 	{
 		if(std::find(edges_[a].begin(), edges_[a].end(), b) == edges_[a].end())
 		{
 			edges_[a].push_back(b);
 			edges_[b].push_back(a);
-			if(checkForCycles && HasCycle())
-			{
+			if(AllowCycles || !HasCycle())
+				return true;
+			else
 				RemoveEdge(a, b);
-			}
 		}
+		return false;
 	}
 
-	void RemoveEdge(Index a, Index b)
+	///  \brief Removes an Edge between indicated nodes, if it exists.
+	///  If AllowCycles is set to false, then the edge is not added if it indtroduces a cycle 
+	///  \param a index of one connected node
+	///  \param b index of the other connected node
+	///  \param return : true if the removal was successful, false otherwise
+	bool RemoveEdge(Index a, Index b)
 	{
 		T_Connexion::iterator it = std::find(edges_[a].begin(), edges_[a].end(), b);
 		if(it != edges_[a].end())
@@ -73,13 +94,17 @@ public:
 		if(it != edges_[b].end())
 		{
 			edges_[b].erase(it);
+			return true;
 		}
+		return false;
 	}
 
+	
+	///  \brief Costful operation to check whether the graph has cycles
+	///  Used internally for edge creation when AllowCycles is set to false.
+	///  \param return : true if the graph has a cycle
 	bool HasCycle() const
 	{
-		 // Mark all the vertices as not visited and not part of recursion
-		// stack
 		bool *visited = new bool[currentIndex_+1];
 		for (int i = 0; i < currentIndex_; i++)
 		{
@@ -116,8 +141,12 @@ private:
 		}
 		return false;
 	}
+	
+private:
+	Graph(const Graph&);
+	Graph& operator=(const Graph&);
 
-public:
+private:
 	T_Edges edges_;
 	T_NodeContentPtr nodeContents_;
 	int currentIndex_;
