@@ -68,7 +68,7 @@ SimplePRM::~SimplePRM()
 	// NOTHING
 }
 
-Configuration::T_Configuration SimplePRM::GetPath(const Configuration& from, const Configuration& to)
+Configuration::T_Configuration SimplePRM::GetPath(const Configuration& from, const Configuration& to, float neighbourDistance)
 {
-	return pImpl_->prm_->ComputePath(&from, &to, Distance, world_);
+	return pImpl_->prm_->ComputePath(&from, &to, Distance, world_, neighbourDistance);
 }

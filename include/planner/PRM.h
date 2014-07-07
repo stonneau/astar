@@ -56,8 +56,11 @@ public:
 			{
 				if(current_index != id && distance(node,*it) <= neighbourDistance && (*localPlanner)(node,*it))
 				{
-					float dist = distance(node,*it);
-					AddEdge(id, current_index);
+					if(edges_[current_index].size() < k)
+					{
+						AddEdge(id, current_index);
+						++connected;
+					}
 				}
 			}
 		}
@@ -72,11 +75,12 @@ public:
 	///  \param dist Function used to measure the distance between two nodes. It 
 	///  has the signature Numeric (*Distance) (const NodeContent*, const NodeContent* )
 	///  \param localPlanner boolean method that returns true whether two nodes can be connected (a collision free-path exists)
+	///	 \param neighbourDistance maximum distance for which a node can be a neighbour of another
 	///  \param return : vector of NodeContent traversed to reach the goal. Empty if no pathfinding failed
-	 T_NodeContentPath ComputePath(const NodeContent* from, const NodeContent* to, Distance dist, const LocalPlanner* localPlanner) const
+	 T_NodeContentPath ComputePath(const NodeContent* from, const NodeContent* to, Distance dist, const LocalPlanner* localPlanner, Numeric neighbourDistance) const
 	 {
-		int start_id = GetClosestPointInGraph(from, dist, localPlanner);
-		int goal_id = GetClosestPointInGraph(to, dist, localPlanner);
+		int start_id = GetClosestPointInGraph(from, dist, localPlanner, neighbourDistance);
+		int goal_id = GetClosestPointInGraph(to, dist, localPlanner, neighbourDistance);
 		astar_t::Path path;
 		T_NodeContentPath res;
 		if(start_id != -1 && goal_id !=-1)
@@ -96,7 +100,7 @@ public:
 	 }
 	 
 private:
-	int GetClosestPointInGraph(const NodeContent* node, Distance dist, const LocalPlanner* localPlanner) const //todo this is really expensive at the moment
+	int GetClosestPointInGraph(const NodeContent* node, Distance dist, const LocalPlanner* localPlanner, Numeric neighbourDistance) const //todo this is really expensive at the moment
 	{
 		Numeric min_distance = std::numeric_limits<Numeric>::max();
 		int current_index = 0; 
@@ -106,7 +110,7 @@ private:
 				++it, ++current_index)
 		{
 			Numeric current_distance = dist(node,*it);
-			if(current_distance < min_distance && (*localPlanner)(node,*it))
+			if(current_distance < min_distance && current_distance < neighbourDistance && (*localPlanner)(node,*it))
 			{
 				closest_index = current_index;
 				min_distance = current_distance;

@@ -229,11 +229,12 @@ void PRMTests(bool& error)
 	configs.push_back(&c3150);
 	Generator generator1(configs);
 	Generator generator2(configs);
+	Generator generator3(configs);
 	World worldNoColl, worldColl; worldColl.AddCollisionBetweenPath(c110.id_,c200.id_);
 
 	// first test connexions
 	float distance = sqrt(2.f) + 0.1f;
-	PRMTest prm1(&worldNoColl, &generator1, distance, 8, 3);
+	PRMTest prm1(&worldNoColl, &generator1, distance, 8, 5);
 
 	//path from point near 000 to point near 330	
 	Configuration nc000(0,0.1f,0); // id 8
@@ -262,7 +263,7 @@ void PRMTests(bool& error)
 	std::vector<const Configuration*> path2 = prm1.GetPath(c000, c320);
 
 	// no connexion due to collision between 1,1,0 and 2,0,0
-	PRMTest prm2(&worldColl, &generator2, distance, 8, 3);
+	PRMTest prm2(&worldColl, &generator2, distance, 8, 5);
 	Configuration nc110(1,1,0);
 	
 	std::vector<const Configuration*> expectedPath3, expectedPath4;
@@ -285,10 +286,41 @@ void PRMTests(bool& error)
 
 	errmess = std::string("Path Test4");
 	Checkpath(path4, expectedPath4, errmess, error);
+
 	//no connexions max neighbours number
+	PRMTest prm3(&worldColl, &generator3, distance, 8, 3); // less neighbours should remove connexion
+	//between  c210 and c3150
+	
+	std::vector<const Configuration*> expectedPath5, expectedPath6;
+	expectedPath5.push_back(&c210);
+	expectedPath5.push_back(&c210);
+	expectedPath5.push_back(&c320);
+	expectedPath5.push_back(&c3150);
+	expectedPath5.push_back(&c3150);
+
+	expectedPath6.push_back(&c210);
+	expectedPath6.push_back(&c210);
+	expectedPath6.push_back(&c3150);
+	expectedPath6.push_back(&c3150);
+
+	std::vector<const Configuration*> path5 = prm3.GetPath(c210, c3150);
+	std::vector<const Configuration*> path6 = prm2.GetPath(c210, c3150);
+
+	errmess = std::string("Path Test5");
+	Checkpath(path5, expectedPath5, errmess, error);
+
+	errmess = std::string("Path Test6");
+	Checkpath(path6, expectedPath6, errmess, error);
 
 	// too far
-	bool tg = false;
+	Configuration c332(3,3,2);
+	std::vector<const Configuration*> path7 = prm1.GetPath(c000, c332);
+	if(path7.size() != 0)
+	{
+		error = true;
+		std::cout << "if prm test 7; error : no path should be found; found:" << std::endl;
+		PrintPath(path7);
+	}
 }
 
 int main(int argc, char *argv[])

@@ -133,6 +133,7 @@ public:
 
 private:
 	const World* world_;
+	const float neighbourDistance_;
 	std::auto_ptr<PImpl> pImpl_;
 };
 } //namespace planner

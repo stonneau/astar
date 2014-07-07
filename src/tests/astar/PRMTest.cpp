@@ -42,8 +42,9 @@ using namespace planner;
 
 PRMTest::PRMTest(const World* world, Generator* generator, float neighbourDistance, int size, int k)
 	: world_(world)
+	, neighbourDistance_(neighbourDistance)
 {
-	prm_t * prm = new prm_t(generator, world_, Distance, neighbourDistance, size, k);
+	prm_t * prm = new prm_t(generator, world_, Distance, neighbourDistance_, size, k);
 	pImpl_.reset(new PImpl(prm));
 }
 
@@ -54,5 +55,5 @@ PRMTest::~PRMTest()
 
 Configuration::T_Configuration PRMTest::GetPath(const Configuration& from, const Configuration& to)
 {
-	return pImpl_->prm_->ComputePath(&from, &to, Distance, world_);
+	return pImpl_->prm_->ComputePath(&from, &to, Distance, world_, neighbourDistance_);
 }

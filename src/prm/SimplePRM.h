@@ -57,7 +57,7 @@ public:
 	///\brief Destructor
 	 ~SimplePRM();
 	 
-	 Configuration::T_Configuration GetPath(const Configuration& from, const Configuration& to);
+	 Configuration::T_Configuration GetPath(const Configuration& /*from*/, const Configuration& /*to*/, float /*neighbourDistance*/);
 
 private:
 	const WorldABC* world_;
