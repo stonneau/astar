@@ -25,6 +25,7 @@ template<class NodeContent, typename Numeric=float, int Dim=10000, typename Inde
 class Graph
 {
 	template<class NodeContent, typename Numeric, int Dim, typename Index, bool AllowCycles> friend class AStar;
+	template<class NodeContent, typename Numeric, int Dim> friend class PRM;
 
 public:
 	typedef std::vector<Index> T_Connexion;
@@ -146,7 +147,7 @@ private:
 	Graph(const Graph&);
 	Graph& operator=(const Graph&);
 
-private:
+protected:
 	T_Edges edges_;
 	T_NodeContentPtr nodeContents_;
 	int currentIndex_;

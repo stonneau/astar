@@ -73,7 +73,7 @@ public:
 	///  \param dist Function used to measure the distance between two nodes. It 
 	///  has the signature Numeric (*Distance) (const NodeContent*, const NodeContent* )
 	///  \param return : true if a path was found, false otherwise
-	bool ComputePath(const Index from, const Index to, Path& path, Distance dist)
+	bool ComputePath(const Index from, const Index to, Path& path, Distance dist) const
 	{
 		OpenSet openSet;
 		T_Node closedSet;
@@ -127,7 +127,7 @@ public:
 	const graph_t& graph_;
 
 private:
-	void ReconstructPath(Path& path, const T_Parent& cameFrom, const Index to)
+	void ReconstructPath(Path& path, const T_Parent& cameFrom, const Index to) const
 	{
 		T_Parent::const_iterator it = cameFrom.find(to);
 		path.push_front(to);

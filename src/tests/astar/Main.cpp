@@ -1,6 +1,7 @@
 
 #include "astar/Graph.h"
 #include "astar/AStar.h"
+#include "PRMTest.h"
 
 #include <string>
 #include <iostream>
@@ -163,12 +164,140 @@ void AStartest(bool& error)
 	}
 }
 
+using namespace planner;
+
+namespace
+{
+	void PrintPath(const std::vector<const Configuration*>& path)
+	{
+		for(std::vector<const Configuration*>::const_iterator it = path.begin(); it != path.end(); ++it)
+		{
+			std::cout << (*it)->id_ << std::endl;
+		}
+	}
+
+	void Checkpath(const std::vector<const Configuration*>& found, const std::vector<const Configuration*>& expected, const std::string& err, bool& error)
+	{
+		bool errorPath = false;
+		if(found.size() != expected.size())
+		{
+			errorPath = true;
+		}
+		else
+		{
+			std::vector<const Configuration*>::const_iterator it = found.begin();
+			std::vector<const Configuration*>::const_iterator it2 = expected.begin();
+			for(; it != found.end() && (!errorPath); ++it, ++it2)
+			{
+				if((*it)->id_ != (*it2)->id_)
+				{
+					errorPath = true;
+				}
+			}
+		}
+		if(errorPath)
+		{		
+			error = false;
+			std::cout << "In PRM test" << err << ": expected and found path do not match" << std::endl;
+			std::cout << "Expected:" << std::endl;
+			PrintPath(expected);
+			std::cout << "Got:" << std::endl;
+			PrintPath(found);
+		}
+	}
+}
+
+void PRMTests(bool& error)
+{
+	Configuration c110(1,1,0);
+	Configuration c200(2,0,0);
+	Configuration c001(0,0,1);
+	Configuration c000(0,0,0);
+	Configuration c020(0,2,0);
+	Configuration c210(2,1,0);
+	Configuration c320(3,2,0);
+	Configuration c3150(3,1.5,0);
+
+	std::vector<Configuration*> configs;
+	configs.push_back(&c110);
+	configs.push_back(&c200);
+	configs.push_back(&c001);
+	configs.push_back(&c000);
+	configs.push_back(&c020);
+	configs.push_back(&c210);
+	configs.push_back(&c320);
+	configs.push_back(&c3150);
+	Generator generator1(configs);
+	Generator generator2(configs);
+	World worldNoColl, worldColl; worldColl.AddCollisionBetweenPath(c110.id_,c200.id_);
+
+	// first test connexions
+	float distance = sqrt(2.f) + 0.1f;
+	PRMTest prm1(&worldNoColl, &generator1, distance, 8, 3);
+
+	//path from point near 000 to point near 330	
+	Configuration nc000(0,0.1f,0); // id 8
+	Configuration nc320(3,3,0.1f); // id 9
+	std::vector<const Configuration*> expectedPath1;
+	expectedPath1.push_back(&nc000);
+	expectedPath1.push_back(&c000);
+	expectedPath1.push_back(&c110);
+	expectedPath1.push_back(&c210);
+	expectedPath1.push_back(&c320);
+	expectedPath1.push_back(&nc320);
+
+	std::vector<const Configuration*> path1 = prm1.GetPath(nc000, nc320);
+	std::string errmess("Path Test1");
+	Checkpath(path1, expectedPath1, errmess, error);
+
+	//path form 000 to 330
+	std::vector<const Configuration*> expectedPath2;
+	expectedPath1.push_back(&c000);
+	expectedPath1.push_back(&c000);
+	expectedPath1.push_back(&c110);
+	expectedPath1.push_back(&c210);
+	expectedPath1.push_back(&c320);
+	expectedPath1.push_back(&c320);
+
+	std::vector<const Configuration*> path2 = prm1.GetPath(c000, c320);
+
+	// no connexion due to collision between 1,1,0 and 2,0,0
+	PRMTest prm2(&worldColl, &generator2, distance, 8, 3);
+	Configuration nc110(1,1,0);
+	
+	std::vector<const Configuration*> expectedPath3, expectedPath4;
+	expectedPath3.push_back(&nc110);
+	expectedPath3.push_back(&c110);
+	expectedPath3.push_back(&c200);
+	expectedPath3.push_back(&c200);
+
+	expectedPath4.push_back(&nc110);
+	expectedPath4.push_back(&c110);
+	expectedPath4.push_back(&c210);
+	expectedPath4.push_back(&c200);
+	expectedPath4.push_back(&c200);
+
+	std::vector<const Configuration*> path3 = prm1.GetPath(nc110, c200);
+	std::vector<const Configuration*> path4 = prm2.GetPath(nc110, c200);
+	
+	errmess = std::string("Path Test3");
+	Checkpath(path3, expectedPath3, errmess, error);
+
+	errmess = std::string("Path Test4");
+	Checkpath(path4, expectedPath4, errmess, error);
+	//no connexions max neighbours number
+
+	// too far
+	bool tg = false;
+}
+
 int main(int argc, char *argv[])
 {
 	std::cout << "performing tests... \n";
 	bool error = false;
 	GraphCreationTest(error);
 	AStartest(error);
+	PRMTests(error);
 	if(error)
 	{
 		std::cout << "There were some errors\n";
