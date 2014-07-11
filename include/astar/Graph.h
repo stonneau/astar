@@ -24,8 +24,7 @@ namespace astar
 template<class NodeContent, typename Numeric=float, int Dim=10000, typename Index=int, bool AllowCycles=false>
 class Graph
 {
-	template<class NodeContent, typename Numeric, int Dim, typename Index, bool AllowCycles> friend class AStar;
-	template<class NodeContent, typename Numeric, int Dim> friend class PRM;
+    //friend class AStar<NodeContent, Numeric, Dim, Index, AllowCycles> ;
 
 public:
 	typedef std::vector<Index> T_Connexion;
@@ -86,7 +85,7 @@ public:
 	///  \param return : true if the removal was successful, false otherwise
 	bool RemoveEdge(Index a, Index b)
 	{
-		T_Connexion::iterator it = std::find(edges_[a].begin(), edges_[a].end(), b);
+        typename T_Connexion::iterator it = std::find(edges_[a].begin(), edges_[a].end(), b);
 		if(it != edges_[a].end())
 		{
 			edges_[a].erase(it);
@@ -128,7 +127,7 @@ private:
 	bool HasCycleInternal(Index currentNode, Index parent, bool* visited) const
 	{
 		visited[currentNode] = true;
-		T_Connexion::const_iterator it = edges_[currentNode].begin();
+        typename T_Connexion::const_iterator it = edges_[currentNode].begin();
 		for(; it != edges_[currentNode].end(); ++it)
 		{
 			if(!visited[*it])
@@ -147,7 +146,7 @@ private:
 	Graph(const Graph&);
 	Graph& operator=(const Graph&);
 
-protected:
+public:
 	T_Edges edges_;
 	T_NodeContentPtr nodeContents_;
 	int currentIndex_;

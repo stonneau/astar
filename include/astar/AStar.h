@@ -97,15 +97,15 @@ public:
 				return true;
 			}
 			closedSet[currentNode] = true;
-			for(graph_t::T_Connexion::const_iterator it = graph_.edges_[currentNode].begin(); it != graph_.edges_[currentNode].end(); ++it)
+            for(typename graph_t::T_Connexion::const_iterator it = graph_.edges_[currentNode].begin(); it != graph_.edges_[currentNode].end(); ++it)
 			{
 				if(closedSet.find(*it) != closedSet.end())
 				{
 					continue;
 				}
 				Numeric currentGScore = costFromStart[currentNode] + dist(graph_.nodeContents_[currentNode], graph_.nodeContents_[*it]);
-				OpenSet::iterator openit = std::find(openSet.begin(), openSet.end(), currentNode);
-				T_Cost::iterator costit = costFromStart.find(*it);
+                typename OpenSet::iterator openit = std::find(openSet.begin(), openSet.end(), currentNode);
+                typename T_Cost::iterator costit = costFromStart.find(*it);
 				if(openit == openSet.end() || (costit != costFromStart.end() && costit->second > currentGScore))
 				{
 					cameFrom[*it] = currentNode;
@@ -129,7 +129,7 @@ public:
 private:
 	void ReconstructPath(Path& path, const T_Parent& cameFrom, const Index to) const
 	{
-		T_Parent::const_iterator it = cameFrom.find(to);
+        typename T_Parent::const_iterator it = cameFrom.find(to);
 		path.push_front(to);
 		if(it != cameFrom.end())
 		{

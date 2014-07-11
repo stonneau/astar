@@ -28,6 +28,7 @@ class PRM : public  astar::Graph<NodeContent, Numeric, Dim, int, true>
 {
 
 public:
+    typedef astar::Graph<NodeContent, Numeric, Dim, int, true> graph_t;
 	typedef Numeric (*Distance)		  (const NodeContent*, const NodeContent*);
 	typedef std::vector<const NodeContent*> T_NodeContentPath;
 public:
@@ -41,8 +42,8 @@ public:
 	///\param size number of nodes to be generated
 	///\param k maximum number of neighbours for a given Node. Default value is 10
 	PRM(Generator* generator, const LocalPlanner* localPlanner, Distance distance, Numeric neighbourDistance, int size = Dim, int k=10)
-		: Graph()
-		, size_(size)
+        : graph_t()
+        , size_(size)
 	{
 		for(int i=0; i< size; ++i)
 		{
@@ -50,15 +51,15 @@ public:
 			int id = AddNode(node);
 			int current_index = 0;
 			int connected = 0;
-			for(PRM::T_NodeContentPtr::iterator it = nodeContents_.begin(); 
-				 current_index < id && it != nodeContents_.end() && connected <k ; 
+            for(typename PRM::T_NodeContentPtr::iterator it = graph_t::nodeContents_.begin();
+                 current_index < id && it != graph_t::nodeContents_.end() && connected <k ;
 				++it, ++current_index)
 			{
 				if(current_index != id && distance(node,*it) <= neighbourDistance && (*localPlanner)(node,*it))
 				{
-					if(edges_[current_index].size() < k)
+                    if(graph_t::edges_[current_index].size() < ((unsigned int) k))
 					{
-						AddEdge(id, current_index);
+                        graph_t::AddEdge(id, current_index);
 						++connected;
 					}
 				}
@@ -81,7 +82,7 @@ public:
 	 {
 		int start_id = GetClosestPointInGraph(from, dist, localPlanner, neighbourDistance);
 		int goal_id = GetClosestPointInGraph(to, dist, localPlanner, neighbourDistance);
-		astar_t::Path path;
+        typename astar_t::Path path;
 		T_NodeContentPath res;
 		if(start_id != -1 && goal_id !=-1)
 		{
@@ -91,7 +92,7 @@ public:
 				res.push_back(from);
 				for(std::list<int>::const_iterator it = path.begin(); it != path.end(); ++it)
 				{
-					res.push_back(nodeContents_[*it]);
+                    res.push_back(graph_t::nodeContents_[*it]);
 				}
 				res.push_back(to);
 			}
@@ -105,8 +106,8 @@ private:
 		Numeric min_distance = std::numeric_limits<Numeric>::max();
 		int current_index = 0; 
 		int closest_index = -1; 
-		for(PRM::T_NodeContentPtr::const_iterator it = nodeContents_.begin(); 
-				it != nodeContents_.end() && current_index < size_; 
+        for(typename PRM::T_NodeContentPtr::const_iterator it = graph_t::nodeContents_.begin();
+                it != graph_t::nodeContents_.end() && current_index < size_;
 				++it, ++current_index)
 		{
 			Numeric current_distance = dist(node,*it);

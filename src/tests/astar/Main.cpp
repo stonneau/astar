@@ -197,7 +197,7 @@ namespace
 		}
 		if(errorPath)
 		{		
-			error = false;
+            error = true;
 			std::cout << "In PRM test" << err << ": expected and found path do not match" << std::endl;
 			std::cout << "Expected:" << std::endl;
 			PrintPath(expected);
@@ -245,7 +245,7 @@ void PRMTests(bool& error)
 	expectedPath1.push_back(&c110);
 	expectedPath1.push_back(&c210);
 	expectedPath1.push_back(&c320);
-	expectedPath1.push_back(&nc320);
+    expectedPath1.push_back(&nc320);
 
 	std::vector<const Configuration*> path1 = prm1.GetPath(nc000, nc320);
 	std::string errmess("Path Test1");
