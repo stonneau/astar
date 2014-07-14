@@ -39,8 +39,8 @@ Object::Object(PQP_Model* model)
 Object::~Object()
 {
     delete model_;
-    delete pqpOrientation_;
-    delete pqpPosition_;
+    //delete pqpOrientation_;
+    //delete pqpPosition_;
 }
 
 bool Object::IsColliding(Object* object)
@@ -56,6 +56,22 @@ bool Object::IsColliding(T_Object& objects)
     PQP_CollideResult cres;
     for(T_Object::iterator it = objects.begin();
         it != objects.end(); ++it)
+    {
+        PQP_Collide(&cres, pqpOrientation_, pqpPosition_, model_,
+                    (*it)->pqpOrientation_, (*it)->pqpPosition_, (*it)->model_, PQP_FIRST_CONTACT);
+        if (cres.Colliding())
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Object::IsColliding(const T_Object::iterator& from,  const T_Object::iterator& to)
+{
+    T_Object::iterator it = from;
+    PQP_CollideResult cres;
+    for(;it != to; ++it)
     {
         PQP_Collide(&cres, pqpOrientation_, pqpPosition_, model_,
                     (*it)->pqpOrientation_, (*it)->pqpPosition_, (*it)->model_, PQP_FIRST_CONTACT);
