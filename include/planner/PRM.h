@@ -41,29 +41,39 @@ public:
 	///\param neighbourDistance maximum distance for which a node can be a neighbour of another
 	///\param size number of nodes to be generated
 	///\param k maximum number of neighbours for a given Node. Default value is 10
-	PRM(Generator* generator, const LocalPlanner* localPlanner, Distance distance, Numeric neighbourDistance, int size = Dim, int k=10)
+    PRM(Generator* generator, LocalPlanner* localPlanner, Distance distance, Numeric neighbourDistance, int size = Dim, int k=10)
         : graph_t()
         , size_(size)
 	{
+        int nbFailure = 10000;
 		for(int i=0; i< size; ++i)
 		{
-			NodeContent* node = (*generator)();
-			int id = AddNode(node);
+            NodeContent* node = (*generator)();
+            int id = AddNode(node);
 			int current_index = 0;
-			int connected = 0;
+            int connected = 0;
             for(typename PRM::T_NodeContentPtr::iterator it = graph_t::nodeContents_.begin();
                  current_index < id && it != graph_t::nodeContents_.end() && connected <k ;
 				++it, ++current_index)
 			{
-				if(current_index != id && distance(node,*it) <= neighbourDistance && (*localPlanner)(node,*it))
+                if(current_index != id && distance(node,*it) <= neighbourDistance && (*localPlanner)(node,*it))
 				{
                     if(graph_t::edges_[current_index].size() < ((unsigned int) k))
-					{
+                    {
                         graph_t::AddEdge(id, current_index);
 						++connected;
 					}
 				}
-			}
+            }
+            if(connected == 0 && id > 0 ) // do not add
+            {
+                /* TODO
+                    --this->currentIndex_;
+                    delete node;
+                    i--;
+                    if(--nbFailure < 0) return;
+                */
+            }
 		}
 	}
 

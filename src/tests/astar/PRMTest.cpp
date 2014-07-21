@@ -40,7 +40,7 @@ namespace planner
 
 using namespace planner;
 
-PRMTest::PRMTest(const World* world, Generator* generator, float neighbourDistance, int size, int k)
+PRMTest::PRMTest(World* world, Generator* generator, float neighbourDistance, int size, int k)
 	: world_(world)
 	, neighbourDistance_(neighbourDistance)
 {

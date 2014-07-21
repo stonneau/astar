@@ -3,6 +3,8 @@
 #include "collision/Object.h"
 #include "collision/Collider.h"
 
+#include "prm/LocalPlanner.h"
+
 #include <string>
 #include <iostream>
 #include <cmath>
@@ -12,8 +14,7 @@ using namespace std;
 void ObjParserCanLoadFileTest(bool& error)
 {
     std::string targetFile("../tests/collision/armoire.obj");
-    planner::ParserObj parser;
-    planner::Object::T_Object objects = parser.CreateWorld(targetFile);
+    planner::Object::T_Object objects = planner::ParseObj(targetFile);
     if(objects.size() != 10)
     {
         error = true;
@@ -24,8 +25,7 @@ void ObjParserCanLoadFileTest(bool& error)
 void ObstacleCreationTest(bool& error)
 {
     std::string targetFile("../tests/collision/cube.obj");
-    planner::ParserObj parser;
-    planner::Object::T_Object objects = parser.CreateWorld(targetFile);
+    planner::Object::T_Object objects = planner::ParseObj(targetFile);
     if(objects.size() != 1)
     {
         error = true;
@@ -33,8 +33,7 @@ void ObstacleCreationTest(bool& error)
         return;
     }
     std::string targetFile2("../tests/collision/cubequad.obj");
-    planner::ParserObj parser2;
-    planner::Object::T_Object objects2 = parser2.CreateWorld(targetFile2);
+    planner::Object::T_Object objects2 = planner::ParseObj(targetFile2);
     if(objects2.size() != 1)
     {
         error = true;
@@ -58,15 +57,14 @@ void ObstacleCreationTest(bool& error)
 void CollisionDetectionTest(bool& error)
 {
     std::string targetFile("../tests/collision/cube.obj");
-    planner::ParserObj parser;
-    planner::Object::T_Object objects = parser.CreateWorld(targetFile);
+    planner::Object::T_Object objects = planner::ParseObj(targetFile);
     planner::Collider collider(objects);
     if(collider.IsColliding())
     {
         error = true;
         std::cout << "in collision tests 1, cube should not collide with itself" << std::endl;
     }
-    objects = parser.CreateWorld(targetFile);
+    planner::ParseObj(targetFile, objects);
     planner::Collider collider2(objects);
     if(!collider2.IsColliding())
     {
@@ -83,15 +81,45 @@ void CollisionDetectionTest(bool& error)
     }
 }
 
+void LocalPlannerTest(bool& error)
+{
+    std::string targetFile("../tests/collision/cube.obj");
+    planner::Object::T_Object objects = planner::ParseObj(targetFile);
+    planner::Object a(*objects[0]);
+    planner::Object b(*objects[0]);
+    planner::LocalPlanner lPlanner(objects);
+
+    Eigen::Vector3d collisionA(-3,0,0);
+    Eigen::Vector3d collisionB(3,0,0);
+    a.SetPosition(collisionA); b.SetPosition(collisionB);
+
+    if(!lPlanner(&a, &b))
+    {
+        error = true;
+        std::cout << "ERROR in LocalPlannerTest1 : collision not detected in path from a to b" << std::endl;
+    }
+
+
+    Eigen::Vector3d noCollisionA(-3,0,0);
+    Eigen::Vector3d noCollisionB(-9,0,0);
+    a.SetPosition(noCollisionA); b.SetPosition(noCollisionB);
+
+    if(lPlanner(&a, &b))
+    {
+        error = true;
+        std::cout << "ERROR in LocalPlannerTest2 : collision should not detected in path from a to b" << std::endl;
+    }
+}
+
 
 int main(int argc, char *argv[])
 {
-	planner::ParserObj parser;
 	std::cout << "performing tests... \n";
     bool error = false;
     ObjParserCanLoadFileTest(error);
     ObstacleCreationTest(error);
     CollisionDetectionTest(error);
+    LocalPlannerTest(error);
 	if(error)
 	{
 		std::cout << "There were some errors\n";

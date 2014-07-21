@@ -1,4 +1,11 @@
-
+/**
+* \file MatriDefs.h
+* \brief Utility functions for Eigen matrices.
+* \author Steve T.
+* \version 0.1
+* \date 07/07/2014
+*
+*/
 #include <Eigen/Dense>
 #include <Eigen/SVD>
 
@@ -16,14 +23,14 @@ namespace matrices
 {
 #if (USEFLOAT)
 	typedef Eigen::Vector3f Vector3;
-	typedef Eigen::Vector2f Vector2;
-	typedef Eigen::VectorXf VectorX;
+    typedef Eigen::Vector2f Vector2;
+    typedef Eigen::VectorXf VectorX;
 	typedef Eigen::Matrix4f Matrix4;
 	typedef Eigen::Matrix3f Matrix3;
 #else
 	typedef Eigen::Vector3d Vector3;
-	typedef Eigen::Vector2d Vector2;
-	typedef Eigen::VectorXd VectorX;
+    typedef Eigen::Vector2d Vector2;
+    typedef Eigen::VectorXd VectorX;
 	typedef Eigen::Matrix4d Matrix4;
 	typedef Eigen::Matrix3d Matrix3;
 #endif
@@ -65,13 +72,13 @@ namespace matrices
 	// TODO forward dec
 	Vector3& Rotate(const Vector3& axis, Vector3& rotated, numeric theta);
 
-	void vect4ToVect3(const VectorX& from, Vector3& to);
+    void vect4ToVect3(const VectorX& from, Vector3& to);
 
-	extern void vect3ToVect4(const Vector3& from, VectorX& to);
+    extern void vect3ToVect4(const Vector3& from, VectorX& to);
 
 	Vector3 matrix4TimesVect3(const Matrix4& mat4, const Vector3& vect3);
 
-	Vector3 matrix4TimesVect4(const Matrix4& mat4, const VectorX& vect4);
+    Vector3 matrix4TimesVect4(const Matrix4& mat4, const VectorX& vect4);
 
 } //namespace matrices
 

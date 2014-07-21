@@ -56,7 +56,7 @@ private:
 	typedef typename std::map<Index,Index> T_Parent;
 
 public:
-	///\brief Constructor
+    ///  \brief Constructor
 	///  \param graph the graph on which the Pathdinfing is to be made
 	 AStar(const graph_t& graph)
 		 : graph_(graph){}

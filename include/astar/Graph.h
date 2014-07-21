@@ -52,12 +52,12 @@ public:
 	///  \param return : the index of the added NodeContent, which is equal to the total number of nodes -1
 	Index AddNode(NodeContent* node)
 	{
-		if(++currentIndex_ < Dim)
+        if(currentIndex_ < Dim)
 		{
-			nodeContents_[currentIndex_] = node;
+            nodeContents_[++currentIndex_] = node;
 		}
-		return currentIndex_ < Dim ? currentIndex_ : currentIndex_ - 1;
-	}
+        return currentIndex_;
+    }
 
 	///  \brief Adds an Edge between indicated nodes, if it does not already exist.
 	///  If AllowCycles is set to false, then the edge is not added if it indtroduces a cycle 
@@ -140,7 +140,7 @@ private:
 			}
 		}
 		return false;
-	}
+    }
 	
 private:
 	Graph(const Graph&);

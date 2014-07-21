@@ -11,6 +11,6 @@ add_executable(
         prmcollision_tests Main.cpp
 )
 
-TARGET_LINK_LIBRARIES(prmcollision_tests prmcollision)
+TARGET_LINK_LIBRARIES(prmcollision_tests prmcollision prm)
 
 

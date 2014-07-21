@@ -8,6 +8,8 @@
 
 #include <drawstuff/drawstuff.h> // The drawing library for ODE;
 
+#include "prm/SimplePRM.h"
+
 #include <string>
 #include <iostream>
 #include <cmath>
@@ -19,6 +21,14 @@
 
 using namespace std;
 using namespace Eigen;
+
+
+namespace
+{
+    static float xyz[3] = {-10.0,1,6.0};
+    static float hpr[3] = {0.0,0.0,0.0};
+    planner::SimplePRM * prm;
+}
 
 namespace
 {
@@ -62,7 +72,6 @@ namespace
         PQP_REAL p2 [3];
         PQP_REAL p3 [3];
         //createTransform(obj->GetOrientation(), obj->GetPosition(), R);
-        dsSetColorAlpha(0,0, 0,1);
         for(int i =0; i< obj->GetModel()->num_tris; ++i)
         {
             const Tri& t = obj->GetModel()->tris[i];
@@ -78,20 +87,44 @@ namespace
         }
     }
 
+    void LineBetweenObjects(planner::Object* a, planner::Object* b)
+    {
+        PQP_REAL p1 [3];
+        PQP_REAL p2 [3];
+        Vect3ToArray(p1, a->GetPosition());
+        Vect3ToArray(p2, b->GetPosition());
+        dsDrawLineD(p1, p2);
+    }
+
 
     void DrawObjects()
     {
+        dsSetColorAlpha(0,0, 0,1);
         for(planner::Object::T_Object::iterator it = objects.begin();
             it != objects.end();
             ++it)
         {
             DrawObject(*it);
         }
+        int i = 0;
+        for(planner::Object::T_Object::const_iterator it = prm->GetPRMNodes().begin();
+            it != prm->GetPRMNodes().end();
+            ++it, ++i)
+        {
+            dsSetColorAlpha(1,0, 0,1);
+            DrawObject(*it);
+            const std::vector< int > connexions = prm->GetConnections(i);
+            dsSetColorAlpha(0,1, 0,1);
+            for(int j = 0; j< connexions.size(); ++j)
+            {
+                LineBetweenObjects(*it, prm->GetPRMNodes()[connexions[j]]);
+            }
+        }
+        // then draw lines
     }
 }
 
-static float xyz[3] = {-10.0,1,6.0};
-static float hpr[3] = {0.0,0.0,0.0};
+
 
 static void simLoop (int pause)
 {
@@ -102,20 +135,12 @@ static void simLoop (int pause)
 void start()
 {
     //dsSetViewpoint (xyz,hpr);
-    //std::string targetFile("../tests/collision/armoire.obj");
-    std::string targetFile("../tests/collision/cube.obj");
-    planner::ParserObj parser;
-    objects = parser.CreateWorld(targetFile);
-    objects.push_back(parser.CreateWorld(targetFile)[0]);
-    planner::Collider collider2(objects);
-    Eigen::Vector3d newPos(1.9,1.9,1.9);
-    Eigen::Matrix3d rot= matrices::Rotx3(45);
-    objects[0]->SetPosition(newPos);
-    objects[0]->SetOrientation(rot);
-    if(collider2.IsColliding())
-    {
-        std::cout << "After translation cube should not collide" << std::endl;
-    }
+    std::string targetFile("../tests/collision/armoire.obj");
+    std::string model("../tests/collision/cube.obj");
+    objects = planner::ParseObj(targetFile);
+
+    planner::Object::T_Object objects2 = planner::ParseObj(model);
+    prm = new planner::SimplePRM(*(objects2[0]), objects, 20, 20, 4);
 }
 
 void command(int cmd)   /**  key control function; */

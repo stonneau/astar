@@ -28,10 +28,26 @@ namespace
 using namespace planner;
 
 Object::Object(PQP_Model* model)
-    :model_(model)
+    : model_(model)
     , position_(Eigen::Vector3d::Zero())
     , orientation_(Eigen::Matrix3d::Identity())
 {
+    EigenToDoubleMatrix(orientation_, pqpOrientation_);
+    EigenToDoubleVector(position_, pqpPosition_);
+}
+
+Object::Object(const Object& parent)
+    : position_(Eigen::Vector3d::Zero())
+    , orientation_(Eigen::Matrix3d::Identity())
+{
+    model_ = new PQP_Model;
+    model_->BeginModel();
+    for (int i =0; i< parent.model_->num_tris; ++i)
+    {
+         // TODO CHECK MEME ?
+        model_->AddTri(parent.model_->tris[i].p1, parent.model_->tris[i].p2, parent.model_->tris[i].p3, parent.model_->tris[i].id);
+    }
+    model_->EndModel();
     EigenToDoubleMatrix(orientation_, pqpOrientation_);
     EigenToDoubleVector(position_, pqpPosition_);
 }
@@ -95,18 +111,18 @@ void Object::SetPosition(const Eigen::Vector3d& position)
     EigenToDoubleVector(position_, pqpPosition_);
 }
 
-const Eigen::Matrix3d& Object::GetOrientation()
+const Eigen::Matrix3d& Object::GetOrientation() const
 {
     return orientation_;
 }
 
-const Eigen::Vector3d& Object::GetPosition()
+const Eigen::Vector3d& Object::GetPosition() const
 {
     return position_;
 }
 
 
-const PQP_Model* Object::GetModel()
+const PQP_Model* Object::GetModel() const
 {
     return model_;
 }

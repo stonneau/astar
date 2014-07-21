@@ -8,9 +8,9 @@ namespace matrices
 {
 
 #if (USEFLOAT)
-	typedef Eigen::MatrixXf MatrixX;
+    typedef Eigen::MatrixXf MatrixX;
 #else
-	typedef Eigen::MatrixXd MatrixX;
+    typedef Eigen::MatrixXd MatrixX;
 #endif
 
 //REF: boulic et al An inverse kinematics architecture enforcing an arbitrary numeric of strict priority levels

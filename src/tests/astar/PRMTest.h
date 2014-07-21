@@ -38,8 +38,7 @@ struct Configuration
 
 	Configuration(const Configuration* c)
 		: x_(c->x_), y_(c->y_), z_(c->z_), rotx_(c->rotx_), roty_(c->roty_), rotz_(c->rotz_), id_(c->id_)
-	{
-		bool tg = false;
+    {
 	}
 	
 	///\brief Destructor
@@ -62,7 +61,7 @@ struct World
 		collisions.push_back(std::make_pair(id1, id2));
 	}
 
-	bool operator() (const Configuration* a, const Configuration* b) const
+    bool operator() (const Configuration* a, const Configuration* b) const
 	{
 		for(std::vector<std::pair<int, int> >::const_iterator it = collisions.begin(); 
 			it != collisions.end();
@@ -124,7 +123,7 @@ public:
 	///\param neighbourDistance maximum distance for which a node can be a neighbour of another
 	///\param size number of nodes to be generated
 	///\param k maximum number of neighbours for a given Node. Default value is 10
-	PRMTest(const World* /*world*/, Generator* /*generator*/, float /*neighbourDistance*/, int size = 1000, int k = 10);
+    PRMTest(World* /*world*/, Generator* /*generator*/, float /*neighbourDistance*/, int size = 1000, int k = 10);
 
 	///\brief Destructor
 	 ~PRMTest();
@@ -132,7 +131,7 @@ public:
 	 Configuration::T_Configuration GetPath(const Configuration& from, const Configuration& to);
 
 private:
-	const World* world_;
+    World* world_;
 	const float neighbourDistance_;
 	std::auto_ptr<PImpl> pImpl_;
 };

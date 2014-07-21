@@ -8,59 +8,67 @@
 */
 
 #include "SimplePRM.h"
-#include "WorldABC.h"
+#include "collision/ParserObj.h"
 #include "planner/PRM.h" // Template PRM definition
+
+#include "LocalPlanner.h"
+#include "Generator.h"
 
 namespace planner
 {
-	struct Generator
-	{
-		Generator() {}
-		~Generator() {}
-		Configuration* operator()() 
-		{
-			return new Configuration(); // TODO Generate Random
-		}
-	};
+    float Distance(const Object* obj1, const Object* obj2)
+    {
+        // TODO include angles
+        const Eigen::Vector3d& a = obj1->GetPosition();
+        const Eigen::Vector3d& b = obj2->GetPosition();
+double res =sqrt((b.x() - a.x()) * (b.x() - a.x()) + (b.y() - a.y()) * (b.y() - a.y()) + (b.z() - a.z()) * (b.z() - a.z()));
+        return sqrt((b.x() - a.x()) * (b.x() - a.x()) + (b.y() - a.y()) * (b.y() - a.y()) + (b.z() - a.z()) * (b.z() - a.z()));
+    }
 	
-	typedef PRM<Configuration, Generator, WorldABC, float, 10000> prm_t;
+    typedef PRM<Object, planner::Generator, LocalPlanner, float, 10000> prm_t;
 
 	struct PImpl
 	{
-		PImpl(const prm_t* prm) : prm_(prm){}
+        PImpl(const Object& model, Object::T_Object& objects, float neighbourDistance, int size, int k)
+            : planner_(objects)
+        {
+            Generator* gen = new Generator(objects, model); // TODO MEME
+            prm_ = new prm_t(gen, &planner_, Distance, neighbourDistance, size, k);
+            // feel prmNodes
+            for(int i =0; i< prm_->currentIndex_ +1; ++i)
+            {
+                prmNodes_.push_back(prm_->nodeContents_[i]);
+            }
+        }
 		~PImpl()
 		{
 			delete prm_;
 		}
 
-		Configuration* operator()() 
+        Object* operator()()
 		{
-			return new Configuration();
+            return 0;
 		}
 
 		const prm_t* prm_;
+        LocalPlanner planner_;
+        Object::T_Object prmNodes_;
+
 	};
 
-	Configuration* GenerateConfiguration()
+    Object* GenerateConfiguration()
 	{
-		return new Configuration();
-	}
-
-	float Distance(const Configuration* a, const Configuration* b)
-	{
-		// TODO include angles
-		return sqrt((b->x_ - a->x_) * (b->x_ - a->x_) + (b->y_ - a->y_) * (b->y_ - a->y_) + (b->z_ - a->z_) * (b->z_ - a->z_));
-	}
+        return 0;
+    }
 }
 
 using namespace planner;
 
-SimplePRM::SimplePRM(const WorldABC* world, float neighbourDistance, int size, int k)
-	: world_(world)
+SimplePRM::SimplePRM(const Object &model, Object::T_Object &objects, float neighbourDistance, int size, int k)
+    : model_(model)
+    , objects_(objects)
 {
-	Generator gen;
-	prm_t * prm = new prm_t(&gen, world_, Distance, neighbourDistance, size, k);
-	pImpl_.reset(new PImpl(prm));
+    pImpl_.reset(new PImpl(model_, objects_, neighbourDistance, size, k));
 }
 
 SimplePRM::~SimplePRM()
@@ -68,7 +76,18 @@ SimplePRM::~SimplePRM()
 	// NOTHING
 }
 
-Configuration::T_Configuration SimplePRM::GetPath(const Configuration& from, const Configuration& to, float neighbourDistance)
+const Object::T_Object& SimplePRM::GetPRMNodes() const
+{
+    return pImpl_->prmNodes_;
+}
+
+
+const std::vector<int> &SimplePRM::GetConnections(int node) const
+{
+    return pImpl_->prm_->edges_[node];
+}
+
+/*Object::T_Object SimplePRM::GetPath(const Object &from, const Object &to, float neighbourDistance)
 {
 	return pImpl_->prm_->ComputePath(&from, &to, Distance, world_, neighbourDistance);
-}
+}*/
