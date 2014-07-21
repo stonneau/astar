@@ -101,6 +101,7 @@ namespace
     void DrawObjects()
     {
         dsSetColorAlpha(0,0, 0,1);
+        int test = prm->GetPRMNodes().size();
         for(planner::Object::T_Object::iterator it = objects.begin();
             it != objects.end();
             ++it)
@@ -136,7 +137,7 @@ static void simLoop (int pause)
 void start()
 {
     //dsSetViewpoint (xyz,hpr);
-    std::string targetFile("../tests/collision/armoire.obj");
+    std::string targetFile("../tests/collision/wall_1s.obj");
     std::string model("../tests/collision/cube.obj");
     std::string model2("../tests/collision/cubeenglob.obj");
     objects = planner::ParseObj(targetFile);
@@ -145,7 +146,7 @@ void start()
     planner::ParseObj(model2, objects2);
     robot.englobed = objects2[0];
     robot.englobing = objects2[1];
-    prm = new planner::SimplePRM(robot, objects, 1000, 20, 4);
+    prm = new planner::SimplePRM(robot, objects, 10, 100, 4);
 }
 
 void command(int cmd)   /**  key control function; */
