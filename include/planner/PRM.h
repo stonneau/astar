@@ -44,11 +44,11 @@ public:
     PRM(Generator* generator, LocalPlanner* localPlanner, Distance distance, Numeric neighbourDistance, int size = Dim, int k=10)
         : graph_t()
         , size_(size)
-	{
-        int nbFailure = 10000;
+    {
 		for(int i=0; i< size; ++i)
 		{
             NodeContent* node = (*generator)();
+            if(node == 0) return;
             int id = AddNode(node);
 			int current_index = 0;
             int connected = 0;

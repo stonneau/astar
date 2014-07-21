@@ -21,7 +21,6 @@ namespace planner
         // TODO include angles
         const Eigen::Vector3d& a = obj1->GetPosition();
         const Eigen::Vector3d& b = obj2->GetPosition();
-double res =sqrt((b.x() - a.x()) * (b.x() - a.x()) + (b.y() - a.y()) * (b.y() - a.y()) + (b.z() - a.z()) * (b.z() - a.z()));
         return sqrt((b.x() - a.x()) * (b.x() - a.x()) + (b.y() - a.y()) * (b.y() - a.y()) + (b.z() - a.z()) * (b.z() - a.z()));
     }
 	
@@ -29,7 +28,7 @@ double res =sqrt((b.x() - a.x()) * (b.x() - a.x()) + (b.y() - a.y()) * (b.y() - 
 
 	struct PImpl
 	{
-        PImpl(const Object& model, Object::T_Object& objects, float neighbourDistance, int size, int k)
+        PImpl(const Model& model, Object::T_Object& objects, float neighbourDistance, int size, int k)
             : planner_(objects)
         {
             Generator* gen = new Generator(objects, model); // TODO MEME
@@ -64,7 +63,7 @@ double res =sqrt((b.x() - a.x()) * (b.x() - a.x()) + (b.y() - a.y()) * (b.y() - 
 
 using namespace planner;
 
-SimplePRM::SimplePRM(const Object &model, Object::T_Object &objects, float neighbourDistance, int size, int k)
+SimplePRM::SimplePRM(const Model &model, Object::T_Object &objects, float neighbourDistance, int size, int k)
     : model_(model)
     , objects_(objects)
 {

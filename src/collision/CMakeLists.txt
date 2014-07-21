@@ -20,8 +20,8 @@ set(SOURCES
     Object.cpp
     Collider.h
     Collider.cpp
-	${SRC_TOOLS_DIR}/MatrixDefs.h ${SRC_TOOLS_DIR}/MatrixDefs.cpp
-	${SRC_TOOLS_DIR}/MatrixDefsInternal.h
+        ${SRC_TOOLS_DIR}/MatrixDefs.h ${SRC_TOOLS_DIR}/MatrixDefs.cpp
+        ${SRC_TOOLS_DIR}/MatrixDefsInternal.h
 )
 
 

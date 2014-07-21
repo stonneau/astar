@@ -48,6 +48,8 @@ Object::Object(const Object& parent)
         model_->AddTri(parent.model_->tris[i].p1, parent.model_->tris[i].p2, parent.model_->tris[i].p3, parent.model_->tris[i].id);
     }
     model_->EndModel();
+    SetPosition(parent.GetPosition());
+    SetOrientation(parent.GetOrientation());
     EigenToDoubleMatrix(orientation_, pqpOrientation_);
     EigenToDoubleVector(position_, pqpPosition_);
 }

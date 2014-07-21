@@ -11,6 +11,7 @@
 
 #include "collision/Object.h"
 #include "collision/Collider.h"
+#include "prm/SimplePRM.h"
 
 namespace planner
 {
@@ -20,7 +21,7 @@ class Generator
 {
 public:
     ///\brief Constructor
-    Generator(Object::T_Object& objects, const Object& model);
+    Generator(Object::T_Object& objects, const Model& model);
 
     ///\brief Destructor
     ~Generator();
@@ -29,7 +30,8 @@ public:
     Object* operator()();
 
 public:
-    const Object& model_;
+    const Model& model_;
+    Object::T_Object& objects_;
     Collider collider_;
 };
 } //namespace planner

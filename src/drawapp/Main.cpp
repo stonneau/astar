@@ -28,6 +28,7 @@ namespace
     static float xyz[3] = {-10.0,1,6.0};
     static float hpr[3] = {0.0,0.0,0.0};
     planner::SimplePRM * prm;
+    planner::Model robot;
 }
 
 namespace
@@ -115,7 +116,7 @@ namespace
             DrawObject(*it);
             const std::vector< int > connexions = prm->GetConnections(i);
             dsSetColorAlpha(0,1, 0,1);
-            for(int j = 0; j< connexions.size(); ++j)
+            for(unsigned int j = 0; j< connexions.size(); ++j)
             {
                 LineBetweenObjects(*it, prm->GetPRMNodes()[connexions[j]]);
             }
@@ -137,10 +138,14 @@ void start()
     //dsSetViewpoint (xyz,hpr);
     std::string targetFile("../tests/collision/armoire.obj");
     std::string model("../tests/collision/cube.obj");
+    std::string model2("../tests/collision/cubeenglob.obj");
     objects = planner::ParseObj(targetFile);
 
     planner::Object::T_Object objects2 = planner::ParseObj(model);
-    prm = new planner::SimplePRM(*(objects2[0]), objects, 20, 20, 4);
+    planner::ParseObj(model2, objects2);
+    robot.englobed = objects2[0];
+    robot.englobing = objects2[1];
+    prm = new planner::SimplePRM(robot, objects, 1000, 20, 4);
 }
 
 void command(int cmd)   /**  key control function; */
