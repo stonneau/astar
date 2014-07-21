@@ -93,10 +93,10 @@ void LocalPlannerTest(bool& error)
     Eigen::Vector3d collisionB(3,0,0);
     a.SetPosition(collisionA); b.SetPosition(collisionB);
 
-    if(!lPlanner(&a, &b))
+    if(lPlanner(&a, &b))
     {
         error = true;
-        std::cout << "ERROR in LocalPlannerTest1 : collision not detected in path from a to b" << std::endl;
+        std::cout << "ERROR in LocalPlannerTest1 : collision detected in path from a to b" << std::endl;
     }
 
 
@@ -104,10 +104,10 @@ void LocalPlannerTest(bool& error)
     Eigen::Vector3d noCollisionB(-9,0,0);
     a.SetPosition(noCollisionA); b.SetPosition(noCollisionB);
 
-    if(lPlanner(&a, &b))
+    if(!lPlanner(&a, &b))
     {
         error = true;
-        std::cout << "ERROR in LocalPlannerTest2 : collision should not detected in path from a to b" << std::endl;
+        std::cout << "ERROR in LocalPlannerTest2 : collision should not be detected in path from a to b" << std::endl;
     }
 }
 
