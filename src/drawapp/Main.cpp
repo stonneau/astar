@@ -25,10 +25,11 @@ using namespace Eigen;
 
 namespace
 {
-    static float xyz[3] = {-10.0,1,6.0};
+    static float xyz[3] = {-30.0,1,6.0};
     static float hpr[3] = {0.0,0.0,0.0};
     planner::SimplePRM * prm;
     planner::Model robot;
+    bool pathOn = false;
 }
 
 namespace
@@ -65,7 +66,8 @@ namespace
     }
 
     planner::Object::T_Object objects;
-    void DrawObject(planner::Object* obj)
+    planner::Object::CT_Object path;
+    void DrawObject(const planner::Object* obj)
     {
         // TODO DRAW OFFSET
 
@@ -88,7 +90,7 @@ namespace
         }
     }
 
-    void LineBetweenObjects(planner::Object* a, planner::Object* b)
+    void LineBetweenObjects(const planner::Object* a, const planner::Object* b)
     {
         PQP_REAL p1 [3];
         PQP_REAL p2 [3];
@@ -108,21 +110,47 @@ namespace
         {
             DrawObject(*it);
         }
-        int i = 0;
-        for(planner::Object::T_Object::const_iterator it = prm->GetPRMNodes().begin();
-            it != prm->GetPRMNodes().end();
-            ++it, ++i)
+        if(pathOn)
         {
-            dsSetColorAlpha(1,0, 0,1);
-            DrawObject(*it);
-            const std::vector< int > connexions = prm->GetConnections(i);
-            dsSetColorAlpha(0,1, 0,1);
-            for(unsigned int j = 0; j< connexions.size(); ++j)
+            dsSetColorAlpha(0,0, 0,1);
+            int test = prm->GetPRMNodes().size();
+            bool afterfirst = false;
+            planner::Object::CT_Object::iterator it = path.begin();
+            for(planner::Object::CT_Object::iterator it2 = path.begin();
+                it2 != path.end();
+                ++it2)
             {
-                LineBetweenObjects(*it, prm->GetPRMNodes()[connexions[j]]);
+                dsSetColorAlpha(1,0, 0,1);
+                DrawObject(*it);
+                if(afterfirst)
+                {
+                    dsSetColorAlpha(0,1, 0,1);
+                    LineBetweenObjects(*it, *it2);
+                    ++it;
+                }
+                else
+                {
+                    afterfirst = true;
+                }
             }
         }
-        // then draw lines
+        else
+        {
+            int i = 0;
+            for(planner::Object::T_Object::const_iterator it = prm->GetPRMNodes().begin();
+                it != prm->GetPRMNodes().end();
+                ++it, ++i)
+            {
+                dsSetColorAlpha(1,0, 0,1);
+                DrawObject(*it);
+                const std::vector< int > connexions = prm->GetConnections(i);
+                dsSetColorAlpha(0,1, 0,1);
+                for(unsigned int j = 0; j< connexions.size(); ++j)
+                {
+                    LineBetweenObjects(*it, prm->GetPRMNodes()[connexions[j]]);
+                }
+            }
+        }
     }
 }
 
@@ -146,14 +174,25 @@ void start()
     planner::ParseObj(model2, objects2);
     robot.englobed = objects2[0];
     robot.englobing = objects2[1];
-    prm = new planner::SimplePRM(robot, objects, 10, 100, 4);
+    prm = new planner::SimplePRM(robot, objects, 10, 1000, 4);
+    path = prm->GetPath(*(prm->GetPRMNodes()[0]),*(prm->GetPRMNodes()[10]), 10.f);
+    if(path.empty())
+    {
+        path.push_back(prm->GetPRMNodes()[0]);
+        path.push_back(prm->GetPRMNodes()[10]);
+    }
+    dsSetViewpoint (xyz,hpr);
 }
 
 void command(int cmd)   /**  key control function; */
 {
-
+    switch (cmd)
+    {
+        case 'e' :
+            pathOn = !pathOn;
+        break;
+    }
 }
-
 
 int main(int argc, char *argv[])
 {

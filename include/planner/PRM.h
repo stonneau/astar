@@ -105,7 +105,7 @@ public:
 	///  \param localPlanner boolean method that returns true whether two nodes can be connected (a collision free-path exists)
 	///	 \param neighbourDistance maximum distance for which a node can be a neighbour of another
 	///  \param return : vector of NodeContent traversed to reach the goal. Empty if no pathfinding failed
-	 T_NodeContentPath ComputePath(const NodeContent* from, const NodeContent* to, Distance dist, const LocalPlanner* localPlanner, Numeric neighbourDistance) const
+     T_NodeContentPath ComputePath(const NodeContent* from, const NodeContent* to, Distance dist, LocalPlanner* localPlanner, Numeric neighbourDistance) const
 	 {
 		int start_id = GetClosestPointInGraph(from, dist, localPlanner, neighbourDistance);
 		int goal_id = GetClosestPointInGraph(to, dist, localPlanner, neighbourDistance);
@@ -128,7 +128,7 @@ public:
 	 }
 	 
 private:
-	int GetClosestPointInGraph(const NodeContent* node, Distance dist, const LocalPlanner* localPlanner, Numeric neighbourDistance) const //todo this is really expensive at the moment
+    int GetClosestPointInGraph(const NodeContent* node, Distance dist, LocalPlanner* localPlanner, Numeric neighbourDistance) const //todo this is really expensive at the moment
 	{
 		Numeric min_distance = std::numeric_limits<Numeric>::max();
 		int current_index = 0; 

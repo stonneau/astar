@@ -26,6 +26,7 @@ class Object
 {
 public:
     typedef std::vector<Object*> T_Object;
+    typedef std::vector<const Object*> CT_Object;
 
 public:
     ///  \brief Constructor

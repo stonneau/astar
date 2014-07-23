@@ -86,7 +86,7 @@ const std::vector<int> &SimplePRM::GetConnections(int node) const
     return pImpl_->prm_->edges_[node];
 }
 
-/*Object::T_Object SimplePRM::GetPath(const Object &from, const Object &to, float neighbourDistance)
+Object::CT_Object SimplePRM::GetPath(const Object &from, const Object &to, float neighbourDistance)
 {
-	return pImpl_->prm_->ComputePath(&from, &to, Distance, world_, neighbourDistance);
-}*/
+    return pImpl_->prm_->ComputePath(&from, &to, Distance, &pImpl_->planner_, neighbourDistance);
+}

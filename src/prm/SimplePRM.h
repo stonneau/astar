@@ -75,7 +75,7 @@ public:
 	///\brief Destructor
 	 ~SimplePRM();
 	 
-     Object::T_Object GetPath(const Object& /*from*/, const Object& /*to*/, float /*neighbourDistance*/);
+     Object::CT_Object GetPath(const Object& /*from*/, const Object& /*to*/, float /*neighbourDistance*/);
 
 public:
      const Model& model_;
