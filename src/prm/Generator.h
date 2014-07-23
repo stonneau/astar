@@ -33,6 +33,15 @@ public:
     const Model& model_;
     Object::T_Object& objects_;
     Collider collider_;
+
+private:
+    void InitWeightedTriangles();
+    std::pair<Object*, const Tri*> RandomPointIntriangle();
+    const std::pair<Object*, const Tri*>& WeightedTriangles();
+
+private:
+    std::vector<float> weights_;
+    std::vector<std::pair<Object*, const Tri*> > triangles_;
 };
 } //namespace planner
 #endif //_CLASS_GENERATOR

@@ -67,7 +67,7 @@ namespace
     planner::Object::T_Object objects;
     void DrawObject(planner::Object* obj)
     {
-        // TODO DRAW OFFSETE
+        // TODO DRAW OFFSET
 
         PQP_REAL p1 [3];
         PQP_REAL p2 [3];
@@ -140,7 +140,7 @@ void start()
     std::string targetFile("../tests/collision/wall_1s.obj");
     std::string model("../tests/collision/cube.obj");
     std::string model2("../tests/collision/cubeenglob.obj");
-    objects = planner::ParseObj(targetFile);
+    objects = planner::ParseObj(targetFile, true);
 
     planner::Object::T_Object objects2 = planner::ParseObj(model);
     planner::ParseObj(model2, objects2);

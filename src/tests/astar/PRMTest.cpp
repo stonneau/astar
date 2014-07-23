@@ -8,7 +8,6 @@
 */
 
 #include "PRMTest.h"
-#include "planner/PRM.h" // Template PRM definition
 
 namespace planner
 {

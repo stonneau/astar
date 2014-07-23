@@ -323,6 +323,35 @@ void PRMTests(bool& error)
 	}
 }
 
+void ComponentTest(bool& error)
+{
+    planner::Components components;
+    components.AddConnection(0,1);
+    components.AddConnection(2,3);
+    if(components.components.size() != 2)
+    {
+        error = true;
+        std::cout << "In ComponentTest 1; error : should have 2 different sets" << std::endl;
+    }
+    components.AddConnection(4,3);
+    if(components.components.size() != 2)
+    {
+        error = true;
+        std::cout << "In ComponentTest 2; error : should have 2 different sets" << std::endl;
+    }
+    if(components.components[1].size() != 3)
+    {
+        error = true;
+        std::cout << "In ComponentTest 3; error : last set should have a size of 3" << std::endl;
+    }
+    components.AddConnection(1,4);
+    if(components.components.size() != 1)
+    {
+        error = true;
+        std::cout << "In ComponentTest 4; error : Sets should be merged" << std::endl;
+    }
+}
+
 int main(int argc, char *argv[])
 {
 	std::cout << "performing tests... \n";
@@ -330,6 +359,7 @@ int main(int argc, char *argv[])
 	GraphCreationTest(error);
 	AStartest(error);
 	PRMTests(error);
+    ComponentTest(error);
 	if(error)
 	{
 		std::cout << "There were some errors\n";

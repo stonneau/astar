@@ -176,26 +176,27 @@ namespace planner
 
 using namespace planner;
 
-Object::T_Object planner::ParseObj(const std::string& filename)
+Object::T_Object planner::ParseObj(const std::string& filename, const bool asOneObject)
 {
     Object::T_Object objects;
-    ParseObj(filename, objects);
+    ParseObj(filename, objects, asOneObject);
     return objects;
 }
 
-void planner::ParseObj(const std::string& filename, std::vector<Object*>& objects)
+void planner::ParseObj(const std::string& filename, std::vector<Object*>& objects, const bool asOneObject)
 {
     ParserPImpl pImpl;
 	string line;
 	ifstream myfile (filename);
 	std::vector<std::string> lines;
+    bool firstInit = false;
 	if (myfile.is_open())
 	{
 		while ( myfile.good() )
 		{
 			getline (myfile, line);
             // new model
-            if(line.find("o ") == 0 || line.find("g ") == 0)
+            if((line.find("o ") == 0 || line.find("g ") == 0) && (!asOneObject || !firstInit))
             {
                 PQP_Model* m = new PQP_Model;
                 if(pImpl.modelOn_)
@@ -206,6 +207,7 @@ void planner::ParseObj(const std::string& filename, std::vector<Object*>& object
                 else
                 {
                     pImpl.modelOn_ = true;
+                    firstInit = true;
                 }
                 pImpl.currentIndex_ = -1;
                 pImpl.models_.push_back(m);

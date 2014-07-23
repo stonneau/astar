@@ -20,8 +20,9 @@ namespace planner
 ///  \brief Loads a set of Object from an obj files.
 ///  TODO: Only accepts triangles and quads objects.
 ///  \param filename path to the obj file to be loaded.
+///  \param asOneObject if true obj file is considered one single object
 ///  \param return : a list of Object from the obj file.
-Object::T_Object ParseObj(const std::string& /*filename*/);
+Object::T_Object ParseObj(const std::string&  /*filename*/, const bool asOneObject = false);
 
 
 ///  \brief Loads a set of Object from an obj files and concatenates
@@ -29,7 +30,8 @@ Object::T_Object ParseObj(const std::string& /*filename*/);
 ///  TODO: Only accepts triangles and quads objects.
 ///  \param filename path to the obj file to be loaded.
 ///  \param objects a T_Object at the end of which the new Object will be concatanated.
+///  \param asOneObject if true obj file is considered one single object
 ///  \param return : a list of Object from the obj file.
-void ParseObj(const std::string& /*filename*/, Object::T_Object& /*objects*/);
+void ParseObj(const std::string& /*filename*/, Object::T_Object& /*objects*/, const bool asOneObject = false);
 }//namespace planner;
 #endif //_CLASS_ParserObj

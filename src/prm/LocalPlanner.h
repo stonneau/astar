@@ -26,7 +26,7 @@ public:
     ~LocalPlanner();
 
 public:
-    bool operator ()(const Object* /*a*/, const Object* /*b*/);
+    bool operator ()(const Object* /*a*/, const Object* /*b*/, int stage =0);
 };
 } //namespace planner
 #endif //_CLASS_LOCALPLANNER

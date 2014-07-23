@@ -12,11 +12,20 @@
 
 #include "astar/Graph.h"
 #include "astar/AStar.h"
+#include "planner/Component.h"
 
 #include <limits>       // std::numeric_limits
 
 namespace planner
 {
+/// \enum PlannerStage
+/// \brief description of increasing complexity of planner
+enum Stage
+{
+    simpleConnect,
+    componentConnect,
+    componentGrow
+};
 
 /// \class PRM
 /// \brief Generic implementation of a probabilistic roadmap (PRM) as a astar::Graph.
@@ -30,21 +39,23 @@ class PRM : public  astar::Graph<NodeContent, Numeric, Dim, int, true>
 public:
     typedef astar::Graph<NodeContent, Numeric, Dim, int, true> graph_t;
 	typedef Numeric (*Distance)		  (const NodeContent*, const NodeContent*);
-	typedef std::vector<const NodeContent*> T_NodeContentPath;
+    typedef std::vector<const NodeContent*> T_NodeContentPath;
+
 public:
-	///\brief Constructor
-	///\param generator instance of Generator template class that will generate collision-free configurations using operator()
-	///\param localPlanner instance of LocalPlanner class; operator() takes two NodeContent and
+    /// \brief Constructor
+    /// \param generator instance of Generator template class that will generate collision-free configurations using operator()
+    /// \param localPlanner instance of LocalPlanner class; operator() takes two NodeContent and a PlannerLevel and
 	/// returns true whether two nodes can be connected (a collision free-path exists)
-	/// \param distance Function used to measure the distance between two nodes. It 
+    /// \param distance Function used to measure the distance between two nodes. It
 	///  has the signature Numeric (*Distance) (const NodeContent*, const NodeContent* )
-	///\param neighbourDistance maximum distance for which a node can be a neighbour of another
-	///\param size number of nodes to be generated
-	///\param k maximum number of neighbours for a given Node. Default value is 10
+    /// \param neighbourDistance maximum distance for which a node can be a neighbour of another
+    /// \param size number of nodes to be generated
+    /// \param k maximum number of neighbours for a given Node. Default value is 10
     PRM(Generator* generator, LocalPlanner* localPlanner, Distance distance, Numeric neighbourDistance, int size = Dim, int k=10)
         : graph_t()
         , size_(size)
     {
+        Components components;
 		for(int i=0; i< size; ++i)
 		{
             NodeContent* node = (*generator)();
@@ -56,25 +67,31 @@ public:
                  current_index < id && it != graph_t::nodeContents_.end() && connected <k ;
 				++it, ++current_index)
 			{
-                if(current_index != id && distance(node,*it) <= neighbourDistance && (*localPlanner)(node,*it))
+                if(current_index != id && distance(node,*it) <= neighbourDistance && (*localPlanner)(node,*it, simpleConnect))
 				{
                     if(graph_t::edges_[current_index].size() < ((unsigned int) k))
                     {
                         graph_t::AddEdge(id, current_index);
+                        components.AddConnection(current_index, id);
 						++connected;
 					}
 				}
             }
-            if(connected == 0 && id > 0 ) // do not add
+            if(connected == 0) // do not add
             {
-                /* TODO
-                    --this->currentIndex_;
-                    delete node;
-                    i--;
-                    if(--nbFailure < 0) return;
-                */
+                components.AddConnection(id);
             }
 		}
+        float prevsize, newsize;
+        prevsize = components.components.size();
+        ConnectComponents(components, localPlanner, distance, neighbourDistance);
+        newsize = components.components.size();
+        while(prevsize != newsize)
+        {
+            prevsize = newsize;
+            ConnectComponents(components, localPlanner, distance, neighbourDistance);
+            newsize = components.components.size();
+        }
 	}
 
 	///\brief Destructor
@@ -121,7 +138,7 @@ private:
 				++it, ++current_index)
 		{
 			Numeric current_distance = dist(node,*it);
-			if(current_distance < min_distance && current_distance < neighbourDistance && (*localPlanner)(node,*it))
+            if(current_distance < min_distance && current_distance < neighbourDistance && (*localPlanner)(node,*it, simpleConnect))
 			{
 				closest_index = current_index;
 				min_distance = current_distance;
@@ -129,6 +146,65 @@ private:
 		}
 		return closest_index;
 	}
+
+    void ConnectComponents(Components& components, LocalPlanner* localPlanner, Distance distance, Numeric neighbourDistance)
+    {
+        components.Sort();
+        for(std::vector<Component>::iterator it = components.components.begin();
+            it!= components.components.end(); ++it)
+        {
+            std::vector<Component>::iterator it2 = it; ++it2;
+            for(;it2 != components.components.end(); ++it2)
+            {
+                if(it->size() < 15) // MAX2 // ATTEMPT ALL
+                {
+                    for(Component::iterator it3 = it->begin();
+                        it3!= it->end(); ++it3)
+                    {
+                        NodeContent* node = this->nodeContents_[*it3];
+                        std::vector<int> closest = GetClosestPoints( node, *it2, 10, distance); //K2.1
+                        for (std::vector<int>::const_iterator nodeit = closest.begin();
+                             nodeit != closest.end(); ++nodeit)
+                        {
+                            if(distance(node,this->nodeContents_[*nodeit]) <= neighbourDistance && (*localPlanner)(node,this->nodeContents_[*nodeit], componentConnect))
+                            {
+                                graph_t::AddEdge(*it3, *nodeit);
+                                components.AddConnection(*it3, *nodeit);
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    std::vector<int> GetClosestPoints(const NodeContent* node, const planner::Component& component, int nbNeighbours, Distance distance)
+    {
+        typedef std::pair<int, Numeric> DistanceNode;
+        std::list< DistanceNode > distances;
+        for(Component::iterator it = component.begin();
+            it!= component.end(); ++it)
+        {
+            Numeric dist = distance(node, this->nodeContents_[*it]);
+            typename std::list< DistanceNode >::iterator it2 = distances.begin();
+            for(;it2 != distances.end(); ++it2)
+            {
+                if(dist < it2->second)
+                {
+                    break;
+                }
+            }
+            distances.insert(it2, std::make_pair(*it, dist));
+        }
+        std::vector<int> res; int i =0;
+        for(typename std::list< DistanceNode >::iterator it = distances.begin();
+            it != distances.end() && i < nbNeighbours; ++it, ++i)
+        {
+            res.push_back(it->first);
+        }
+        return res;
+    }
 
 private:
 	typedef astar::AStar<NodeContent, Numeric, Dim, int, true> astar_t;

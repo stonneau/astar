@@ -11,6 +11,7 @@
 
 #include <vector>
 #include <memory>
+#include "planner/PRM.h" // Template PRM definition
 
 namespace planner
 {
@@ -61,7 +62,7 @@ struct World
 		collisions.push_back(std::make_pair(id1, id2));
 	}
 
-    bool operator() (const Configuration* a, const Configuration* b) const
+    bool operator() (const Configuration* a, const Configuration* b, planner::Stage stage = planner::simpleConnect) const
 	{
 		for(std::vector<std::pair<int, int> >::const_iterator it = collisions.begin(); 
 			it != collisions.end();
