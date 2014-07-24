@@ -111,6 +111,28 @@ void LocalPlannerTest(bool& error)
     }
 }
 
+#include "prm/SimplePRM.h"
+
+void SerializeSimplePRMTest(bool& error)
+{
+    std::string targetFile("../tests/collision/wall_1s.obj");
+    std::string model("../tests/collision/cube.obj");
+    std::string model2("../tests/collision/cubeenglob.obj");
+    std::string outpath("../tests/testSerialization.txt");
+    std::string outpath2("../tests/testSerialization2.txt");
+    planner::Object::T_Object objects = planner::ParseObj(targetFile, true);
+
+    planner::Object::T_Object objects2 = planner::ParseObj(model);
+    planner::ParseObj(model2, objects2);
+
+    planner::Model robot;
+    robot.englobed = objects2[0];
+    robot.englobing = objects2[1];
+    planner::SimplePRM* prm = new planner::SimplePRM(robot, objects, 10, 10, 4);
+    planner::SavePrm(*prm, outpath);
+    planner::SimplePRM* prm2 = planner::LoadPRM(outpath, objects, robot);
+    planner::SavePrm(*prm2, outpath2);
+}
 
 int main(int argc, char *argv[])
 {
@@ -120,6 +142,7 @@ int main(int argc, char *argv[])
     ObstacleCreationTest(error);
     CollisionDetectionTest(error);
     LocalPlannerTest(error);
+    SerializeSimplePRMTest(error);
 	if(error)
 	{
 		std::cout << "There were some errors\n";

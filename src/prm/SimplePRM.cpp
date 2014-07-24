@@ -14,6 +14,10 @@
 #include "LocalPlanner.h"
 #include "Generator.h"
 
+#include <fstream>
+#include <iostream>
+#include <string>
+
 namespace planner
 {
     float Distance(const Object* obj1, const Object* obj2)
@@ -21,7 +25,7 @@ namespace planner
         // TODO include angles
         const Eigen::Vector3d& a = obj1->GetPosition();
         const Eigen::Vector3d& b = obj2->GetPosition();
-        return sqrt((b.x() - a.x()) * (b.x() - a.x()) + (b.y() - a.y()) * (b.y() - a.y()) + (b.z() - a.z()) * (b.z() - a.z()));
+        return (float)(sqrt((b.x() - a.x()) * (b.x() - a.x()) + (b.y() - a.y()) * (b.y() - a.y()) + (b.z() - a.z()) * (b.z() - a.z())));
     }
 	
     typedef PRM<Object, planner::Generator, LocalPlanner, float, 10000> prm_t;
@@ -33,32 +37,39 @@ namespace planner
         {
             Generator* gen = new Generator(objects, model); // TODO MEME
             prm_ = new prm_t(gen, &planner_, Distance, neighbourDistance, size, k);
+            InitPrmNodes();
             // feel prmNodes
+        }
+
+        PImpl(const Model& model, Object::T_Object& objects, int size)
+            : planner_(objects)
+        {
+           prm_ = new prm_t(size);
+        }
+
+		~PImpl()
+		{
+			delete prm_;
+		}
+
+        void InitPrmNodes()
+        {
             for(int i =0; i< prm_->currentIndex_ +1; ++i)
             {
                 prmNodes_.push_back(prm_->nodeContents_[i]);
             }
         }
-		~PImpl()
-		{
-			delete prm_;
-		}
 
         Object* operator()()
 		{
             return 0;
 		}
 
-		const prm_t* prm_;
+        prm_t* prm_;
         LocalPlanner planner_;
         Object::T_Object prmNodes_;
 
 	};
-
-    Object* GenerateConfiguration()
-	{
-        return 0;
-    }
 }
 
 using namespace planner;
@@ -68,6 +79,13 @@ SimplePRM::SimplePRM(const Model &model, Object::T_Object &objects, float neighb
     , objects_(objects)
 {
     pImpl_.reset(new PImpl(model_, objects_, neighbourDistance, size, k));
+}
+
+SimplePRM::SimplePRM(const Model& model, Object::T_Object &objects, int size)
+    : model_(model)
+    , objects_(objects)
+{
+    pImpl_.reset(new PImpl(model_, objects_, size));
 }
 
 SimplePRM::~SimplePRM()
@@ -89,4 +107,149 @@ const std::vector<int> &SimplePRM::GetConnections(int node) const
 Object::CT_Object SimplePRM::GetPath(const Object &from, const Object &to, float neighbourDistance)
 {
     return pImpl_->prm_->ComputePath(&from, &to, Distance, &pImpl_->planner_, neighbourDistance);
+}
+
+
+using namespace std;
+
+namespace
+{
+    int getLastPointIndex(const string& s)
+    {
+        int res = -1;
+        for(unsigned int i=0;i<s.size();i++)
+        {
+            if(s[i]=='.')
+                res = i;
+        }
+        return res;
+    }
+
+    string insertEndFilename(const string& s, const std::string& ext)
+    {
+        //Remplace les ',' par des espaces.
+        string ret= s.substr(0, getLastPointIndex(s));
+        ret += ext;
+        ret += s.substr(getLastPointIndex(s),  string::npos);
+        return ret;
+    }
+
+    Eigen::Matrix4d readNodeLine(const std::string& line)
+    {
+        Eigen::Matrix4d transform;
+        char c11[255],c12[255],c13[255];
+        char c21[255],c22[255],c23[255];
+        char c31[255],c32[255],c33[255];
+        char x[255],y[255],z[255];
+        sscanf(line.c_str(),"%s %s %s %s %s %s %s %s %s %s %s %s",
+               c11, c12, c13, x, c21, c22, c23, y, c31, c32, c33, z);
+        transform << strtod (c11, NULL), strtod (c12, NULL), strtod (c13, NULL), strtod (x, NULL),
+                strtod (c21, NULL), strtod (c22, NULL), strtod (c23, NULL), strtod (y, NULL),
+                strtod (c31, NULL), strtod (c32, NULL), strtod (c33, NULL), strtod (z, NULL),
+                0, 0, 0, 1;
+        return transform;
+    }
+
+    void WriteNodeLine(const Eigen::Matrix3d& rotation, const Eigen::Vector3d& position, std::stringstream& outstream)
+    {
+        for(int i=0; i<3; ++i)
+        {
+            for(int j=0; j<3; ++j)
+            {
+                outstream << rotation(i,j) << " ";
+            }
+            outstream << position(i) << " ";
+        }
+        outstream << std::endl;
+    }
+}
+
+
+bool planner::SavePrm(SimplePRM& prm, const std::string& outfilename)
+{
+    size_t size = prm.GetPRMNodes().size();
+    std::stringstream outstream;
+    outstream << "size " << (int)(size) << std::endl;
+    for(std::vector<Object*>::const_iterator it = prm.GetPRMNodes().begin();
+        it!= prm.GetPRMNodes().end(); ++it)
+    {
+        WriteNodeLine((*it)->GetOrientation(),(*it)->GetPosition(), outstream);
+    }
+    outstream << "connections " << std::endl;
+    for(size_t i =0; i< size; ++i)
+    {
+        for(std::vector<int>::const_iterator it = prm.GetConnections(i).begin();
+            it!= prm.GetConnections(i).end(); ++it)
+        {
+            if(*it > (int)i)
+            {
+                outstream << i << " " << (*it) << std::endl;
+            }
+        }
+    }
+    ofstream outfile;
+    outfile.open(outfilename.c_str());
+    if (outfile.is_open())
+    {
+        outfile << outstream.rdbuf();
+        outfile.close();
+        return true;
+    }
+    else
+    {
+        std::cout << "Can not open outfile " << outfilename << std::endl;
+        return false;
+    }
+}
+
+SimplePRM* planner::LoadPRM(const std::string& filename, Object::T_Object& objects, const Model& model)
+{
+    SimplePRM* prm(0);
+    const Object& target = *model.englobed;
+    ifstream myfile (filename);
+    string line;
+    int size = -1;
+    if (myfile.is_open())
+    {
+        Eigen::Matrix4d tmp;
+        bool inConnexions = false;
+        while (myfile.good())
+        {
+            getline(myfile, line);
+            if(line.size()==0) break;
+            else if(line.find("size ") == 0)
+            {
+                line = line.substr(5);
+                size = std::stoi (line);
+                prm = new SimplePRM(model, objects, size);
+            }
+            else if(line.find("connections ") == 0)
+            {
+                inConnexions = true;
+            }
+            else if(inConnexions)
+            {
+                int from, to;
+                std::string::size_type sz;     // alias of size_t
+                from = std::stoi (line,&sz);
+                to = std::stoi (line.substr(sz));
+                prm->pImpl_->prm_->AddEdge(from, to);
+            }
+            else
+            {
+                tmp = readNodeLine(line);
+                Object* obj = new Object(target);
+                obj->SetOrientation(tmp.block<3,3>(0,0));
+                obj->SetPosition(tmp.block<3,1>(0,3));
+                prm->pImpl_->prm_->AddNode(obj);
+            }
+        }
+        myfile.close();
+    }
+    else
+    {
+        std::cout << "file not found" << filename << std::endl;
+    }
+    prm->pImpl_->InitPrmNodes();
+    return prm;
 }

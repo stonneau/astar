@@ -103,7 +103,6 @@ namespace
     void DrawObjects()
     {
         dsSetColorAlpha(0,0, 0,1);
-        int test = prm->GetPRMNodes().size();
         for(planner::Object::T_Object::iterator it = objects.begin();
             it != objects.end();
             ++it)
@@ -113,7 +112,6 @@ namespace
         if(pathOn)
         {
             dsSetColorAlpha(0,0, 0,1);
-            int test = prm->GetPRMNodes().size();
             bool afterfirst = false;
             planner::Object::CT_Object::iterator it = path.begin();
             for(planner::Object::CT_Object::iterator it2 = path.begin();

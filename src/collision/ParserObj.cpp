@@ -151,7 +151,7 @@ namespace planner
             // start just with triangles
             if(ndonnees >= 3 && ndonnees <=4) // only triangles or quad
             {
-                PQP_REAL points [ndonnees][3];
+                PQP_REAL points [4][3];
                 for(int i=0; i< ndonnees; ++i)
                 {
                     long int idx = (strtol(termes[i*3].c_str(),NULL, 10)) - 1;

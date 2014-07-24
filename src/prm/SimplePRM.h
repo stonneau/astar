@@ -1,6 +1,6 @@
 /**
 * \file SimplePRM.h
-* \brief A PRM concrete implementation
+* \brief A PRM concrete implementation, and serialization methods associated
 * \author Steve T.
 * \version 0.1
 * \date 07/07/2014
@@ -74,7 +74,13 @@ public:
 
 	///\brief Destructor
 	 ~SimplePRM();
-	 
+
+    ///\brief Computes a path between two nodes. If the nodes are not on the graph, the closest nodes
+    ///are chosen and connected to the path.
+    ///\param from Starting configuration
+    ///\param to Goal configuration
+    ///\param neighbourDistance maximum distance for which a node can be a neighbour of another
+    ///\return a list of Object corresponding to the path. If no path was found the list is empty
      Object::CT_Object GetPath(const Object& /*from*/, const Object& /*to*/, float /*neighbourDistance*/);
 
 public:
@@ -85,8 +91,18 @@ public:
      const std::vector< int >& GetConnections(int node) const;
 
 private:
+     SimplePRM(const Model& model, Object::T_Object &objects, int size);
+
+private:
     Object::T_Object objects_;
 	std::auto_ptr<PImpl> pImpl_;
+
+public:
+    friend SimplePRM* LoadPRM(const std::string& filename, Object::T_Object& objects, const Model& model);
 };
+
+bool SavePrm(SimplePRM& prm, const std::string& outfilename);
+SimplePRM* LoadPRM(const std::string& filename, Object::T_Object& objects, const Model& model);
+
 } //namespace planner
 #endif //_CLASS_SIMPLEPRM

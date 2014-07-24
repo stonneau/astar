@@ -352,6 +352,7 @@ void ComponentTest(bool& error)
     }
 }
 
+
 int main(int argc, char *argv[])
 {
 	std::cout << "performing tests... \n";

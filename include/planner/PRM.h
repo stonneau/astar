@@ -43,6 +43,15 @@ public:
 
 public:
     /// \brief Constructor
+    /// \param size number of nodes to be generated
+    PRM(int size = Dim)
+        : graph_t()
+        , size_(size)
+    {
+        // NOTHING
+    }
+
+    /// \brief Constructor
     /// \param generator instance of Generator template class that will generate collision-free configurations using operator()
     /// \param localPlanner instance of LocalPlanner class; operator() takes two NodeContent and a PlannerLevel and
 	/// returns true whether two nodes can be connected (a collision free-path exists)
@@ -56,33 +65,33 @@ public:
         , size_(size)
     {
         Components components;
-		for(int i=0; i< size; ++i)
-		{
+        for(int i=0; i< size; ++i)
+        {
             NodeContent* node = (*generator)();
             if(node == 0) return;
             int id = AddNode(node);
-			int current_index = 0;
+            int current_index = 0;
             int connected = 0;
             for(typename PRM::T_NodeContentPtr::iterator it = graph_t::nodeContents_.begin();
                  current_index < id && it != graph_t::nodeContents_.end() && connected <k ;
-				++it, ++current_index)
-			{
+                ++it, ++current_index)
+            {
                 if(current_index != id && distance(node,*it) <= neighbourDistance && (*localPlanner)(node,*it, simpleConnect))
-				{
+                {
                     if(graph_t::edges_[current_index].size() < ((unsigned int) k))
                     {
                         graph_t::AddEdge(id, current_index);
                         components.AddConnection(current_index, id);
-						++connected;
-					}
-				}
+                        ++connected;
+                    }
+                }
             }
             if(connected == 0) // do not add
             {
                 components.AddConnection(id);
             }
-		}
-        float prevsize, newsize;
+        }
+        size_t prevsize, newsize;
         prevsize = components.components.size();
         ConnectComponents(components, localPlanner, distance, neighbourDistance);
         newsize = components.components.size();
@@ -92,7 +101,7 @@ public:
             ConnectComponents(components, localPlanner, distance, neighbourDistance);
             newsize = components.components.size();
         }
-	}
+    }
 
 	///\brief Destructor
 	 ~PRM(){}
@@ -125,8 +134,8 @@ public:
 			}
 		 }
 		 return res;
-	 }
-	 
+     }
+
 private:
     int GetClosestPointInGraph(const NodeContent* node, Distance dist, LocalPlanner* localPlanner, Numeric neighbourDistance) const //todo this is really expensive at the moment
 	{
