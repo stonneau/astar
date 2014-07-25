@@ -23,6 +23,8 @@ set(SOURCES
     LocalPlanner.cpp
     Generator.h
     Generator.cpp
+    Scenario.h
+    Scenario.cpp
         ${SRC_TOOLS_DIR}/MatrixDefs.h ${SRC_TOOLS_DIR}/MatrixDefs.cpp
         ${SRC_TOOLS_DIR}/MatrixDefsInternal.h
 )

@@ -9,6 +9,7 @@
 #include <drawstuff/drawstuff.h> // The drawing library for ODE;
 
 #include "prm/SimplePRM.h"
+#include "prm/Scenario.h"
 
 #include <string>
 #include <iostream>
@@ -27,9 +28,9 @@ namespace
 {
     static float xyz[3] = {-30.0,1,6.0};
     static float hpr[3] = {0.0,0.0,0.0};
-    planner::SimplePRM * prm;
-    planner::Model robot;
+	planner::Scenario* scenario;
     bool pathOn = false;
+    std::string outpath("../tests/testSerialization.txt");
 }
 
 namespace
@@ -65,7 +66,6 @@ namespace
         }
     }
 
-    planner::Object::T_Object objects;
     planner::Object::CT_Object path;
     void DrawObject(const planner::Object* obj)
     {
@@ -103,8 +103,8 @@ namespace
     void DrawObjects()
     {
         dsSetColorAlpha(0,0, 0,1);
-        for(planner::Object::T_Object::iterator it = objects.begin();
-            it != objects.end();
+        for(planner::Object::T_Object::iterator it = scenario->objects_.begin();
+            it != scenario->objects_.end();
             ++it)
         {
             DrawObject(*it);
@@ -135,17 +135,17 @@ namespace
         else
         {
             int i = 0;
-            for(planner::Object::T_Object::const_iterator it = prm->GetPRMNodes().begin();
-                it != prm->GetPRMNodes().end();
+            for(planner::Object::T_Object::const_iterator it = scenario->prm->GetPRMNodes().begin();
+                it != scenario->prm->GetPRMNodes().end();
                 ++it, ++i)
             {
                 dsSetColorAlpha(1,0, 0,1);
                 DrawObject(*it);
-                const std::vector< int > connexions = prm->GetConnections(i);
+                const std::vector< int > connexions = scenario->prm->GetConnections(i);
                 dsSetColorAlpha(0,1, 0,1);
                 for(unsigned int j = 0; j< connexions.size(); ++j)
                 {
-                    LineBetweenObjects(*it, prm->GetPRMNodes()[connexions[j]]);
+                    LineBetweenObjects(*it, scenario->prm->GetPRMNodes()[connexions[j]]);
                 }
             }
         }
@@ -163,21 +163,12 @@ static void simLoop (int pause)
 void start()
 {
     //dsSetViewpoint (xyz,hpr);
-    std::string targetFile("../tests/collision/wall_1s.obj");
-    std::string model("../tests/collision/cube.obj");
-    std::string model2("../tests/collision/cubeenglob.obj");
-    objects = planner::ParseObj(targetFile, true);
-
-    planner::Object::T_Object objects2 = planner::ParseObj(model);
-    planner::ParseObj(model2, objects2);
-    robot.englobed = objects2[0];
-    robot.englobing = objects2[1];
-    prm = new planner::SimplePRM(robot, objects, 10, 1000, 4);
-    path = prm->GetPath(*(prm->GetPRMNodes()[0]),*(prm->GetPRMNodes()[10]), 10.f);
+	scenario = new planner::Scenario("../tests/testscenario.txt");
+    //path = scenario->prm->GetPath(*(scenario->prm->GetPRMNodes()[0]),*(scenario->prm->GetPRMNodes()[10]), 10.f);
     if(path.empty())
     {
-        path.push_back(prm->GetPRMNodes()[0]);
-        path.push_back(prm->GetPRMNodes()[10]);
+        /*path.push_back(scenario->prm->GetPRMNodes()[0]);
+        path.push_back(scenario->prm->GetPRMNodes()[10]);*/
     }
     dsSetViewpoint (xyz,hpr);
 }
@@ -189,6 +180,11 @@ void command(int cmd)   /**  key control function; */
         case 'e' :
             pathOn = !pathOn;
         break;
+        /*case 'r' :
+            planner::SavePrm(*prm, outpath);
+            delete prm;
+            prm = planner::LoadPRM(outpath, objects, robot);
+        break;*/
     }
 }
 

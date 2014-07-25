@@ -1,0 +1,3 @@
+MODEL = ../tests/collision/cube.obj ../tests/collision/cubeenglob.obj
+OBJECT = ../tests/collision/wall_1s.obj
+SIZE = 100 10 4

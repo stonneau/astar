@@ -41,7 +41,7 @@ public:
 	{
 		for(int i=0; i <= currentIndex_; ++i)
 		{
-			delete nodeContents_[i];
+			delete nodeContents_[i]; // Is this the right place to do this ?
 		}
 	}
 
