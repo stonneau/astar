@@ -163,12 +163,12 @@ static void simLoop (int pause)
 void start()
 {
     //dsSetViewpoint (xyz,hpr);
-	scenario = new planner::Scenario("../tests/testscenario.txt");
-    //path = scenario->prm->GetPath(*(scenario->prm->GetPRMNodes()[0]),*(scenario->prm->GetPRMNodes()[10]), 10.f);
+	scenario = new planner::Scenario("../tests/testscenarioload.txt");
+    path = scenario->prm->GetPath(*(scenario->prm->GetPRMNodes()[0]),*(scenario->prm->GetPRMNodes()[10]), 10.f);
     if(path.empty())
     {
-        /*path.push_back(scenario->prm->GetPRMNodes()[0]);
-        path.push_back(scenario->prm->GetPRMNodes()[10]);*/
+        path.push_back(scenario->prm->GetPRMNodes()[0]);
+        path.push_back(scenario->prm->GetPRMNodes()[10]);
     }
     dsSetViewpoint (xyz,hpr);
 }
@@ -180,11 +180,9 @@ void command(int cmd)   /**  key control function; */
         case 'e' :
             pathOn = !pathOn;
         break;
-        /*case 'r' :
-            planner::SavePrm(*prm, outpath);
-            delete prm;
-            prm = planner::LoadPRM(outpath, objects, robot);
-        break;*/
+        case 's' :
+			planner::SavePrm(*(scenario->prm), outpath);
+        break;
     }
 }
 

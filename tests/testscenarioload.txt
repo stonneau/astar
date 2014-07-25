@@ -1,3 +1,4 @@
 MODEL = ../tests/collision/cube.obj ../tests/collision/cubeenglob.obj
 OBJECT = ../tests/collision/wall_1s.obj
+PRMFILE = ../tests/testSerialization.txt
 SIZE = 1000 10 4
