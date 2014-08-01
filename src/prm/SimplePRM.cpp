@@ -25,7 +25,12 @@ namespace planner
         // TODO include angles
         const Eigen::Vector3d& a = obj1->GetPosition();
         const Eigen::Vector3d& b = obj2->GetPosition();
-        return (float)(sqrt((b.x() - a.x()) * (b.x() - a.x()) + (b.y() - a.y()) * (b.y() - a.y()) + (b.z() - a.z()) * (b.z() - a.z())));
+        float p = (float)(sqrt((b.x() - a.x()) * (b.x() - a.x()) + (b.y() - a.y()) * (b.y() - a.y()) + (b.z() - a.z()) * (b.z() - a.z())));
+
+		const Eigen::Vector3d& ea = obj1->GetOrientation().eulerAngles(0, 1, 2);
+        const Eigen::Vector3d& eb = obj2->GetOrientation().eulerAngles(0, 1, 2);
+        float q = (float)(sqrt((eb.x() - ea.x()) * (eb.x() - ea.x()) + (eb.y() - ea.y()) * (eb.y() - ea.y()) + (eb.z() - ea.z()) * (eb.z() - ea.z())));
+		return 0.8 * p + 0.2 * q;
     }
 	
     typedef PRM<Object, planner::Generator, LocalPlanner, float, 10000> prm_t;

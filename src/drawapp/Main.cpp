@@ -26,8 +26,8 @@ using namespace Eigen;
 
 namespace
 {
-    static float xyz[3] = {-30.0,1,6.0};
-    static float hpr[3] = {0.0,0.0,0.0};
+    static float xyz[3] = {60.0,-5,20.0};
+    static float hpr[3] = {180.0,0.0,0.0};
 	planner::Scenario* scenario;
     bool pathOn = false;
     std::string outpath("../tests/testSerialization.txt");
@@ -163,7 +163,8 @@ static void simLoop (int pause)
 void start()
 {
     //dsSetViewpoint (xyz,hpr);
-	scenario = new planner::Scenario("../tests/testscenarioload.txt");
+    //scenario = new planner::Scenario("../tests/testscenario.txt");
+    scenario = new planner::Scenario("../tests/testscenarioload.txt");
     path = scenario->prm->GetPath(*(scenario->prm->GetPRMNodes()[0]),*(scenario->prm->GetPRMNodes()[10]), 10.f);
     if(path.empty())
     {
