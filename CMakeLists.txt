@@ -27,6 +27,7 @@ find_package(DrawStuff REQUIRED)
 
 add_subdirectory (src/prm)
 add_subdirectory (src/collision)
+add_subdirectory (src/equilibrium)
 add_subdirectory (src/tests/astar)
 add_subdirectory (src/tests/prmcollisiontests)
 add_subdirectory (src/drawapp)

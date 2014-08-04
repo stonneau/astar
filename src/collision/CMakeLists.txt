@@ -6,6 +6,7 @@ include_directories("${SRC_TOOLS_DIR})
 include_directories("${PQP_INCLUDE_DIR}")
 include_directories("${EIGEN3_INCLUDE_DIR}")
 
+message("${PQP_INCLUDE_DIR}")
 PROJECT(prmcollision)
 
 
