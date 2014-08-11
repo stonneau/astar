@@ -13,4 +13,4 @@ add_executable(
         equilibrium_tests Main.cpp
 )
 
-TARGET_LINK_LIBRARIES(equilibrium_tests ${CDD_LIBRARY})
+TARGET_LINK_LIBRARIES(equilibrium_tests equilibrium ${CDD_LIBRARY})

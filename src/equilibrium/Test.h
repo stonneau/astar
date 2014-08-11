@@ -17,8 +17,11 @@ namespace equilib
 typedef Eigen::Vector3d Vector;
 typedef Eigen::Matrix3d Rotation;
 typedef Eigen::Matrix4d Transform;
+typedef std::vector<Transform> T_Transform;
 
-void CheckEquilibrium(const Eigen::MatrixXd& contactTransforms, const Eigen::MatrixXd& graspTransforms, const Eigen::MatrixXd& maxGraspingForces,  float friction = 1.f, double flimit = 3000);
+bool CheckEquilibrium(const T_Transform& contactTransforms, const T_Transform& graspTransforms, const Eigen::VectorXd& maxGraspingForces,
+                      const Eigen::Vector3d& acceleration, const Eigen::Vector3d& comLocation,
+                      const float mass, float friction, double flimit);
 
 } //namespace planner
 #endif //equilib
