@@ -13,10 +13,13 @@
 
 namespace planner
 {
-    bool StraightLine(const Object* a, const Object* b, LocalPlanner& planner)
+    bool StraightLine(const Object* a, const Object* b, LocalPlanner& planner, std::vector<Eigen::Matrix4d>& path, double tInc=0.1)
     {
+		std::vector<Eigen::Matrix4d> res;
         // v0 : draw line between a and b and check every 1 / 5 of the path if there is a collision
-        Object tmp(*a);
+		Model tmp(planner.model_);
+		tmp.SetOrientation(a->GetOrientation());
+		tmp.SetPosition(a->GetPosition());
         // compute line
         Eigen::Vector3d line = b->GetPosition() - a->GetPosition();
         // norm
@@ -37,7 +40,6 @@ namespace planner
         Eigen::Vector3d va = a->GetPosition();
         Eigen::Vector3d vb = b->GetPosition();
 
-        double tInc = 0.1;
         /*Vector3f ea = mat.eulerAngles(2, 0, 2);
 
         "2" represents the z axis and "0" the x axis, etc. The returned angles are such that we have the following equality:
@@ -46,7 +48,10 @@ namespace planner
         * * AngleAxisf(ea[2], Vector3f::UnitZ());*/
 
         /*Perform linear interpolation*/
-        for(double t = 0; t <= 1; t = t + tInc)
+		float linenorm = (float)line.norm();
+		float nbSteps = (float)(linenorm / tInc);
+		float inc = 1 / nbSteps;
+		for(double t = 0; t <= 1; t = t + inc)
         {
             offset = va + t * (vb - va);
             offrot = ea + t * (eb - ea);
@@ -55,30 +60,44 @@ namespace planner
                      *  Eigen::AngleAxisd(offrot[2],  Eigen::Vector3d::UnitZ());
             tmp.SetPosition(offset);
             tmp.SetOrientation(offrotmat);
-            if(planner.IsColliding(&tmp))
+			if(planner.IsColliding(tmp.englobed) || !planner.IsColliding(tmp.englobing))
             {
                 return false;
             }
+			else
+			{
+				Eigen::Matrix4d config = Eigen::Matrix4d::Identity();
+				config.block<3,3>(0,0) = offrotmat;
+				config.block<3,1>(0,3) = offset;
+				res.push_back(config);
+			}
         }
+		for(std::vector<Eigen::Matrix4d>::const_iterator cit = res.begin(); cit!=res.end(); ++cit)
+		{
+			path.push_back(*cit);
+		}
         return true;
     }
 
-    bool RotateAt(const Object* a, const Object* b, float when, LocalPlanner& planner)
+    bool RotateAt(const Object* a, const Object* b, float when, LocalPlanner& planner, std::vector<Eigen::Matrix4d>& path, int steps=10)
     {
         // v0 : draw line between a and b and check every 1 / 5 of the path if there is a collision
         Object tmp(*a);
         // compute line
+		double tInc1, tInc2;
+		tInc1 = 1. / (steps* when);
+		tInc2 = 1. / (steps* (1-when));
         Eigen::Vector3d position = a->GetPosition() +  when *(b->GetPosition() - a->GetPosition());
         tmp.SetPosition(position);
-        if(StraightLine(a, &tmp, planner))
+        if(StraightLine(a, &tmp, planner, path))
         {
             tmp.SetOrientation(b->GetOrientation());
-            return StraightLine(&tmp, b, planner);
+			return StraightLine(&tmp, b, planner, path);
         }
         return false;
     }
 
-    bool AstarLike(const Object* a, const Object* b, LocalPlanner& planner, int nbrs, int steps)
+    bool AstarLike(const Object* a, const Object* b, LocalPlanner& planner, std::vector<Eigen::Matrix4d>& path, int nbrs, int steps)
     {
         if(steps == 0) return false;
         // step distance given by distance to cover.
@@ -97,9 +116,9 @@ namespace planner
             dir = dir*stepdistance;
             Object tmp(*a);
             tmp.SetPosition(a->GetPosition() + dir);
-            if(StraightLine(a,&tmp, planner))
+            if(StraightLine(a,&tmp, planner, path))
             {
-                if(StraightLine(&tmp, b, planner))
+                if(StraightLine(&tmp, b, planner, path))
                 {
                     return true;
                 }
@@ -117,7 +136,7 @@ namespace planner
         }
         if(bestDistance < std::numeric_limits<double>::max())
         {
-            return AstarLike(&best, b, planner, nbrs, steps-1);
+            return AstarLike(&best, b, planner, path, nbrs, steps-1);
         }
         else
         {
@@ -128,8 +147,9 @@ namespace planner
 
 using namespace planner;
 
-LocalPlanner::LocalPlanner(Object::T_Object& objects)
+LocalPlanner::LocalPlanner(Object::T_Object& objects, const Model& model)
     : Collider(objects)
+	, model_(model)
 {
 	// NOTHING
 }
@@ -142,11 +162,24 @@ LocalPlanner::~LocalPlanner()
 
 bool LocalPlanner::operator ()(const Object* a, const Object* b, int stage)
 {
-    bool found = StraightLine(a, b, *this);
+	std::vector<Eigen::Matrix4d> path;
+    bool found = StraightLine(a, b, *this, path);
     if(!found && stage >0)
     {
-        found = RotateAt(a, b, 0.5, *this) || RotateAt(a, b, 0, *this) || RotateAt(a, b, 1, *this)
-        || AstarLike(a, b, *this, 15, 9);
+        found = RotateAt(a, b, 0.5, *this, path) || RotateAt(a, b, 0, *this, path) || RotateAt(a, b, 1, *this, path)
+        || AstarLike(a, b, *this,path, 15, 9);
     }
     return found;
+}
+
+std::vector<Eigen::Matrix4d> LocalPlanner::Interpolate(const Object* a, const Object* b, int nbSteps)
+{
+	std::vector<Eigen::Matrix4d> path;
+    bool found = StraightLine(a, b, *this, path, 1./nbSteps);
+    if(!found)
+    {
+        found = RotateAt(a, b, 0.5, *this, path, nbSteps) || RotateAt(a, b, 0, *this, path, nbSteps) || RotateAt(a, b, 1, *this, path, nbSteps)
+        || AstarLike(a, b, *this,path, 15, nbSteps);
+    }
+    return path;
 }

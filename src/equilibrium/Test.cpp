@@ -371,6 +371,10 @@ double ResidualRadius(const T_Transform &contactTransforms, const T_Transform &g
 	std::cout << "V" << std::endl << V << std::endl;
 	std::cout << "Vp" << std::endl << Vp << std::endl;*/
     dd_PolyhedraPtr polyH = dd_DDMatrix2Poly(Vpc, &error);
+	if(error != dd_NoError)
+	{
+		return -1000;
+	}
     dd_MatrixPtr Hc = dd_CopyInequalities(polyH);
     Eigen::MatrixXd H(Hc->rowsize, Hc->colsize-1);
     Eigen::MatrixXd h(Hc->rowsize, 1);

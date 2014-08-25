@@ -73,7 +73,7 @@ public:
 	///  \param dist Function used to measure the distance between two nodes. It 
 	///  has the signature Numeric (*Distance) (const NodeContent*, const NodeContent* )
 	///  \param return : true if a path was found, false otherwise
-	bool ComputePath(const Index from, const Index to, Path& path, Distance dist) const
+	bool ComputePath(const Index from, const Index to, Path& path, Distance dist, Numeric costPerNode = 0) const
 	{
 		OpenSet openSet;
 		T_Node closedSet;
@@ -103,7 +103,7 @@ public:
 				{
 					continue;
 				}
-				Numeric currentGScore = costFromStart[currentNode] + dist(graph_.nodeContents_[currentNode], graph_.nodeContents_[*it]);
+				Numeric currentGScore = costFromStart[currentNode] + dist(graph_.nodeContents_[currentNode], graph_.nodeContents_[*it]) + costPerNode;
                 typename OpenSet::iterator openit = std::find(openSet.begin(), openSet.end(), currentNode);
                 typename T_Cost::iterator costit = costFromStart.find(*it);
 				if(openit == openSet.end() || (costit != costFromStart.end() && costit->second > currentGScore))

@@ -2,6 +2,7 @@
 #include "MatrixDefsInternal.h"
 
 #include <time.h>
+#include <math.h>
 
 namespace
 {
@@ -74,7 +75,7 @@ Object* Generator::operator()()
         // pick one object randomly
         std::pair<Object*, const Tri*> sampled;
         double r = ((double) rand() / (RAND_MAX));
-        if(r > 0.2)
+        if(r > 0.3)
             sampled = RandomPointIntriangle();
         else
             sampled = WeightedTriangles();
@@ -89,7 +90,7 @@ Object* Generator::operator()()
         Eigen::Vector3d P = (1 - sqrt(r1)) * A + (sqrt(r1) * (1 - r2)) * B + (sqrt(r1) * r2) * C;
         configuration.SetPosition(P);
         // random rotation
-        double rx = ((double) rand() / (RAND_MAX)); double ry = ((double) rand() / (RAND_MAX)); double rz = ((double) rand() / (RAND_MAX));
+		double rx = ((double) rand() / (RAND_MAX)) * M_PI *2; double ry = ((double) rand() / (RAND_MAX)) * M_PI *2; double rz = ((double) rand() / (RAND_MAX));
         matrices::Matrix3 tranform = matrices::Rotx3(rx);
         tranform*= matrices::Roty3(ry);
         tranform*= matrices::Rotz3(rz);

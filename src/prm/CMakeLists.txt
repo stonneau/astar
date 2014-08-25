@@ -17,6 +17,7 @@ if ( MSVC )
 endif ( MSVC )
 	
 set(SOURCES
+    Model.h
     SimplePRM.h
     SimplePRM.cpp
     LocalPlanner.h

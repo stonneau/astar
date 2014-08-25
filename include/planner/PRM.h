@@ -60,46 +60,18 @@ public:
     /// \param neighbourDistance maximum distance for which a node can be a neighbour of another
     /// \param size number of nodes to be generated
     /// \param k maximum number of neighbours for a given Node. Default value is 10
-    PRM(Generator* generator, LocalPlanner* localPlanner, Distance distance, Numeric neighbourDistance, int size = Dim, int k=10)
+    /// \param Use a visiblity PRM or the classical PRM construction method
+    PRM(Generator* generator, LocalPlanner* localPlanner, Distance distance, Numeric neighbourDistance, int size = Dim, int k=10, bool visibility = false)
         : graph_t()
         , size_(size)
     {
-        Components components;
-        for(int i=0; i< size; ++i)
+        if(visibility)
         {
-            NodeContent* node = (*generator)();
-            if(node == 0) return;
-            int id = AddNode(node);
-            int current_index = 0;
-            int connected = 0;
-            for(typename PRM::T_NodeContentPtr::iterator it = graph_t::nodeContents_.begin();
-                 current_index < id && it != graph_t::nodeContents_.end() && connected <k ;
-                ++it, ++current_index)
-            {
-                if(current_index != id && distance(node,*it) <= neighbourDistance && (*localPlanner)(node,*it, simpleConnect))
-                {
-                    if(graph_t::edges_[current_index].size() < ((unsigned int) k))
-                    {
-                        graph_t::AddEdge(id, current_index);
-                        components.AddConnection(current_index, id);
-                        ++connected;
-                    }
-                }
-            }
-            if(connected == 0) // do not add
-            {
-                components.AddConnection(id);
-            }
+            GenerateVisibilityPRM(generator, localPlanner, distance, neighbourDistance, size, k);
         }
-        size_t prevsize, newsize;
-        prevsize = components.components.size();
-        ConnectComponents(components, localPlanner, distance, neighbourDistance);
-        newsize = components.components.size();
-        while(prevsize != newsize)
+        else
         {
-            prevsize = newsize;
-            ConnectComponents(components, localPlanner, distance, neighbourDistance);
-            newsize = components.components.size();
+            GeneratePRM(generator, localPlanner, distance, neighbourDistance, size, k);
         }
     }
 
@@ -213,6 +185,100 @@ private:
             res.push_back(it->first);
         }
         return res;
+    }
+
+    void GeneratePRM(Generator* generator, LocalPlanner* localPlanner, Distance distance, Numeric neighbourDistance, int size = Dim, int k=10)
+    {
+        Components components;
+        for(int i=0; i< size; ++i)
+        {
+            NodeContent* node = (*generator)();
+            if(node == 0) return;
+            int id = AddNode(node);
+            int current_index = 0;
+            int connected = 0;
+            for(typename PRM::T_NodeContentPtr::iterator it = graph_t::nodeContents_.begin();
+                 current_index < id && it != graph_t::nodeContents_.end() && connected <k ;
+                ++it, ++current_index)
+            {
+                if(current_index != id && distance(node,*it) <= neighbourDistance && (*localPlanner)(node,*it, simpleConnect))
+                {
+                    if(graph_t::edges_[current_index].size() < ((unsigned int) k))
+                    {
+                        graph_t::AddEdge(id, current_index);
+                        components.AddConnection(current_index, id);
+                        ++connected;
+                    }
+                }
+            }
+            if(connected == 0) // do not add
+            {
+                components.AddConnection(id);
+            }
+        }
+        size_t prevsize, newsize;
+        prevsize = components.components.size();
+        ConnectComponents(components, localPlanner, distance, neighbourDistance);
+        newsize = components.components.size();
+        while(prevsize != newsize)
+        {
+            prevsize = newsize;
+            ConnectComponents(components, localPlanner, distance, neighbourDistance);
+            newsize = components.components.size();
+        }
+    }
+
+    void GenerateVisibilityPRM(Generator* generator, LocalPlanner* localPlanner, Distance distance, Numeric neighbourDistance, int M = Dim, int k=10)
+    {
+        int ntry = 0;
+        Components guards;
+        while(ntry < M)
+        {
+            bool foundGvis = false;
+            bool connect = false;
+            int gvis = -1;
+            NodeContent* node = (*generator)();
+            for(std::vector<Component>::iterator git = guards.components.begin();
+                git != guards.components.end() && !connect; ++ git)
+            {
+                bool found = false;
+                for(Component::const_iterator cit = (*git).begin();
+                    cit != (*git).end() && !found; ++cit)
+                {
+                    int g = *cit;
+                    if(distance(node,this->nodeContents_[g]) <= neighbourDistance && (*localPlanner)(node,this->nodeContents_[g], componentConnect))
+                    {
+                        found = true;
+                        if(!foundGvis)
+                        {
+                            foundGvis = true;
+                            gvis = g;
+                        }
+                        else
+                        {
+                            int id = AddNode(node);
+                            graph_t::AddEdge(id, gvis);
+                            graph_t::AddEdge(id, g);
+                            guards.AddConnection(id, gvis);
+                            guards.AddConnection(id, g); // auto merge en thoerie
+                            connect = true;
+							git = guards.components.begin();
+							break;
+                        }
+                    }
+                }
+            }
+            if(!foundGvis) // guard
+            {
+                int id = AddNode(node);
+                guards.AddConnection(id);
+                ntry = 0;
+            }
+            else
+            {
+                ++ntry;
+            }
+        }
     }
 
 private:

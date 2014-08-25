@@ -30,7 +30,8 @@ namespace planner
 		const Eigen::Vector3d& ea = obj1->GetOrientation().eulerAngles(0, 1, 2);
         const Eigen::Vector3d& eb = obj2->GetOrientation().eulerAngles(0, 1, 2);
         float q = (float)(sqrt((eb.x() - ea.x()) * (eb.x() - ea.x()) + (eb.y() - ea.y()) * (eb.y() - ea.y()) + (eb.z() - ea.z()) * (eb.z() - ea.z())));
-		return 0.8 * p + 0.2 * q;
+		return 0.8f * p + 0.2f * q;
+		//return p + q;
     }
 	
     typedef PRM<Object, planner::Generator, LocalPlanner, float, 10000> prm_t;
@@ -38,16 +39,16 @@ namespace planner
 	struct PImpl
 	{
         PImpl(const Model& model, Object::T_Object& objects, float neighbourDistance, int size, int k)
-            : planner_(objects)
+            : planner_(objects, model)
         {
             Generator* gen = new Generator(objects, model); // TODO MEME
-            prm_ = new prm_t(gen, &planner_, Distance, neighbourDistance, size, k);
+            prm_ = new prm_t(gen, &planner_, Distance, neighbourDistance, size, k, true);
             InitPrmNodes();
             // feel prmNodes
         }
 
         PImpl(const Model& model, Object::T_Object& objects, int size)
-            : planner_(objects)
+            : planner_(objects, model)
         {
            prm_ = new prm_t(size);
         }
@@ -114,6 +115,22 @@ Object::CT_Object SimplePRM::GetPath(const Object &from, const Object &to, float
     return pImpl_->prm_->ComputePath(&from, &to, Distance, &pImpl_->planner_, neighbourDistance);
 }
 
+std::vector<Eigen::Matrix4d> SimplePRM::Interpolate(const Object::CT_Object& path, int steps)
+{
+    std::vector<Eigen::Matrix4d> res, tmp;
+	int each = steps/(int)path.size();
+	Object::CT_Object::const_iterator it2= path.begin(); ++it2;
+	for(Object::CT_Object::const_iterator it= path.begin(); it2!= path.end(); ++it, ++it2)
+	{
+		tmp = pImpl_->planner_.Interpolate(*it, *it2, each);
+		
+		for(std::vector<Eigen::Matrix4d>::const_iterator cit = tmp.begin(); cit!=tmp.end(); ++cit)
+		{
+			res.push_back(*cit);
+		}
+	}
+	return res;
+}
 
 using namespace std;
 
@@ -183,8 +200,8 @@ bool planner::SavePrm(SimplePRM& prm, const std::string& outfilename)
     outstream << "connections " << std::endl;
     for(size_t i =0; i< size; ++i)
     {
-        for(std::vector<int>::const_iterator it = prm.GetConnections(i).begin();
-            it!= prm.GetConnections(i).end(); ++it)
+        for(std::vector<int>::const_iterator it = prm.GetConnections((int)i).begin();
+            it!= prm.GetConnections((int)i).end(); ++it)
         {
             if(*it > (int)i)
             {

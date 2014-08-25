@@ -13,47 +13,13 @@
 #include <memory>
 
 #include "collision/Object.h"
+#include "Model.h"
 
 #include <string>
 #include <array>
 
 namespace planner
 {
-
-struct Model
-{
-    Model(){}
-    ~Model()
-    {
-        delete englobed;
-        delete englobing;
-    }
-
-    void SetOrientation(const Eigen::Matrix3d& orientation)
-    {
-        englobed->SetOrientation(orientation);
-        englobing->SetOrientation(orientation);
-    }
-
-    void SetPosition(const Eigen::Vector3d& position)
-    {
-        englobed->SetPosition(position);
-        englobing->SetPosition(position);
-    }
-
-    const Eigen::Matrix3d& GetOrientation() const
-    {
-        return englobed->GetOrientation();
-    }
-    const Eigen::Vector3d& GetPosition() const
-    {
-        return englobed->GetPosition();
-    }
-
-    Object* englobed;
-    Object* englobing;
-};
-
 struct PImpl;
 
 /// \class SimplePRM
@@ -82,6 +48,12 @@ public:
     ///\param neighbourDistance maximum distance for which a node can be a neighbour of another
     ///\return a list of Object corresponding to the path. If no path was found the list is empty
      Object::CT_Object GetPath(const Object& /*from*/, const Object& /*to*/, float /*neighbourDistance*/);
+
+	///\brief Interpolated configurations along path
+    ///\param path path
+    ///\param steps number of computed configurations
+    ///\return a list of Object corresponding to the path. If no path was found the list is empty
+	 std::vector<Eigen::Matrix4d> Interpolate(const Object::CT_Object& path, int /*steps*/);
 
 public:
      const Model& model_;
