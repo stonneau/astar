@@ -119,19 +119,12 @@ void Simplify(LocalPlanner& planner, int currentIndex, Object::CT_Object& res)
     if(currentIndex >= res.size()) return;
     const Object* obj = res[currentIndex];
     bool erased = false;
-    for(int i = res.size()-1; i> currentIndex + 1 && ! erased; --i)
+    for(int i = currentIndex+2; i< res.size() && ! erased; ++i)
     {
         if(planner(obj, res[i], 1))
         {
             erased = true;
-            Object::CT_Object::iterator from, to;
-            int j=0;
-            for(Object::CT_Object::iterator eraseit = res.begin(); j<= i; ++j)
-            {
-                if(j == currentIndex + 1) from = eraseit;
-                else if(j == i) to = eraseit;
-            }
-            res.erase(from, to);
+            res.erase(res.begin() + currentIndex + 1, res.begin() + i);
         }
     }
     if(erased)
@@ -150,11 +143,6 @@ Object::CT_Object SimplePRM::GetPath(const Object &from, const Object &to, float
     Object::CT_Object res = pImpl_->prm_->ComputePath(&from, &to, Distance, &pImpl_->planner_, neighbourDistance);
     if(simplify && !res.empty())
     {
-        ::L_Object reverseres;
-        for(Object::CT_Object::const_iterator it = res.begin(); it!=res.end(); ++it)
-        {
-            reverseres.push_front(*it);
-        }
         Simplify(pImpl_->planner_, 0, res);
     }
     return res;
