@@ -29,6 +29,7 @@ Scenario::Scenario(const std::string& filepath)
 		bool generating = false;
 		bool loading = false;
 		bool modelFound = false;
+		bool visibility = false;
 		std::string prmfile("");
 		int size = -1; int neighbours = -1; float neighbourDistance =-1.;
         while (myfile.good())
@@ -70,6 +71,10 @@ Scenario::Scenario(const std::string& filepath)
                 neighbourDistance = std::stof (line.substr(sz), &sz);
                 neighbours = std::stoi (line.substr(sz2 + sz));
 			}
+			else if(line.find("VISIBILITY") == 0)
+			{
+				visibility = true;
+			}
 		}
 		if((generating && loading) || !(generating ||loading))
 		{
@@ -79,7 +84,7 @@ Scenario::Scenario(const std::string& filepath)
 		}
 		else if(generating)
 		{
-			prm = new SimplePRM(model_, objects_, neighbourDistance, size, neighbours);
+			prm = new SimplePRM(model_, objects_, neighbourDistance, size, neighbours, visibility);
 		}
 		else
 		{

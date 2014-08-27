@@ -88,31 +88,74 @@ Object* Generator::operator()()
         double r1, r2;
         r1 = ((double) rand() / (RAND_MAX)); r2 = ((double) rand() / (RAND_MAX));
         Eigen::Vector3d P = (1 - sqrt(r1)) * A + (sqrt(r1) * (1 - r2)) * B + (sqrt(r1) * r2) * C;
-        configuration.SetPosition(P);
-        // random rotation
-		double rx = ((double) rand() / (RAND_MAX)) * M_PI *2; double ry = ((double) rand() / (RAND_MAX)) * M_PI *2; double rz = ((double) rand() / (RAND_MAX));
-        matrices::Matrix3 tranform = matrices::Rotx3(rx);
-        tranform*= matrices::Roty3(ry);
-        tranform*= matrices::Rotz3(rz);
-        configuration.SetOrientation(tranform);
-        // find random direction
-        int limit2 = 100;
-        while (limit2 >0)
-        {
-            Eigen::Vector3d dir((double) rand() / (RAND_MAX), (double) rand() / (RAND_MAX), (double) rand() / (RAND_MAX));
-            if(dir.norm() == 0) break;
-            dir.normalize();
-            // add random direction and check for collision
-            while(configuration.englobing->IsColliding(sampled.first))
-            {
-                if(!collider_.IsColliding(configuration.englobed))
-                {
-                    return new Object(*configuration.englobed);
-                }
-                configuration.SetPosition(configuration.GetPosition() + (double) rand() / (RAND_MAX) / 2 * dir);
-            }
-            --limit2;
-        }
+		if(P.z() < 2.5)
+		{
+			configuration.SetPosition(P);
+			// random rotation
+			double rx = ((double) rand() / (RAND_MAX)) * M_PI *2; double ry = ((double) rand() / (RAND_MAX)) * M_PI *2; double rz = ((double) rand() / (RAND_MAX))  * M_PI *2;
+			matrices::Matrix3 tranform = matrices::Rotz3(rz);
+			// find random direction
+			int limit2 = 100;
+			int limitstraight = 2;
+			// first try with straight form
+			configuration.SetOrientation(tranform);
+			while (limitstraight >0)
+			{
+				Eigen::Vector3d dir((double) rand() / (RAND_MAX), (double) rand() / (RAND_MAX), (double) rand() / (RAND_MAX));
+				if(dir.norm() == 0) break;
+				dir.normalize();
+				// add random direction and check for collision
+				while(configuration.englobing->IsColliding(sampled.first))
+				{
+					if(!collider_.IsColliding(configuration.englobed))
+					{
+						if(configuration.GetPosition().z() < 2.)
+							return new Object(*configuration.englobed);
+						break;
+					}
+					configuration.SetPosition(configuration.GetPosition() + (double) rand() / (RAND_MAX) / 2 * dir);
+				}
+				--limitstraight;
+			}
+			tranform*= matrices::Roty3(ry);
+			tranform*= matrices::Rotx3(rx);
+			configuration.SetOrientation(tranform);
+			while (limit2 >0)
+			{
+				Eigen::Vector3d dir((double) rand() / (RAND_MAX) -0.5, (double) rand() / (RAND_MAX) -0.5, (double) rand() / (RAND_MAX) -0.5);
+				// if normal check colinearity
+				if(sampled.first->normals_.size() > sampled.second->id)
+				{
+					Eigen::Vector3d normal = sampled.first->normals_[sampled.second->id];
+					normal.normalize();
+					dir.normalize();
+					int i = 1000;
+					while((normal.dot(dir) < 0 && dir.dot(normal) < 0) && i > 0)
+					{
+						dir= Eigen::Vector3d((double) rand() / (RAND_MAX) -0.5, (double) rand() / (RAND_MAX) -0.5, (double) rand() / (RAND_MAX) -0.5);
+						dir.normalize();
+						--i;
+					}
+				}
+				else
+				{
+					if(dir.norm() == 0) break;
+					dir.normalize();
+				}
+				// add random direction and check for collision
+				while(configuration.englobing->IsColliding(sampled.first))
+				{
+					if(!collider_.IsColliding(configuration.englobed))
+					{
+						if(configuration.GetPosition().z() < 2.)
+							return new Object(*configuration.englobed);
+						break;
+					}
+					configuration.SetPosition(configuration.GetPosition() + (double) rand() / (RAND_MAX) / 2 * dir);
+				}
+				--limit2;
+			}
+		}
     }
     return 0;
 }

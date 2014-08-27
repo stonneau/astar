@@ -36,7 +36,7 @@ public:
 	///\param neighbourDistance maximum distance for which a node can be a neighbour of another
 	///\param size number of nodes to be generated
 	///\param k maximum number of neighbours for a given Node. Default value is 10
-    SimplePRM(const Model& model, Object::T_Object &objects, float neighbourDistance, int size = 1000, int k = 10);
+    SimplePRM(const Model& model, Object::T_Object &objects, float neighbourDistance, int size = 1000, int k = 10, bool visibility=false);
 
 	///\brief Destructor
 	 ~SimplePRM();
@@ -47,7 +47,7 @@ public:
     ///\param to Goal configuration
     ///\param neighbourDistance maximum distance for which a node can be a neighbour of another
     ///\return a list of Object corresponding to the path. If no path was found the list is empty
-     Object::CT_Object GetPath(const Object& /*from*/, const Object& /*to*/, float /*neighbourDistance*/);
+     Object::CT_Object GetPath(const Object& /*from*/, const Object& /*to*/, float /*neighbourDistance*/, bool simplify = true);
 
 	///\brief Interpolated configurations along path
     ///\param path path

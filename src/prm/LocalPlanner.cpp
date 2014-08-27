@@ -13,7 +13,7 @@
 
 namespace planner
 {
-    bool StraightLine(const Object* a, const Object* b, LocalPlanner& planner, std::vector<Eigen::Matrix4d>& path, double tInc=0.1)
+    bool StraightLine(const Object* a, const Object* b, LocalPlanner& planner, std::vector<Eigen::Matrix4d>& path, double tInc=0.05)
     {
 		std::vector<Eigen::Matrix4d> res;
         // v0 : draw line between a and b and check every 1 / 5 of the path if there is a collision
@@ -166,8 +166,11 @@ bool LocalPlanner::operator ()(const Object* a, const Object* b, int stage)
     bool found = StraightLine(a, b, *this, path);
     if(!found && stage >0)
     {
-        found = RotateAt(a, b, 0.5, *this, path) || RotateAt(a, b, 0, *this, path) || RotateAt(a, b, 1, *this, path)
-        || AstarLike(a, b, *this,path, 15, 9);
+        found = RotateAt(a, b, 0.5, *this, path) || RotateAt(a, b, 0, *this, path) || RotateAt(a, b, 1, *this, path);
+        if(!found && stage >1)
+		{
+			found = AstarLike(a, b, *this,path, 15, 9);
+		}
     }
     return found;
 }

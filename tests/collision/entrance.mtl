@@ -1,0 +1,77 @@
+
+newmtl apartmentstaticfbx-trimmaterial
+Ka  0.6 0.6 0.6
+Kd  0.6 0.6 0.6
+Ks  0.9 0.9 0.9
+d  1.0
+Ns  0.0
+illum 2
+
+
+
+
+newmtl apartmentstaticfbx-lambert1
+Ka  0.6 0.6 0.6
+Kd  0.6 0.6 0.6
+Ks  0.9 0.9 0.9
+d  1.0
+Ns  0.0
+illum 2
+
+
+
+
+newmtl apartmentstaticfbx-pillowmaterial
+Ka  0.6 0.6 0.6
+Kd  0.6 0.6 0.6
+Ks  0.9 0.9 0.9
+d  1.0
+Ns  0.0
+illum 2
+map_Kd bedSpread.psd
+
+
+
+newmtl apartmentstaticfbx-hardwoodfloor
+Ka  0.6 0.6 0.6
+Kd  0.6 0.6 0.6
+Ks  0.9 0.9 0.9
+d  1.0
+Ns  0.0
+illum 2
+map_Kd woodFloorTexture.tif
+
+
+
+newmtl computerdesk-maplematerial
+Ka  0.6 0.6 0.6
+Kd  0.6 0.6 0.6
+Ks  0.9 0.9 0.9
+d  1.0
+Ns  0.0
+illum 2
+map_Kd mapleWood.psd
+
+
+
+newmtl couch-couchfabricmaterial
+Ka  0.6 0.6 0.6
+Kd  0.6 0.6 0.6
+Ks  0.9 0.9 0.9
+d  1.0
+Ns  0.0
+illum 2
+map_Kd couchFabric.psd
+
+
+
+newmtl couch-kitchencountermaterial
+Ka  0.6 0.6 0.6
+Kd  0.6 0.6 0.6
+Ks  0.9 0.9 0.9
+d  1.0
+Ns  0.0
+illum 2
+map_Kd kitchenButcherBlock.psd
+
+

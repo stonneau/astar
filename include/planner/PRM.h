@@ -232,6 +232,7 @@ private:
     {
         int ntry = 0;
         Components guards;
+		int id = -1;
         while(ntry < M)
         {
             bool foundGvis = false;
@@ -256,7 +257,7 @@ private:
                         }
                         else
                         {
-                            int id = AddNode(node);
+                            id = AddNode(node);
                             graph_t::AddEdge(id, gvis);
                             graph_t::AddEdge(id, g);
                             guards.AddConnection(id, gvis);
@@ -278,12 +279,13 @@ private:
             {
                 ++ntry;
             }
+			size_ = id;
         }
     }
 
 private:
 	typedef astar::AStar<NodeContent, Numeric, Dim, int, true> astar_t;
-	const int size_;
+	int size_;
 
 private:
 	PRM(const PRM&);

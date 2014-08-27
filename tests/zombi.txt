@@ -1,3 +1,4 @@
-MODEL = ../tests/collision/cube07.obj ../tests/collision/cubeenglob07.obj
-OBJECT = ../tests/collision/appartzombi.obj
-SIZE = 100 5 30
+MODEL = ../tests/collision/cenglobed.obj ../tests/collision/cenglobing.obj
+OBJECT = ../tests/collision/entrance.obj
+SIZE = 1000 1 10
+VISIBILITY

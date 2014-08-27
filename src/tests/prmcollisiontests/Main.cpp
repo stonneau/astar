@@ -85,9 +85,15 @@ void LocalPlannerTest(bool& error)
 {
     std::string targetFile("../tests/collision/cube.obj");
     planner::Object::T_Object objects = planner::ParseObj(targetFile);
+    std::string model2("../tests/collision/cubeenglob.obj");
+    planner::Object::T_Object objects2 = planner::ParseObj(model2);
     planner::Object a(*objects[0]);
     planner::Object b(*objects[0]);
-    planner::LocalPlanner lPlanner(objects);
+	
+    planner::Model robot;
+    robot.englobed = objects[0];
+    robot.englobing = objects2[0];
+    planner::LocalPlanner lPlanner(objects, robot);
 
     Eigen::Vector3d collisionA(-3,0,0);
     Eigen::Vector3d collisionB(3,0,0);
@@ -101,9 +107,9 @@ void LocalPlannerTest(bool& error)
 
 
     Eigen::Vector3d noCollisionA(-3,0,0);
-    Eigen::Vector3d noCollisionB(-9,0,0);
+    Eigen::Vector3d noCollisionB(-3,-6,0);
     a.SetPosition(noCollisionA); b.SetPosition(noCollisionB);
-
+	// TODO rewrite this test for taking model into account
     if(!lPlanner(&a, &b))
     {
         error = true;

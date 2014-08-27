@@ -242,7 +242,7 @@ void planner::ParseObj(const std::string& filename, std::vector<Object*>& object
             it != pImpl.models_.end();
             ++it)
         {
-            objects.push_back(new Object(*it));
+			objects.push_back(new Object(*it, pImpl.normals_));
         }
 	}
     else

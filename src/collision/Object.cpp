@@ -36,6 +36,16 @@ Object::Object(PQP_Model* model)
     EigenToDoubleVector(position_, pqpPosition_);
 }
 
+Object::Object(PQP_Model* model, const T_Vector3& normals)
+    : model_(model)
+    , position_(Eigen::Vector3d::Zero())
+    , orientation_(Eigen::Matrix3d::Identity())
+	, normals_(normals)
+{
+    EigenToDoubleMatrix(orientation_, pqpOrientation_);
+    EigenToDoubleVector(position_, pqpPosition_);
+}
+
 Object::Object(const Object& parent)
     : position_(Eigen::Vector3d::Zero())
     , orientation_(Eigen::Matrix3d::Identity())

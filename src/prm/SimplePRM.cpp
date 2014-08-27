@@ -38,11 +38,11 @@ namespace planner
 
 	struct PImpl
 	{
-        PImpl(const Model& model, Object::T_Object& objects, float neighbourDistance, int size, int k)
+        PImpl(const Model& model, Object::T_Object& objects, float neighbourDistance, int size, int k, bool visibility)
             : planner_(objects, model)
         {
             Generator* gen = new Generator(objects, model); // TODO MEME
-            prm_ = new prm_t(gen, &planner_, Distance, neighbourDistance, size, k, true);
+            prm_ = new prm_t(gen, &planner_, Distance, neighbourDistance, size, k, visibility);
             InitPrmNodes();
             // feel prmNodes
         }
@@ -80,11 +80,11 @@ namespace planner
 
 using namespace planner;
 
-SimplePRM::SimplePRM(const Model &model, Object::T_Object &objects, float neighbourDistance, int size, int k)
+SimplePRM::SimplePRM(const Model &model, Object::T_Object &objects, float neighbourDistance, int size, int k, bool visibility)
     : model_(model)
     , objects_(objects)
 {
-    pImpl_.reset(new PImpl(model_, objects_, neighbourDistance, size, k));
+    pImpl_.reset(new PImpl(model_, objects_, neighbourDistance, size, k, visibility));
 }
 
 SimplePRM::SimplePRM(const Model& model, Object::T_Object &objects, int size)
@@ -110,9 +110,54 @@ const std::vector<int> &SimplePRM::GetConnections(int node) const
     return pImpl_->prm_->edges_[node];
 }
 
-Object::CT_Object SimplePRM::GetPath(const Object &from, const Object &to, float neighbourDistance)
+namespace
 {
-    return pImpl_->prm_->ComputePath(&from, &to, Distance, &pImpl_->planner_, neighbourDistance);
+typedef std::list<const Object*> L_Object;
+
+void Simplify(LocalPlanner& planner, int currentIndex, Object::CT_Object& res)
+{
+    if(currentIndex >= res.size()) return;
+    const Object* obj = res[currentIndex];
+    bool erased = false;
+    for(int i = res.size()-1; i> currentIndex + 1 && ! erased; --i)
+    {
+        if(planner(obj, res[i], 1))
+        {
+            erased = true;
+            Object::CT_Object::iterator from, to;
+            int j=0;
+            for(Object::CT_Object::iterator eraseit = res.begin(); j<= i; ++j)
+            {
+                if(j == currentIndex + 1) from = eraseit;
+                else if(j == i) to = eraseit;
+            }
+            res.erase(from, to);
+        }
+    }
+    if(erased)
+    {
+        Simplify(planner, currentIndex, res);
+    }
+    else
+    {
+        Simplify(planner, currentIndex+1, res);
+    }
+}
+}
+
+Object::CT_Object SimplePRM::GetPath(const Object &from, const Object &to, float neighbourDistance, bool simplify)
+{
+    Object::CT_Object res = pImpl_->prm_->ComputePath(&from, &to, Distance, &pImpl_->planner_, neighbourDistance);
+    if(simplify && !res.empty())
+    {
+        ::L_Object reverseres;
+        for(Object::CT_Object::const_iterator it = res.begin(); it!=res.end(); ++it)
+        {
+            reverseres.push_front(*it);
+        }
+        Simplify(pImpl_->planner_, 0, res);
+    }
+    return res;
 }
 
 std::vector<Eigen::Matrix4d> SimplePRM::Interpolate(const Object::CT_Object& path, int steps)

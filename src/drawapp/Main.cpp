@@ -120,7 +120,7 @@ namespace
                 ++it2)
             {
                 dsSetColorAlpha(1,0, 0,1);
-                if(drawObject) DrawObject(*it);
+                if(drawObject) DrawObject(*it2);
                 if(afterfirst)
                 {
                     dsSetColorAlpha(0,1, 0,1);
@@ -169,11 +169,18 @@ void start()
     //scenario = new planner::Scenario("../tests/evac.txt");
     scenario = new planner::Scenario("../tests/zombi.txt");
 	std::cout << "done" << std::endl;
-    //path = scenario->prm->GetPath(*(scenario->prm->GetPRMNodes()[0]),*(scenario->prm->GetPRMNodes()[scenario->prm->GetPRMNodes().size()-1]), 10.f);
+	planner::Object* from = new planner::Object(*(scenario->prm->GetPRMNodes()[0]));
+	from->SetOrientation(Eigen::Matrix3d::Identity());
+	planner::Object* to = new planner::Object(*from);
+	Eigen::Vector3d fromd(17.2, -8.7, 0.4);
+	Eigen::Vector3d tod(13,-8.7, 0.4);
+	from->SetPosition(fromd);
+	to->SetPosition(tod);
+    path = scenario->prm->GetPath(*from,*to, 10.f);
     if(path.empty())
     {
-        path.push_back(scenario->prm->GetPRMNodes()[0]);
-        path.push_back(scenario->prm->GetPRMNodes()[10]);
+        path.push_back(from);
+        path.push_back(to);
     }
     dsSetViewpoint (xyz,hpr);
 }

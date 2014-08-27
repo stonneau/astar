@@ -18,6 +18,7 @@
 
 namespace planner
 {
+typedef std::vector<Eigen::Vector3d,Eigen::aligned_allocator<Eigen::Vector3d> > T_Vector3;
 
 /// \class Object
 /// \brief Description of a collidable 3d Object.
@@ -32,6 +33,11 @@ public:
     ///  \brief Constructor
     ///  \param model a PQP_Model upon which Object will be built.
      Object(PQP_Model *model);
+
+    ///  \brief Constructor
+    ///  \param model a PQP_Model upon which Object will be built.
+    ///  \param normals The normals associated to each triangle
+     Object(PQP_Model *model, const T_Vector3& normals);
 
 
      ///  \brief Constructor
@@ -69,6 +75,9 @@ public:
      const Eigen::Matrix3d& GetOrientation() const;
      const Eigen::Vector3d& GetPosition() const;
      const PQP_Model* GetModel() const;
+
+public:
+	T_Vector3 normals_;
 
 private:
     PQP_Model* model_;
