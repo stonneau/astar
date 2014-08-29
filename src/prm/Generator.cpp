@@ -109,7 +109,7 @@ Object* Generator::operator()()
 				{
 					if(!collider_.IsColliding(configuration.englobed))
 					{
-						if(configuration.GetPosition().z() < 2.)
+                        if(configuration.GetPosition().y() < 2.)
 							return new Object(*configuration.englobed);
 						break;
 					}
@@ -147,7 +147,7 @@ Object* Generator::operator()()
 				{
 					if(!collider_.IsColliding(configuration.englobed))
 					{
-						if(configuration.GetPosition().z() < 2.)
+                        if(configuration.GetPosition().y() < 2.)
 							return new Object(*configuration.englobed);
 						break;
 					}

@@ -217,14 +217,14 @@ void planner::ParseObj(const std::string& filename, std::vector<Object*>& object
 			if(line.find("v ") == 0)
 			{
 				char x[255],y[255],z[255];
-				sscanf(line.c_str(),"v %s %s %s",x,z,y);
-                pImpl.points_.push_back(Vector3(-strtod (x, NULL), strtod(y, NULL), strtod(z, NULL)));
+                sscanf(line.c_str(),"v %s %s %s",x,y,z);
+                pImpl.points_.push_back(Vector3(strtod (x, NULL), strtod(y, NULL), strtod(z, NULL)));
 			}
 			if(line.find("vn ") == 0)
 			{
 				char x[255],y[255],z[255];
-				sscanf(line.c_str(),"vn %s %s %s",x,z,y);
-                pImpl.normals_.push_back(Vector3(-strtod (x, NULL), strtod(y, NULL), strtod(z, NULL)));
+                sscanf(line.c_str(),"vn %s %s %s",x,y,z);
+                pImpl.normals_.push_back(Vector3(strtod (x, NULL), strtod(y, NULL), strtod(z, NULL)));
 			}
 			if(line.find("f ") == 0)
             {

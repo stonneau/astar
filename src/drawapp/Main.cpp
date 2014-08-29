@@ -13,6 +13,7 @@
 
 #include <string>
 #include <iostream>
+#include <fstream>
 #include <cmath>
 
 
@@ -32,6 +33,7 @@ namespace
     bool pathOn = false;
     bool drawObject = true;
     std::string outpath("../tests/testSerialization.txt");
+    Eigen::Matrix3d itompTransform;
 }
 
 namespace
@@ -84,7 +86,8 @@ namespace
             v1 = obj->GetOrientation() * v1; v1 = v1 + obj->GetPosition();
             v2 = obj->GetOrientation() * v2; v2 = v2 + obj->GetPosition();
             v3 = obj->GetOrientation() * v3; v3 = v3 + obj->GetPosition();
-            Vect3ToArray(p1, v1); Vect3ToArray(p2, v2); Vect3ToArray(p3, v3);
+            Vect3ToArray(p1, itompTransform * v1); Vect3ToArray(p2, itompTransform * v2);
+            Vect3ToArray(p3, itompTransform * v3);
             dsDrawLineD(p1, p2);
             dsDrawLineD(p2, p3);
             dsDrawLineD(p3, p1);
@@ -95,8 +98,8 @@ namespace
     {
         PQP_REAL p1 [3];
         PQP_REAL p2 [3];
-        Vect3ToArray(p1, a->GetPosition());
-        Vect3ToArray(p2, b->GetPosition());
+        Vect3ToArray(p1, itompTransform * a->GetPosition());
+        Vect3ToArray(p2, itompTransform * b->GetPosition());
         dsDrawLineD(p1, p2);
     }
 
@@ -151,6 +154,90 @@ namespace
             }
         }
     }
+
+    void WriteNodeLine(const Eigen::Matrix3d& rotation, const Eigen::Vector3d& position, std::stringstream& outstream)
+    {
+        for(int i=0; i<3; ++i)
+        {
+            for(int j=0; j<3; ++j)
+            {
+                outstream << rotation(i,j) << " ";
+            }
+            outstream << position(i) << " ";
+        }
+        outstream << std::endl;
+    }
+    Eigen::Matrix4d readNodeLine(const std::string& line)
+    {
+        Eigen::Matrix4d transform;
+        char c11[255],c12[255],c13[255];
+        char c21[255],c22[255],c23[255];
+        char c31[255],c32[255],c33[255];
+        char x[255],y[255],z[255];
+        sscanf(line.c_str(),"%s %s %s %s %s %s %s %s %s %s %s %s",
+               c11, c12, c13, x, c21, c22, c23, y, c31, c32, c33, z);
+        transform << strtod (c11, NULL), strtod (c12, NULL), strtod (c13, NULL), strtod (x, NULL),
+                strtod (c21, NULL), strtod (c22, NULL), strtod (c23, NULL), strtod (y, NULL),
+                strtod (c31, NULL), strtod (c32, NULL), strtod (c33, NULL), strtod (z, NULL),
+                0, 0, 0, 1;
+        return transform;
+    }
+
+    bool SavePath()
+    {
+        std::string outfilename ("../tests/entrance.path");
+        std::stringstream outstream;
+        outstream << "size " << (int)(path.size()) << std::endl;
+        for(std::vector<const planner::Object*>::const_iterator it = path.begin();
+            it!= path.end(); ++it)
+        {
+            WriteNodeLine((*it)->GetOrientation(),(*it)->GetPosition(), outstream);
+        }
+        ofstream outfile;
+        outfile.open(outfilename.c_str());
+        if (outfile.is_open())
+        {
+            outfile << outstream.rdbuf();
+            outfile.close();
+            return true;
+        }
+        else
+        {
+            std::cout << "Can not open outfile " << outfilename << std::endl;
+            return false;
+        }
+    }
+
+    std::vector<Eigen::Matrix4d> LoadPath(const std::string& filename)
+    {
+        std::vector<Eigen::Matrix4d> res;
+        ifstream myfile (filename);
+        std::string line;
+        int size = -1;
+        if (myfile.is_open())
+        {
+            while (myfile.good())
+            {
+                getline(myfile, line);
+                if(line.size()==0) break;
+                else if(line.find("size ") == 0)
+                {
+                    line = line.substr(5);
+                    size = std::stoi (line);
+                }
+                else
+                {
+                    res.push_back(readNodeLine(line));
+                }
+            }
+            myfile.close();
+        }
+        else
+        {
+            std::cout << "file not found" << filename << std::endl;
+        }
+        return res;
+    }
 }
 
 
@@ -172,17 +259,37 @@ void start()
 	planner::Object* from = new planner::Object(*(scenario->prm->GetPRMNodes()[0]));
 	from->SetOrientation(Eigen::Matrix3d::Identity());
 	planner::Object* to = new planner::Object(*from);
-	Eigen::Vector3d fromd(17.2, -8.7, 0.4);
-	Eigen::Vector3d tod(13,-8.7, 0.4);
+    Eigen::Vector3d fromd(-17.2, 0.4, -8.7);
+    Eigen::Vector3d tod(-13, 0.4, -8.7);
 	from->SetPosition(fromd);
 	to->SetPosition(tod);
-    path = scenario->prm->GetPath(*from,*to, 10.f);
+    path = scenario->prm->GetPath(*from,*to, 10.f, true);
     if(path.empty())
     {
         path.push_back(from);
         path.push_back(to);
     }
     dsSetViewpoint (xyz,hpr);
+    itompTransform =Eigen::Matrix3d::Identity();
+    for(int i =0; i<3; ++i)
+    {
+        itompTransform(i,i)=1;
+    }
+    itompTransform *= AngleAxisd(0.5*M_PI, Vector3d::UnitX()).matrix();
+    std::string outfilename ("../tests/entrance.path");
+    std::vector<Eigen::Matrix4d> res = LoadPath(outfilename);
+    for(std::vector<Eigen::Matrix4d>::const_iterator it = res.begin();
+        it != res.end(); ++it)
+    {
+        for(int i = 0; i< 4; ++i)
+        {
+            for(int j = 0; j<4; ++j)
+            {
+                std::cout << (*it)(i,j) << " ";
+            }
+        }
+        std::cout << std::endl;
+    }
 }
 
 void command(int cmd)   /**  key control function; */
@@ -197,6 +304,9 @@ void command(int cmd)   /**  key control function; */
         break;
         case 's' :
 			planner::SavePrm(*(scenario->prm), outpath);
+        break;
+        case 'b' :
+            SavePath();
         break;
     }
 }

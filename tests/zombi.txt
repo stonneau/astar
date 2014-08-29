@@ -1,4 +1,4 @@
 MODEL = ../tests/collision/cenglobed.obj ../tests/collision/cenglobing.obj
 OBJECT = ../tests/collision/entrance.obj
-SIZE = 1000 1 10
+PRMFILE = ../tests/entrance_path.txt
 VISIBILITY
