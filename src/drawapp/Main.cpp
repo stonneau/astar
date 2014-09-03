@@ -11,6 +11,8 @@
 #include "prm/SimplePRM.h"
 #include "prm/Scenario.h"
 
+#include "prmpath/Robot.h"
+
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -34,6 +36,7 @@ namespace
     bool drawObject = true;
     std::string outpath("../tests/testSerialization.txt");
     Eigen::Matrix3d itompTransform;
+    planner::Node* robot = 0;
 }
 
 namespace
@@ -238,6 +241,16 @@ namespace
         }
         return res;
     }
+
+    void DrawNode(const planner::Node* node)
+    {
+        DrawObject(node->current);
+        for(std::vector<planner::Node*>::const_iterator cit = node->children.begin();
+            cit != node->children.end(); ++cit)
+        {
+            DrawNode(*cit);
+        }
+    }
 }
 
 
@@ -246,6 +259,7 @@ static void simLoop (int pause)
 {
     //drawManager.Draw();
      DrawObjects();
+     DrawNode(robot);
 }
 
 void start()
@@ -290,6 +304,8 @@ void start()
         }
         std::cout << std::endl;
     }
+
+    robot = planner::LoadRobot("../tests/kinematics/io/RobotLoad.txt", "../tests/collision/cube07.obj");
 }
 
 void command(int cmd)   /**  key control function; */
@@ -307,6 +323,18 @@ void command(int cmd)   /**  key control function; */
         break;
         case 'b' :
             SavePath();
+        break;
+        case '+' :
+        robot->SetRotation(1,robot->values[1]+0.1);
+        break;
+        case '-' :
+        planner::GetChild(robot, 3)->SetRotation(1,planner::GetChild(robot, 3)->values[1]-0.1);
+        break;
+        case 'r' :
+        planner::GetChild(robot, 2)->SetRotation(1,planner::GetChild(robot, 2)->values[1]-0.1);
+        break;
+        case 't' :
+        planner::GetChild(robot, 4)->SetRotation(1,planner::GetChild(robot, 4)->values[1]-0.1);
         break;
     }
 }

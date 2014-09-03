@@ -88,7 +88,7 @@ Object* Generator::operator()()
         double r1, r2;
         r1 = ((double) rand() / (RAND_MAX)); r2 = ((double) rand() / (RAND_MAX));
         Eigen::Vector3d P = (1 - sqrt(r1)) * A + (sqrt(r1) * (1 - r2)) * B + (sqrt(r1) * r2) * C;
-		if(P.z() < 2.5)
+        if(P.y() < 2.5)
 		{
 			configuration.SetPosition(P);
 			// random rotation

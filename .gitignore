@@ -3,6 +3,7 @@ bin/
 lib/
 build/
 buildwin/
-
+build*
 # temp files
 .*~
+*.fuse*

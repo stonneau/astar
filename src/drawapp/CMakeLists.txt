@@ -16,5 +16,6 @@ add_executable(
 TARGET_LINK_LIBRARIES(drawapp drawstuff)
 TARGET_LINK_LIBRARIES(drawapp prmcollision)
 TARGET_LINK_LIBRARIES(drawapp prm)
+TARGET_LINK_LIBRARIES(drawapp prmpath)
 TARGET_LINK_LIBRARIES(drawapp PQP)
 TARGET_LINK_LIBRARIES(drawapp ${OPENGL_LIBRARIES})
