@@ -9,14 +9,12 @@
 */
 #ifndef _STRUCT_ROBOT
 #define _STRUCT_ROBOT
-#include "kinematics/joint.h"
 #include "collision/Object.h"
 #include <Eigen/Dense>
 #include <exception>
 #include <string>
 namespace planner
 {
-typedef kinematics::joint<double, double, 3, 5, true> joint_t;
 class Node
 {
 public:

@@ -19,10 +19,6 @@ endif ( MSVC )
 set(SOURCES
     Robot.h
     Robot.cpp
-    ${SRC_DIR}/../include/kinematics/joint.h
-    ${SRC_DIR}/../include/kinematics/joint_io.h
-    ${SRC_DIR}/../include/kinematics/joint_io_urdf.h
-    ${SRC_DIR}/../include/kinematics/Pi.h
         ${SRC_TOOLS_DIR}/MatrixDefs.h ${SRC_TOOLS_DIR}/MatrixDefs.cpp
         ${SRC_TOOLS_DIR}/MatrixDefsInternal.h
 )

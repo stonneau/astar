@@ -26,6 +26,7 @@ namespace
     std::string outpath("../tests/testSerialization.txt");
     Eigen::Matrix3d itompTransform;
     planner::Robot* robot = 0;
+    int current = 0;
 }
 namespace
 {
@@ -289,13 +290,15 @@ void start()
     }
     planner::Node* root = planner::LoadRobot("../humandes/human.urdf");
     robot = new planner::Robot(root);
-    robot->SetConstantRotation(AngleAxisd(-0.5*M_PI, Vector3d::UnitX()).matrix());
+    robot->SetConstantRotation(AngleAxisd(-0.5*M_PI, Vector3d::UnitX()) * AngleAxisd(-0.5*M_PI, Vector3d::UnitZ()).matrix());
     //robot->SetRotation(path[2]->GetOrientation());
     robot->SetConfiguration(path[2]);
+    std::cout << "path size " << path.size() << std::endl;
     //robot->SetPosition(path[1]->GetPosition());
 }
 void command(int cmd)   /**  key control function; */
 {
+    std::cout << "path size " << path.size() << std::endl;
     switch (cmd)
     {
         case 'e' :
@@ -311,8 +314,17 @@ void command(int cmd)   /**  key control function; */
             SavePath();
         break;
         case '+' :
-        robot->Translate(Eigen::Vector3d(0.1,0,0));
-        break;
+        {
+            current ++; if(path.size() <= current) current = path.size()-1;
+            robot->SetConfiguration(path[current]);
+            break;
+        }
+        case '-' :
+        {
+            current--; if(current <0) current = 0;
+            robot->SetConfiguration(path[current]);
+            break;
+        }
         case 'r' :
         planner::GetChild(robot, "torso_z_joint")->SetRotation(planner::GetChild(robot,"torso_z_joint")->value-0.1);
         break;

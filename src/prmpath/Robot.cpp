@@ -1,5 +1,4 @@
 #include "Robot.h"
-#include "kinematics/joint_io.h"
 #include "collision/ParserObj.h"
 #include <iostream>
 #include <sstream>
