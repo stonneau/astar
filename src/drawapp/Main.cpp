@@ -6,6 +6,7 @@
 #include "prm/SimplePRM.h"
 #include "prm/Scenario.h"
 #include "prmpath/Robot.h"
+#include "prmpath/sampling/Sample.h"
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -14,6 +15,7 @@
 #ifdef WIN32
 #include <windows.h>
 #endif
+
 using namespace std;
 using namespace Eigen;
 namespace
@@ -27,6 +29,8 @@ namespace
     Eigen::Matrix3d itompTransform;
     planner::Robot* robot = 0;
     int current = 0;
+    planner::sampling::Sample * sample(0);
+    planner::Node * arm = 0;
 }
 namespace
 {
@@ -294,7 +298,7 @@ void start()
     //robot->SetRotation(path[2]->GetOrientation());
     robot->SetConfiguration(path[2]);
     std::cout << "path size " << path.size() << std::endl;
-    //robot->SetPosition(path[1]->GetPosition());
+    arm = planner::GetChild(root, "upper_left_arm_z_joint");
 }
 void command(int cmd)   /**  key control function; */
 {
@@ -326,13 +330,13 @@ void command(int cmd)   /**  key control function; */
             break;
         }
         case 'r' :
-        planner::GetChild(robot, "torso_z_joint")->SetRotation(planner::GetChild(robot,"torso_z_joint")->value-0.1);
+        planner::GetChild(robot, "upper_left_arm_z_joint")->SetRotation(planner::GetChild(robot,"upper_left_arm_z_joint")->value-0.1);
         break;
         case 't' :
-        planner::GetChild(robot, "torso_y_joint")->SetRotation(planner::GetChild(robot,"torso_y_joint")->value-0.1);
+        planner::GetChild(robot, "upper_left_arm_y_joint")->SetRotation(planner::GetChild(robot,"upper_left_arm_y_joint")->value-0.1);
         break;
         case 'y' :
-        planner::GetChild(robot, "torso_x_joint")->SetRotation(planner::GetChild(robot,"torso_x_joint")->value-0.1);
+        planner::GetChild(robot, "upper_left_arm_x_joint")->SetRotation(planner::GetChild(robot,"upper_left_arm_x_joint")->value-0.1);
         break;
     }
 }

@@ -101,6 +101,44 @@ void Node::SetTranslation(const Eigen::Vector3d& position)
     offset = position;
     Update();
 }
+
+int planner::GetNumChildren(const Node* node)
+{
+    int tmp = 0;
+    for(std::vector<Node*>::const_iterator cit = node->children.begin();
+        cit != node->children.end(); ++cit)
+    {
+        tmp += 1 + planner::GetNumChildren(*cit);
+    }
+    return tmp;
+}
+
+namespace
+{
+    void GetEffectorsRec(Node* node, std::vector<Node*>& effectors)
+    {
+        if(node->children.size() == 0)
+        {
+            effectors.push_back(node);
+        }
+        else
+        {
+            for(std::vector<Node*>::iterator it = node->children.begin();
+                it != node->children.end(); ++it)
+            {
+                GetEffectorsRec(*it, effectors);
+            }
+        }
+    }
+}
+
+std::vector<Node*> planner::GetEffectors(Node* node)
+{
+    std::vector<Node*> effectors;
+    GetEffectorsRec(node, effectors);
+    return effectors;
+}
+
 planner::Node* planner::GetChild(Node* node, const std::string& tag)
 {
     if(node->tag == tag) return node;

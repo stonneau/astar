@@ -28,6 +28,8 @@ public:
 public:
     void Translate(const Eigen::Vector3d& delta);
     void SetTranslation(const Eigen::Vector3d& position);
+
+public:
     Object* current;
     double value;
     std::string tag;
@@ -62,6 +64,9 @@ public:
     Eigen::Matrix3d currentRotation;
     Eigen::Vector3d currentPosition;
 };
+
+int GetNumChildren(const Node* node);
+std::vector<Node*> GetEffectors(Node* node);
 Node* GetChild(Node* node, const std::string& tag);
 Node* GetChild(Node* node, const int id);
 Node* GetChild(Robot *robot, const std::string& tag);
