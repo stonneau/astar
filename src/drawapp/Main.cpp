@@ -10,6 +10,7 @@
 #include <iostream>
 #include <fstream>
 #include <cmath>
+#include <Eigen/Geometry>
 #ifdef WIN32
 #include <windows.h>
 #endif
@@ -288,9 +289,10 @@ void start()
     }
     planner::Node* root = planner::LoadRobot("../humandes/human.urdf");
     robot = new planner::Robot(root);
-    //robot->SetConfiguration(path[3]);
-    robot->SetRotation(path[3]->GetOrientation());
-    //robot->SetTranslation(path[1]->GetPosition());
+    robot->SetConstantRotation(AngleAxisd(-0.5*M_PI, Vector3d::UnitX()).matrix());
+    //robot->SetRotation(path[2]->GetOrientation());
+    robot->SetConfiguration(path[2]);
+    //robot->SetPosition(path[1]->GetPosition());
 }
 void command(int cmd)   /**  key control function; */
 {

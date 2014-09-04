@@ -6,9 +6,7 @@
 #include <fstream>
 #include <string>
 #include <map>
-
 #include <Eigen/Geometry>
-
 using namespace planner;
 Node::Node(const int id)
     : current(0)
@@ -61,7 +59,6 @@ void Node::free()
     }
     delete this;
 }
-
 void Node::Update()
 {
     toWorldRotation = Eigen::AngleAxisd(value, axis).matrix();
@@ -78,7 +75,7 @@ void Node::Update()
         position = toWorldRotation * offset;
     }
     toLocalRotation = toWorldRotation;
-    toLocalRotation.transpose();
+    toLocalRotation.inverse();
     if(current)
     {
         current->SetOrientation(toWorldRotation);
@@ -90,7 +87,6 @@ void Node::Update()
         (*cit)->Update();
     }
 }
-
 void Node::SetRotation(double value)
 {
     this->value = value;
@@ -130,7 +126,6 @@ planner::Node* planner::GetChild(Node* node, const int id)
     }
     return 0;
 }
-
 planner::Node* planner::GetChild(Robot* robot, const std::string& tag)
 {
     return GetChild(robot->node, tag);
@@ -139,28 +134,27 @@ planner::Node* planner::GetChild(Robot* robot, const int id)
 {
     return GetChild(robot->node, id);
 }
-
 Robot::Robot(Node* root)
     : node(root)
+    , constantRotation(Eigen::Matrix3d::Identity())
+    , currentRotation(Eigen::Matrix3d::Identity())
+    , currentPosition(Eigen::Vector3d::Zero())
 {
     // NOTHING
 }
-
 Robot::~Robot()
 {
     delete node;
 }
-
 void Robot::SetConfiguration(const planner::Object* object)
 {
-    SetRotation(object->GetOrientation(), false);
+    SetRotation(object->GetOrientation(), true);
     SetPosition(object->GetPosition(), true);
 }
-
 void Robot::SetRotation(const Eigen::Matrix3d& rotation, bool update)
 {
-    currentRotation = rotation;
-    Eigen::Vector3d ea = rotation.eulerAngles(2,1,0);
+    currentRotation = rotation * constantRotation;
+    Eigen::Vector3d ea = currentRotation.eulerAngles(2,1,0);
     Node* current = node; // first node is translation
     for(int i =0; i<3; ++i)
     {
@@ -168,6 +162,19 @@ void Robot::SetRotation(const Eigen::Matrix3d& rotation, bool update)
         current->value = ea[i];
     }
     if(update) node->Update();
+}
+void Robot::SetConstantRotation(const Eigen::Matrix3d& rotation)
+{
+    constantRotation = rotation;
+    currentRotation = currentRotation * constantRotation;
+    Eigen::Vector3d ea = rotation.eulerAngles(2,1,0);
+    Node* current = node; // first node is translation
+    for(int i =0; i<3; ++i)
+    {
+        current = current->children[0];
+        current->value = ea[i];
+    }
+    node->Update();
 }
 void Robot::SetPosition(const Eigen::Vector3d& position, bool update)
 {
@@ -181,7 +188,6 @@ void Robot::Translate(const Eigen::Vector3d& delta, bool update)
     node->offset = currentPosition;
     if(update) node->Update();
 }
-
 namespace
 {
 struct Joint;
