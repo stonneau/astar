@@ -227,7 +227,7 @@ Eigen::Vector3d ExtractOffset(const std::string& line)
     int quoteEnd = line.find("\"", quoteStart +1);
     quoteStart = line.find("\"", quoteEnd+1);
     quoteEnd = line.find("\"", quoteStart+1);
-    return VectorFromString(ExtractQuotes(line));
+    return VectorFromString(line.substr(quoteStart+1, quoteEnd - quoteStart -1));
     /*for(int i =0; i<3; ++i)
     {
         joint->offset[i] = res(i);
@@ -324,7 +324,6 @@ void ReadJoint(const std::string& firstline, std::ifstream& file, std::map<std::
 void MakeNodeRec(Node* node, Joint* current, std::map<std::string, Link*>& links, int& id)
 {
     Link* next= links[current->childLink];
-    if(next->object) node->current = next->object;
     if(current->type == "revolute")
     {
         Node* res = new Node(id++);
@@ -332,6 +331,8 @@ void MakeNodeRec(Node* node, Joint* current, std::map<std::string, Link*>& links
         res->tag = current->name;
         res->offset = current->offset;
         res->parent = node;
+        if(next->object)
+            res->current = next->object;
         node->children.push_back(res);
         node = res;
     }

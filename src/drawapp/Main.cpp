@@ -245,7 +245,8 @@ namespace
     void DrawNode(const planner::Node* node)
     {
         dsSetColorAlpha(0,0, 0,1);
-        if(node->current)DrawObject(node->current);
+        if(node->current)
+            DrawObject(node->current);
         for(std::vector<planner::Node*>::const_iterator cit = node->children.begin();
             cit != node->children.end(); ++cit)
         {
@@ -328,14 +329,14 @@ void command(int cmd)   /**  key control function; */
         case '+' :
         robot->SetRotation(robot->value+0.1);
         break;
-        case '-' :
-        planner::GetChild(robot, 3)->SetRotation(planner::GetChild(robot, 3)->value-0.1);
-        break;
         case 'r' :
-        planner::GetChild(robot, 2)->SetRotation(planner::GetChild(robot, 2)->value-0.1);
+        planner::GetChild(robot, "torso_z_joint")->SetRotation(planner::GetChild(robot,"torso_z_joint")->value-0.1);
         break;
         case 't' :
-        planner::GetChild(robot, 4)->SetRotation(planner::GetChild(robot, 4)->value-0.1);
+        planner::GetChild(robot, "torso_y_joint")->SetRotation(planner::GetChild(robot,"torso_y_joint")->value-0.1);
+        break;
+        case 'y' :
+        planner::GetChild(robot, "torso_x_joint")->SetRotation(planner::GetChild(robot,"torso_x_joint")->value-0.1);
         break;
     }
 }
