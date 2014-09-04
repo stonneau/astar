@@ -31,37 +31,35 @@ public:
     void free();
 
 public:
-    void SetRotation(int axis, double value);
-    void SetRotation(double xvalue, double yvalue, double zvalue);
+    void SetRotation(double value);
     void Translate(const Eigen::Vector3f& delta);
     void SetTranslation(const Eigen::Vector3f& position);
 
     Object* current;
-    joint_t* joint;
-    int jointOrder[3];
-    double values[3];
+    double value;
     std::string tag;
     Node* parent;
     Eigen::Matrix3d toParentRotation;
     Eigen::Matrix3d toLocalRotation;
     Eigen::Matrix3d toWorldRotation;
     Eigen::Vector3d position;
-    std::vector<Node*> children;
+
+public: //*should be const*/
     const int id;
+    Eigen::Vector3d axis;
+    Eigen::Vector3d offset;
+    std::vector<Node*> children;
 
 public:
     void Update();
 
-private:
-    Eigen::Vector3d axis1_;
-    Eigen::Vector3d axis2_;
-    Eigen::Vector3d axis3_;
+
 };
 
 Node* GetChild(Node* node, const std::string& tag);
 Node* GetChild(Node* node, const int id);
 
-Node* LoadRobot(const std::string& skeletonpath, const std::string& objectpath);
+Node* LoadRobot(const std::string& urdfpath);
 
 } //namespace planner
 #endif //_STRUCT_ROBOT

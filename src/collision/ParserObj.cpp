@@ -247,7 +247,7 @@ void planner::ParseObj(const std::string& filename, std::vector<Object*>& object
 	}
     else
     {
-        std::cout << "file not found" << std::endl;
+        std::cout << "file not found:" << filename << std::endl;
     }
 }
 

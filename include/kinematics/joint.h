@@ -32,16 +32,22 @@ struct joint
 {
 	/* Constructors - destructors */
 	///\brief Constructor
-	explicit joint()
+    explicit joint(bool lock = false)
 	: nbChildren_(0)
 	, parent(0)
 	, constraintType(unknown)
 	{
+        int min = -360;
+        int max = 360;
+        if (lock)
+        {
+            min = 0; max = 0;
+        }
 		tag[0] = '\0';
 		for(unsigned int i = 0; i < Dim; ++i)
 		{
-			minAngleValues[i] = -360;
-			maxAngleValues[i] = 360;
+            minAngleValues[i] = min;
+            maxAngleValues[i] = max;
 			defaultAngleValues[i] = 0;
 			offset[i] = 0;
 		}
@@ -150,7 +156,7 @@ struct joint
 	Angle defaultAngleValues[Dim]; /*!< default angle values, in degrees [-360, 360], for joint along x, y, and z (if Dim = 3) axes */
 	Angle maxAngleValues[Dim]; /*!< maximum angle boundaries, in degrees [-360, 360], for joint along x, y, and z (if Dim = 3) axes */
 	Numeric offset[Dim]; /*!< vector indicating the direction and distance of the joint relative to its parent */
-    char tag[10];
+    char tag[25];
 	joint* children[MaxChildren]; /*!< array indicating the current joint children */
 	unsigned int nbChildren_; /*!< number of children connected to the current joint */
 	joint* parent; /*!< pointer to eventual joint parent. Empty if joint is Root. */

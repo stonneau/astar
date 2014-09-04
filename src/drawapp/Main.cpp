@@ -244,7 +244,8 @@ namespace
 
     void DrawNode(const planner::Node* node)
     {
-        DrawObject(node->current);
+        dsSetColorAlpha(0,0, 0,1);
+        if(node->current)DrawObject(node->current);
         for(std::vector<planner::Node*>::const_iterator cit = node->children.begin();
             cit != node->children.end(); ++cit)
         {
@@ -258,7 +259,7 @@ namespace
 static void simLoop (int pause)
 {
     //drawManager.Draw();
-     DrawObjects();
+    // DrawObjects();
      DrawNode(robot);
 }
 
@@ -305,7 +306,7 @@ void start()
         std::cout << std::endl;
     }
 
-    robot = planner::LoadRobot("../tests/kinematics/io/RobotLoad.txt", "../tests/collision/cube07.obj");
+    robot = planner::LoadRobot("../humandes/human.urdf");
 }
 
 void command(int cmd)   /**  key control function; */
@@ -325,16 +326,16 @@ void command(int cmd)   /**  key control function; */
             SavePath();
         break;
         case '+' :
-        robot->SetRotation(1,robot->values[1]+0.1);
+        robot->SetRotation(robot->value+0.1);
         break;
         case '-' :
-        planner::GetChild(robot, 3)->SetRotation(1,planner::GetChild(robot, 3)->values[1]-0.1);
+        planner::GetChild(robot, 3)->SetRotation(planner::GetChild(robot, 3)->value-0.1);
         break;
         case 'r' :
-        planner::GetChild(robot, 2)->SetRotation(1,planner::GetChild(robot, 2)->values[1]-0.1);
+        planner::GetChild(robot, 2)->SetRotation(planner::GetChild(robot, 2)->value-0.1);
         break;
         case 't' :
-        planner::GetChild(robot, 4)->SetRotation(1,planner::GetChild(robot, 4)->values[1]-0.1);
+        planner::GetChild(robot, 4)->SetRotation(planner::GetChild(robot, 4)->value-0.1);
         break;
     }
 }
