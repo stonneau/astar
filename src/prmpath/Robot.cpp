@@ -1,14 +1,15 @@
 #include "Robot.h"
 #include "kinematics/joint_io.h"
 #include "collision/ParserObj.h"
-
 #include <iostream>
 #include <sstream>
 #include <fstream>
 #include <string>
 #include <map>
-using namespace planner;
 
+#include <Eigen/Geometry>
+
+using namespace planner;
 Node::Node(const int id)
     : current(0)
     , value(0)
@@ -17,14 +18,14 @@ Node::Node(const int id)
     , toParentRotation(Eigen::Matrix3d::Identity())
     , toLocalRotation(Eigen::Matrix3d::Identity())
     , toWorldRotation(Eigen::Matrix3d::Identity())
-    , id(id)
     , position(0,0,0)
+    , id(id)
     , axis(0,0,1)
     , offset(0,0,0)
+    , permanentRotation(Eigen::Matrix3d::Identity())
 {
     //NOTHING
 }
-
 Node::Node(const Node& clone)
     : current(new Object(*(clone.current)))
     , value(clone.value)
@@ -33,10 +34,11 @@ Node::Node(const Node& clone)
     , toParentRotation(clone.toParentRotation)
     , toLocalRotation(clone.toLocalRotation)
     , toWorldRotation(clone.toWorldRotation)
-    , id(clone.id)
     , position(clone.position)
+    , id(clone.id)
     , axis(clone.axis)
     , offset(clone.offset)
+    , permanentRotation(clone.permanentRotation)
 {
     for(std::vector<Node*>::const_iterator cit = clone.children.begin();
         cit != children.end(); ++cit)
@@ -46,12 +48,10 @@ Node::Node(const Node& clone)
         children.push_back(child);
     }
 }
-
 Node::~Node()
 {
     delete current;
 }
-
 void Node::free()
 {
     for(std::vector<Node*>::iterator cit = children.begin();
@@ -70,18 +70,15 @@ void Node::Update()
     {
         toWorldRotation = parent->toWorldRotation * toWorldRotation;
         toParentRotation = parent->toLocalRotation * toWorldRotation;
-    }
-    toLocalRotation = toWorldRotation;
-    toLocalRotation.transpose();
-    if(parent)
-    {
         position = parent->toWorldRotation * offset;
+        position += parent->position;
     }
     else
     {
-        position = toWorldRotation * position;
+        position = toWorldRotation * offset;
     }
-    if(parent) position += parent->position;
+    toLocalRotation = toWorldRotation;
+    toLocalRotation.transpose();
     if(current)
     {
         current->SetOrientation(toWorldRotation);
@@ -99,7 +96,16 @@ void Node::SetRotation(double value)
     this->value = value;
     Update();
 }
-
+void Node::Translate(const Eigen::Vector3d& delta)
+{
+    offset += delta;
+    Update();
+}
+void Node::SetTranslation(const Eigen::Vector3d& position)
+{
+    offset = position;
+    Update();
+}
 planner::Node* planner::GetChild(Node* node, const std::string& tag)
 {
     if(node->tag == tag) return node;
@@ -112,7 +118,6 @@ planner::Node* planner::GetChild(Node* node, const std::string& tag)
     }
     return 0;
 }
-
 planner::Node* planner::GetChild(Node* node, const int id)
 {
     if(node->id == id) return node;
@@ -126,32 +131,56 @@ planner::Node* planner::GetChild(Node* node, const int id)
     return 0;
 }
 
-/*namespace
+planner::Node* planner::GetChild(Robot* robot, const std::string& tag)
 {
-    Node* CreateNodeRec(joint_t* current, const Object* currentObj, int& id)
-    {
-        Node* res = new Node(id++);
-        res->current = new Object(*currentObj);
-        res->joint = current;
-        for(int i =0; i< current->nbChildren_; ++i)
-        {
-            Node* son = CreateNodeRec(current->children[i], currentObj, id);
-            son->parent = res;
-            res->children.push_back(son);
-        }
-        return res;
-    }
+    return GetChild(robot->node, tag);
+}
+planner::Node* planner::GetChild(Robot* robot, const int id)
+{
+    return GetChild(robot->node, id);
 }
 
-planner::Node* planner::LoadRobot(const std::string& urdfpath)
+Robot::Robot(Node* root)
+    : node(root)
 {
-    joint_t* root = kinematics::ReadTree<double, double, 3, 5, true>(skeletonpath);
-    Object::T_Object objects = ParseObj(objectpath);
-    int id = 0;
-    Node* res = CreateNodeRec(root, objects[0], id);
-    res->Update();
-    return res;
-}*/
+    // NOTHING
+}
+
+Robot::~Robot()
+{
+    delete node;
+}
+
+void Robot::SetConfiguration(const planner::Object* object)
+{
+    SetRotation(object->GetOrientation(), false);
+    SetPosition(object->GetPosition(), true);
+}
+
+void Robot::SetRotation(const Eigen::Matrix3d& rotation, bool update)
+{
+    currentRotation = rotation;
+    Eigen::Vector3d ea = rotation.eulerAngles(2,1,0);
+    Node* current = node; // first node is translation
+    for(int i =0; i<3; ++i)
+    {
+        current = current->children[0];
+        current->value = ea[i];
+    }
+    if(update) node->Update();
+}
+void Robot::SetPosition(const Eigen::Vector3d& position, bool update)
+{
+    currentPosition = position;
+    node->offset = currentPosition;
+    if(update) node->Update();
+}
+void Robot::Translate(const Eigen::Vector3d& delta, bool update)
+{
+    currentPosition += delta;
+    node->offset = currentPosition;
+    if(update) node->Update();
+}
 
 namespace
 {
@@ -163,18 +192,14 @@ struct Link
     {
         // nothing
     }
-
     ~Link()
     {
         // nothing
     }
-
     planner::Object* object;
     std::string name;
     std::vector<Joint*> children;
 };
-
-
 struct Joint
 {
     Joint()
@@ -183,12 +208,10 @@ struct Joint
     {
         // nothing
     }
-
     ~Joint()
     {
         // nothing
     }
-
     Eigen::Vector3d axis;
     Eigen::Vector3d offset;
     std::string name;
@@ -196,14 +219,12 @@ struct Joint
     std::string childLink;
     std::string type;
 };
-
 std::string ExtractQuotes(const std::string& line)
 {
     int quoteStart = line.find("\"");
     int quoteEnd = line.find("\"", quoteStart+1);
     return line.substr(quoteStart+1, quoteEnd - quoteStart -1);
 }
-
 std::string ExtractType(const std::string& line)
 {
     int quoteStart = line.find("\"");
@@ -212,14 +233,12 @@ std::string ExtractType(const std::string& line)
     quoteEnd = line.find("\"", quoteStart+1);
     return line.substr(quoteStart+1, quoteEnd - quoteStart -1);
 }
-
 Eigen::Vector3d VectorFromString(const std::string& line)
 {
     char x[255],y[255],z[255];
     sscanf(line.c_str(),"%s %s %s",x,y,z);
     return Eigen::Vector3d(strtod (x, NULL), strtod(y, NULL), strtod(z, NULL));
 }
-
 Eigen::Vector3d ExtractOffset(const std::string& line)
 {
     // skiiping rpy
@@ -233,7 +252,6 @@ Eigen::Vector3d ExtractOffset(const std::string& line)
         joint->offset[i] = res(i);
     }*/
 }
-
 void ReadLink(const std::string& firstline, std::ifstream& file, std::map<std::string, Link*>& links)
 {
     std::string objpath;
@@ -270,7 +288,6 @@ void ReadLink(const std::string& firstline, std::ifstream& file, std::map<std::s
         links.insert(std::make_pair(lk->name, lk));
     }
 }
-
 void ReadJoint(const std::string& firstline, std::ifstream& file, std::map<std::string, Joint*>& joints, std::map<std::string, Link*>& links)
 {
     std::string name = ExtractQuotes(firstline);
@@ -320,7 +337,6 @@ void ReadJoint(const std::string& firstline, std::ifstream& file, std::map<std::
         joints.insert(std::make_pair(name, joint));
     }
 }
-
 void MakeNodeRec(Node* node, Joint* current, std::map<std::string, Link*>& links, int& id)
 {
     Link* next= links[current->childLink];
@@ -336,18 +352,16 @@ void MakeNodeRec(Node* node, Joint* current, std::map<std::string, Link*>& links
         node->children.push_back(res);
         node = res;
     }
-
     for(std::vector<Joint*>::iterator it = next->children.begin();
         it != next->children.end(); ++it)
     {
         MakeNodeRec(node, *it, links, id);
     }
 }
-
 Node* MakeNode(Link* roots, std::map<std::string, Link*>& links)
 {
     //create root
-    int id = 0;
+    int id = 3;
     Node* res = new Node(id++);
     if(roots->object) res->current = roots->object;
     for(std::vector<Joint*>::iterator it = roots->children.begin();
@@ -355,13 +369,41 @@ Node* MakeNode(Link* roots, std::map<std::string, Link*>& links)
     {
         MakeNodeRec(res, *it, links, id);
     }
-    res->tag == "root_link";
-    res->Update();
-    return res;
+    // create 3 dummy nodes for rotation + 1 for translation
+    // make X
+    {
+        res->tag = "root_x_joint";
+        res->axis = Eigen::Vector3d::UnitX();
+        res->offset = Eigen::Vector3d::Zero();
+    }
+    Node* ynode = new Node(2);
+    {
+        ynode->tag = "root_y_joint";
+        ynode->axis = Eigen::Vector3d::UnitY();
+        ynode->offset = Eigen::Vector3d::Zero();
+        ynode->children.push_back(res);
+        res->parent = ynode;
+    }
+    Node* znode = new Node(1);
+    {
+        znode->tag = "root_z_joint";
+        znode->axis = Eigen::Vector3d::UnitZ();
+        znode->offset = Eigen::Vector3d::Zero();
+        znode->children.push_back(ynode);
+        ynode->parent = znode;
+    }
+    Node* tnode = new Node(0);
+    {
+        tnode->tag = "root_translation_joint";
+        tnode->axis = Eigen::Vector3d::UnitZ();
+        tnode->offset = Eigen::Vector3d::Zero();
+        tnode->children.push_back(znode);
+        znode->parent = tnode;
+    }
+    tnode->Update();
+    return tnode;
 }
-
 }
-
 planner::Node* planner::LoadRobot(const std::string& urdfpath)
 {
     std::map<std::string, Link*> links;
@@ -390,7 +432,6 @@ planner::Node* planner::LoadRobot(const std::string& urdfpath)
             }
         }
         myfile2.close();
-
         std::map<std::string, Link*>::iterator it = links.find("root_link");
         if(it == links.end())
         {

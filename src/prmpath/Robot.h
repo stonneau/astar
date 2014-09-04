@@ -32,8 +32,11 @@ public:
 
 public:
     void SetRotation(double value);
-    void Translate(const Eigen::Vector3f& delta);
-    void SetTranslation(const Eigen::Vector3f& position);
+
+    //only for root
+public:
+    void Translate(const Eigen::Vector3d& delta);
+    void SetTranslation(const Eigen::Vector3d& position);
 
     Object* current;
     double value;
@@ -48,16 +51,35 @@ public: //*should be const*/
     const int id;
     Eigen::Vector3d axis;
     Eigen::Vector3d offset;
+    Eigen::Matrix3d permanentRotation;
     std::vector<Node*> children;
 
 public:
     void Update();
+};
 
+class Robot
+{
+public:
+    Robot(Node* root);
+    ~Robot();
 
+public:
+    void SetConfiguration(const planner::Object* object);
+    void SetRotation(const Eigen::Matrix3d& rotation, bool update = true);
+    void SetPosition(const Eigen::Vector3d& position, bool update = true);
+    void Translate  (const Eigen::Vector3d& delta, bool update = true);
+
+public:
+    Node* node;
+    Eigen::Matrix3d currentRotation;
+    Eigen::Vector3d currentPosition;
 };
 
 Node* GetChild(Node* node, const std::string& tag);
 Node* GetChild(Node* node, const int id);
+Node* GetChild(Robot *robot, const std::string& tag);
+Node* GetChild(Robot *robot, const int id);
 
 Node* LoadRobot(const std::string& urdfpath);
 
