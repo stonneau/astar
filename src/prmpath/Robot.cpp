@@ -16,10 +16,14 @@ Node::Node(const int id)
     , toLocalRotation(Eigen::Matrix3d::Identity())
     , toWorldRotation(Eigen::Matrix3d::Identity())
     , position(0,0,0)
+    , minAngleValue(-2*M_PI)
+    , maxAngleValue(2*M_PI)
+    , defaultAngleValue(0)
     , id(id)
     , axis(0,0,1)
     , offset(0,0,0)
     , permanentRotation(Eigen::Matrix3d::Identity())
+    , romId(-1)
 {
     //NOTHING
 }
@@ -32,10 +36,14 @@ Node::Node(const Node& clone)
     , toLocalRotation(clone.toLocalRotation)
     , toWorldRotation(clone.toWorldRotation)
     , position(clone.position)
+    , minAngleValue(clone.minAngleValue)
+    , maxAngleValue(clone.maxAngleValue)
+    , defaultAngleValue(clone.defaultAngleValue)
     , id(clone.id)
     , axis(clone.axis)
     , offset(clone.offset)
     , permanentRotation(clone.permanentRotation)
+    , romId(clone.romId)
 {
     for(std::vector<Node*>::const_iterator cit = clone.children.begin();
         cit != children.end(); ++cit)
@@ -182,6 +190,11 @@ Robot::Robot(Node* root)
 Robot::~Robot()
 {
     delete node;
+    for(std::vector<NodeRom*>::iterator it = roms.begin();
+        it != roms.end(); ++it)
+    {
+        delete (*it);
+    }
 }
 void Robot::SetConfiguration(const planner::Object* object)
 {

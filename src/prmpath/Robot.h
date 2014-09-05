@@ -9,12 +9,15 @@
 */
 #ifndef _STRUCT_ROBOT
 #define _STRUCT_ROBOT
+
 #include "collision/Object.h"
+#include "prmpath/ROM.h"
 #include <Eigen/Dense>
 #include <exception>
 #include <string>
 namespace planner
 {
+
 class Node
 {
 public:
@@ -38,15 +41,58 @@ public:
     Eigen::Matrix3d toLocalRotation;
     Eigen::Matrix3d toWorldRotation;
     Eigen::Vector3d position;
+
+//constraints
+    double minAngleValue;
+    double maxAngleValue;
+    double defaultAngleValue;
+
 public: //*should be const*/
     const int id;
     Eigen::Vector3d axis;
     Eigen::Vector3d offset;
     Eigen::Matrix3d permanentRotation;
+    int romId;
     std::vector<Node*> children;
+
 public:
     void Update();
+    bool IsLocked();
 };
+
+struct NodeRom
+{
+    typedef Node* NodeGroup [3];
+
+     NodeRom(const rom::ROM& rom)
+         : rom(rom){}
+    ~NodeRom(){}
+
+    bool InsideJointLimits()
+    {
+        return rom.ResidualRadius(group[0]->value, group[1]->value, group[2]->value) > 0;
+    }
+
+    bool InsideJointLimits(const double ea1, const double ea2, const double ea3)
+    {
+        return rom.ResidualRadius(ea1, ea2, ea3) > 0;
+    }
+
+    bool ResidualRadius()
+    {
+        return rom.ResidualRadius(group[0]->value, group[1]->value, group[2]->value);
+    }
+
+    double ResidualRadius(const double ea1, const double ea2, const double ea3)
+    {
+        return rom.ResidualRadius(ea1, ea2, ea3);
+    }
+
+    NodeGroup group;
+    rom::ROM rom;
+    int groupId;
+};
+
 class Robot
 {
 public:
@@ -58,11 +104,13 @@ public:
     void SetRotation(const Eigen::Matrix3d& rotation, bool update = true);
     void SetPosition(const Eigen::Vector3d& position, bool update = true);
     void Translate  (const Eigen::Vector3d& delta, bool update = true);
+
 public:
     Node* node;
     Eigen::Matrix3d constantRotation;
     Eigen::Matrix3d currentRotation;
     Eigen::Vector3d currentPosition;
+    std::vector<NodeRom*> roms;
 };
 
 int GetNumChildren(const Node* node);

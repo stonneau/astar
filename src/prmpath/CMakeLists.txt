@@ -19,8 +19,12 @@ endif ( MSVC )
 set(SOURCES
     Robot.h
     Robot.cpp
+    JointConstraint.h
+    JointConstraint.cpp
     Jacobian.h
     Jacobian.cpp
+    ROM.h
+    ROM.cpp
     sampling/Sample.h
     sampling/Sample.cpp
         ${SRC_TOOLS_DIR}/MatrixDefs.h ${SRC_TOOLS_DIR}/MatrixDefs.cpp

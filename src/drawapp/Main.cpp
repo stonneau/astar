@@ -7,6 +7,7 @@
 #include "prm/Scenario.h"
 #include "prmpath/Robot.h"
 #include "prmpath/sampling/Sample.h"
+#include "prmpath/JointConstraint.h"
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -299,6 +300,7 @@ void start()
     robot->SetConfiguration(path[2]);
     std::cout << "path size " << path.size() << std::endl;
     arm = planner::GetChild(root, "upper_left_arm_z_joint");
+    planner::LoadJointConstraints(*robot, "../humandes/jointconstraints.txt");
 }
 void command(int cmd)   /**  key control function; */
 {
