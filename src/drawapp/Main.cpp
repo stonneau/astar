@@ -30,7 +30,8 @@ namespace
     Eigen::Matrix3d itompTransform;
     planner::Robot* robot = 0;
     int current = 0;
-    planner::sampling::Sample * sample(0);
+    int currentSample = 0;
+    planner::sampling::T_Samples samples;
     planner::Node * arm = 0;
 }
 namespace
@@ -297,10 +298,11 @@ void start()
     robot = new planner::Robot(root);
     robot->SetConstantRotation(AngleAxisd(-0.5*M_PI, Vector3d::UnitX()) * AngleAxisd(-0.5*M_PI, Vector3d::UnitZ()).matrix());
     //robot->SetRotation(path[2]->GetOrientation());
-    robot->SetConfiguration(path[2]);
+    //robot->SetConfiguration(path[2]);
     std::cout << "path size " << path.size() << std::endl;
-    arm = planner::GetChild(root, "upper_left_arm_z_joint");
+    arm = planner::GetChild(root, "upper_right_arm_z_joint");
     planner::LoadJointConstraints(*robot, "../humandes/jointconstraints.txt");
+    samples = planner::sampling::GenerateSamples(*robot, arm, 10);
 }
 void command(int cmd)   /**  key control function; */
 {
@@ -332,11 +334,18 @@ void command(int cmd)   /**  key control function; */
             break;
         }
         case 'r' :
-        planner::GetChild(robot, "upper_left_arm_z_joint")->SetRotation(planner::GetChild(robot,"upper_left_arm_z_joint")->value-0.1);
+        {
+            currentSample ++; if(samples.size() <= currentSample) currentSample = samples.size()-1;
+            planner::sampling::LoadSample(*samples[currentSample],arm);
+            break;
+        }
         break;
         case 't' :
-        planner::GetChild(robot, "upper_left_arm_y_joint")->SetRotation(planner::GetChild(robot,"upper_left_arm_y_joint")->value-0.1);
-        break;
+        {
+            currentSample --; if(currentSample < 0) currentSample = 0;
+            planner::sampling::LoadSample(*samples[currentSample],arm);
+            break;
+        }
         case 'y' :
         planner::GetChild(robot, "upper_left_arm_x_joint")->SetRotation(planner::GetChild(robot,"upper_left_arm_x_joint")->value-0.1);
         break;

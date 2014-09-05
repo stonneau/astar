@@ -13,6 +13,8 @@
 #include <vector>
 #include <Eigen/Dense>
 
+#include "prmpath/Robot.h"
+
 namespace planner
 {
 class Node;
@@ -29,8 +31,10 @@ struct Sample
     const Eigen::Matrix3d jacobianProduct;
 };
 
-typedef std::vector<Sample> T_Samples;
+typedef std::vector<Sample*> T_Samples;
 void LoadSample(const Sample& sample, Node* root);
+
+T_Samples GenerateSamples(const planner::Robot& robot, const Node *root, int nbSamples);
 
 } // namespace sampling
 } // namespace planner

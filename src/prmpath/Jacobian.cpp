@@ -34,7 +34,7 @@ void Jacobian::ComputeJacobian(Node* root)
 {
     Eigen::Matrix4d toRootCoordinates = Eigen::Matrix4d::Identity();
     toRootCoordinates.block<3,3>(0,0) = root->toLocalRotation;
-    toRootCoordinates.block<3,1>(2,0) = root->position;
+    toRootCoordinates.block<3,1>(0,3) = root->position;
     toRootCoordinates.inverse();
 	Invalidate();
     int dim = planner::GetNumChildren(root);

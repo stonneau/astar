@@ -28,7 +28,7 @@ Node::Node(const int id)
     //NOTHING
 }
 Node::Node(const Node& clone)
-    : current(new Object(*(clone.current)))
+    : current(0)
     , value(clone.value)
     , tag(clone.tag)
     , parent(0)
@@ -45,8 +45,12 @@ Node::Node(const Node& clone)
     , permanentRotation(clone.permanentRotation)
     , romId(clone.romId)
 {
+    if(clone.current)
+    {
+        current = new Object(*(clone.current));
+    }
     for(std::vector<Node*>::const_iterator cit = clone.children.begin();
-        cit != children.end(); ++cit)
+        cit != clone.children.end(); ++cit)
     {
         Node * child = new Node(*(*cit));
         child->parent = this;
@@ -187,6 +191,26 @@ Robot::Robot(Node* root)
 {
     // NOTHING
 }
+
+
+Robot::Robot(const Robot& clone)
+    : node(new Node (*clone.node))
+    , constantRotation(clone.constantRotation)
+    , currentRotation(clone.currentRotation)
+    , currentPosition(clone.currentPosition)
+{
+    for(std::vector<NodeRom*>::const_iterator cit = clone.roms.begin();
+        cit != clone.roms.end(); ++cit)
+    {
+        NodeRom* rom = new NodeRom((*cit)->rom);
+        rom->groupId = (*cit)->groupId;
+        for(int i=0; i<3; ++i)
+        {
+            rom->group[i] = planner::GetChild(node, (*cit)->group[i]->id);
+        }
+    }
+}
+
 Robot::~Robot()
 {
     delete node;

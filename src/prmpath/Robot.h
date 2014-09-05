@@ -68,22 +68,22 @@ struct NodeRom
          : rom(rom){}
     ~NodeRom(){}
 
-    bool InsideJointLimits()
+    bool InsideJointLimits() const
     {
-        return rom.ResidualRadius(group[0]->value, group[1]->value, group[2]->value) > 0;
+        return rom.ResidualRadius(group[0]->value, group[1]->value, group[2]->value) >= 0;
     }
 
-    bool InsideJointLimits(const double ea1, const double ea2, const double ea3)
+    bool InsideJointLimits(const double ea1, const double ea2, const double ea3) const
     {
-        return rom.ResidualRadius(ea1, ea2, ea3) > 0;
+        return rom.ResidualRadius(ea1, ea2, ea3) >= 0;
     }
 
-    bool ResidualRadius()
+    bool ResidualRadius() const
     {
         return rom.ResidualRadius(group[0]->value, group[1]->value, group[2]->value);
     }
 
-    double ResidualRadius(const double ea1, const double ea2, const double ea3)
+    double ResidualRadius(const double ea1, const double ea2, const double ea3) const
     {
         return rom.ResidualRadius(ea1, ea2, ea3);
     }
@@ -97,6 +97,7 @@ class Robot
 {
 public:
     Robot(Node* root);
+    Robot(const Robot& clone);
     ~Robot();
 public:
     void SetConfiguration(const planner::Object* object);
