@@ -208,6 +208,7 @@ Robot::Robot(const Robot& clone)
         {
             rom->group[i] = planner::GetChild(node, (*cit)->group[i]->id);
         }
+        roms.push_back(rom);
     }
 }
 

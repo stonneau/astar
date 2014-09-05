@@ -4,6 +4,8 @@
 
 #include <vector>
 #include <iostream>
+#include <time.h>
+#include <math.h>
 
 using namespace planner;
 using namespace planner::sampling;
@@ -118,7 +120,7 @@ namespace
 
     void GetConcernedGroups(const Robot &robot, Node* node, std::vector<int>& ids, std::vector<NodeRom*>& roms)
     {
-        if(node->romId !=-1 && std::find(ids.begin(), ids.end(), node->romId)!=ids.end())
+        if(node->romId !=-1 && std::find(ids.begin(), ids.end(), node->romId)==ids.end())
         {
             ids.push_back(node->romId);
             roms.push_back(robot.roms[node->romId]);

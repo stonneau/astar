@@ -78,7 +78,7 @@ struct NodeRom
         return rom.ResidualRadius(ea1, ea2, ea3) >= 0;
     }
 
-    bool ResidualRadius() const
+    double ResidualRadius() const
     {
         return rom.ResidualRadius(group[0]->value, group[1]->value, group[2]->value);
     }

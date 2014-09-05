@@ -26,6 +26,7 @@ namespace
     planner::Scenario* scenario;
     bool pathOn = false;
     bool drawObject = true;
+    bool drawPOstures = false;
     std::string outpath("../tests/testSerialization.txt");
     Eigen::Matrix3d itompTransform;
     planner::Robot* robot = 0;
@@ -33,6 +34,7 @@ namespace
     int currentSample = 0;
     planner::sampling::T_Samples samples;
     planner::Node * arm = 0;
+    std::vector<planner::Node*> postures;
 }
 namespace
 {
@@ -249,8 +251,27 @@ static void simLoop (int pause)
 {
     //drawManager.Draw();
     DrawObjects();
-    dsSetColorAlpha(0,0, 0.7,1);
+    dsSetColorAlpha(0,0, 0.7,0.7);
     DrawNode(robot->node);
+    if(drawPOstures)
+    {
+        PQP_REAL p1 [3];
+        PQP_REAL p2 [3];
+        Vect3ToArray(p1, Eigen::Vector3d::Zero());
+        /*for(std::vector<planner::sampling::Sample*>::iterator it = samples.begin();
+            it != samples.end(); ++ it)
+        {
+            Vect3ToArray(p2, (*it)->effectorPosition);
+            dsDrawLineD(p1, p2);
+        }*/
+		for(std::vector<planner::Node*>::iterator it = postures.begin();
+            it != postures.end(); ++ it)
+        {
+			DrawNode(*it);
+            /*Vect3ToArray(p2, (*it)->);
+            dsDrawLineD(p1, p2);*/
+        }
+    }
 }
 void start()
 {
@@ -302,7 +323,18 @@ void start()
     std::cout << "path size " << path.size() << std::endl;
     arm = planner::GetChild(root, "upper_right_arm_z_joint");
     planner::LoadJointConstraints(*robot, "../humandes/jointconstraints.txt");
-    samples = planner::sampling::GenerateSamples(*robot, arm, 10);
+    samples = planner::sampling::GenerateSamples(*robot, arm, 100);
+    std::cout << "done creating samples " << path.size() << std::endl;
+    for(int i=0; i< samples.size(); ++i)
+    {
+        planner::Node* node = new planner::Node(*arm);
+        node->offset = Eigen::Vector3d(0,0,0);
+        node->position = Eigen::Vector3d(0,0,0);
+        planner::sampling::LoadSample(*samples[i], node);
+		node->Update();
+        postures.push_back(node);
+    }
+    std::cout << "done creating nodes " << path.size() << std::endl;
 }
 void command(int cmd)   /**  key control function; */
 {
@@ -344,6 +376,11 @@ void command(int cmd)   /**  key control function; */
         {
             currentSample --; if(currentSample < 0) currentSample = 0;
             planner::sampling::LoadSample(*samples[currentSample],arm);
+            break;
+        }
+        case 'm' :
+        {
+            drawPOstures = ! drawPOstures;
             break;
         }
         case 'y' :

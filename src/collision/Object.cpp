@@ -37,10 +37,10 @@ Object::Object(PQP_Model* model)
 }
 
 Object::Object(PQP_Model* model, const T_Vector3& normals)
-    : model_(model)
+    : normals_(normals)
+    , model_(model)
     , position_(Eigen::Vector3d::Zero())
     , orientation_(Eigen::Matrix3d::Identity())
-	, normals_(normals)
 {
     EigenToDoubleMatrix(orientation_, pqpOrientation_);
     EigenToDoubleVector(position_, pqpPosition_);
