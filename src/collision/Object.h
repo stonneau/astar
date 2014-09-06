@@ -55,7 +55,7 @@ public:
     ///  \param object the object on which to test the collision
     ///  \param epsilon threshold for contact
     ///  \param return : true if a collision exists, false otherwise
-    bool InContact(Object* object, double espilon); // can not be const because of pqp but it is.
+    bool InContact(Object* object, double epsilon); // can not be const because of pqp but it is.
 
     ///  \brief returns whether the current Object collide with another.
     ///  \param object the object on which to test the collision

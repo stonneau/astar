@@ -9,6 +9,7 @@
 #include "prmpath/sampling/Sample.h"
 #include "prmpath/JointConstraint.h"
 #include "CompleteScenario.h"
+#include "prmpath/PostureSelection.h"
 
 #include <string>
 #include <iostream>
@@ -36,6 +37,7 @@ namespace
     planner::Node * arm = 0;
     planner::CompleteScenario* cScenario = 0;
     std::vector<planner::Node*> postures;
+    planner::sampling::T_Samples samples;
 }
 namespace
 {
@@ -192,6 +194,7 @@ void start()
         node->Update();
         postures.push_back(node);
     }
+    samples = cScenario->limbSamples[0];
     std::cout << "done creating nodes " << path.size() << std::endl;
 }
 void command(int cmd)   /**  key control function; */
@@ -215,25 +218,32 @@ void command(int cmd)   /**  key control function; */
         {
             current ++; if(cScenario->path.size() <= current) current = cScenario->path.size()-1;
             cScenario->robot->SetConfiguration(cScenario->path[current]);
+            currentSample = 0;
+            samples = planner::GetPosturesInContact(*cScenario->robot, cScenario->limbs[0], cScenario->limbSamples[0], cScenario->scenario->objects_ );
             break;
         }
         case '-' :
         {
+            if(samples.empty()) return;
             current--; if(current <0) current = 0;
             cScenario->robot->SetConfiguration(cScenario->path[current]);
+            currentSample = 0;
+            samples = planner::GetPosturesInContact(*cScenario->robot, cScenario->limbs[0], cScenario->limbSamples[0], cScenario->scenario->objects_ );
+
             break;
         }
         case 'r' :
         {
-            currentSample ++; if(cScenario->limbSamples[0].size() <= currentSample) currentSample = cScenario->limbSamples[0].size()-1;
-            planner::sampling::LoadSample(*(cScenario->limbSamples[0][currentSample]),arm);
+            if(samples.empty()) return;
+            currentSample ++; if(samples.size() <= currentSample) currentSample = samples.size()-1;
+            planner::sampling::LoadSample(*(samples[currentSample]),arm);
             break;
         }
         break;
         case 't' :
         {
             currentSample --; if(currentSample < 0) currentSample = 0;
-            planner::sampling::LoadSample(*(cScenario->limbSamples[0][currentSample]),arm);
+            planner::sampling::LoadSample(*(samples[currentSample]),arm);
             break;
         }
         case 'm' :

@@ -17,6 +17,8 @@ if ( MSVC )
 endif ( MSVC )
 	
 set(SOURCES
+    PostureSelection.h
+    PostureSelection.cpp
     Robot.h
     Robot.cpp
     JointConstraint.h

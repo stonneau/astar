@@ -71,6 +71,24 @@ Object::~Object()
     //delete pqpPosition_;
 }
 
+double Object::Distance(Object* object)
+{
+    PQP_DistanceResult result;
+    PQP_Distance(&result, pqpOrientation_, pqpPosition_, model_,
+                 object->pqpOrientation_, object->pqpPosition_, object->model_,
+                 0.01, 0.01, 2);
+    return result.distance;
+}
+
+bool Object::InContact(Object* object, double epsilon)
+{
+    PQP_ToleranceResult result;
+    PQP_Tolerance(&result, pqpOrientation_, pqpPosition_, model_,
+                 object->pqpOrientation_, object->pqpPosition_, object->model_,
+                 epsilon, 2);
+    return result.CloserThanTolerance();
+}
+
 bool Object::IsColliding(Object* object)
 {
     PQP_CollideResult cres;
