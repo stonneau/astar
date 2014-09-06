@@ -19,6 +19,17 @@
 #include "prmpath/sampling/Sample.h"
 namespace planner
 {
+
+struct State
+{
+    State():value(0){}
+    ~State(){if(value)delete value;}
+    std::vector<int> contactLimbs;
+    Robot* value;
+};
+
+typedef std::vector<State*> T_State;
+
 struct CompleteScenario
 {
      CompleteScenario();
@@ -34,6 +45,7 @@ struct CompleteScenario
     Object* to;
     Object::CT_Object path;
     std::vector<planner::Robot*> completePath;
+    State initstate;
 };
 
 /*
@@ -41,12 +53,14 @@ File description:
 PRMSCENARIO file="path/to/scenario"
 ROBOT_SKELETON file="path/to/urdf"
 ROBOT_CONSTRAINTS file="path/to/joint_constraints"
+CONSTANT_ROTATION matrix="a00 a01 a02 a03 ... a30 a31 a32 a33"
 PATH_FROM matrix="a00 a01 a02 a03 ... a30 a31 a32 a33"
 PATH_TO matrix="a00 a01 a02 a03 ... a30 a31 a32 a33"
 LIMB joint_name="joint_name"
 ...
 LIMB joint_name="joint_name"
 NBSAMPLES N=""
+INITCONTACTS 2 3
 */
 CompleteScenario* CompleteScenarioFromFile(const std::string& file);
 

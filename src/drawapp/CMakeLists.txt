@@ -11,8 +11,6 @@ LINK_DIRECTORIES(${PQP_LIBRARY_DIR})
 
 add_executable(
         drawapp
-        CompleteScenario.h
-        CompleteScenario.cpp
         Main.cpp
 )
 

@@ -137,7 +137,7 @@ void Jacobian::GetNullspace(const MatrixX pseudoId, MatrixX& result)
         result = pseudoId - (id + Identitymin_);
 }
 
-const Matrix3& Jacobian::GetJacobianProduct()
+const Eigen::MatrixXd& Jacobian::GetJacobianProduct()
 {
 	if(computeProduct_)
 	{
@@ -147,12 +147,12 @@ const Matrix3& Jacobian::GetJacobianProduct()
 	return jacobianProduct_;
 }
 
-const Matrix3& Jacobian::GetJacobianProductInverse()
+const Eigen::MatrixXd &Jacobian::GetJacobianProductInverse()
 {
 	if(computeProductInverse_)
 	{
 		computeProductInverse_ = false;
-		Eigen::JacobiSVD<Matrix3> svd = Eigen::JacobiSVD<Matrix3>(jacobianProduct_, Eigen::ComputeFullU | Eigen::ComputeFullV);
+        Eigen::JacobiSVD<MatrixX> svd = Eigen::JacobiSVD<MatrixX>(jacobianProduct_, Eigen::ComputeFullU | Eigen::ComputeFullV);
 		PseudoInverseSVDDLS(jacobianProduct_, svd, jacobianProductInverse_);
 	}
 	return jacobianProductInverse_;

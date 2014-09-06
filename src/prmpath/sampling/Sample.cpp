@@ -40,8 +40,33 @@ Eigen::Vector3d AssignValues(Node* root, const std::vector<double>& values)
 Eigen::Matrix3d GetJacobianProduct(Node* root)
 {
     Jacobian j(root);
-    return j.GetJacobianProduct();
+    return j.GetJacobianProduct().block<3,3>(0,0);
 }
+
+void ValuesFromNodeRec(Node* node, std::vector<double>& values)
+{
+    values.push_back(node->value);
+    for(std::vector<Node*>::iterator it = node->children.begin();
+        it != node->children.end(); ++it)
+    {
+        ValuesFromNodeRec(*it, values);
+    }
+}
+
+std::vector<double> ValuesFromNode(Node* node)
+{
+    std::vector<double> res;
+    ValuesFromNodeRec(node, res);
+    return res;
+}
+}
+
+Sample::Sample(Node* root)
+    : values(ValuesFromNode(root))
+    , effectorPosition(AssignValues(root, values))
+    , jacobianProduct(GetJacobianProduct(root))
+{
+    // NOTHING
 }
 
 Sample::Sample(Node* root, const std::vector<double>& values)

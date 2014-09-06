@@ -27,8 +27,8 @@ public:
     const Eigen::MatrixXd& GetNullspace();
     const Eigen::MatrixXd& GetJacobian();
     const Eigen::MatrixXd& GetJacobianInverse();
-    const Eigen::Matrix3d& GetJacobianProduct();
-    const Eigen::Matrix3d& GetJacobianProductInverse();
+    const Eigen::MatrixXd& GetJacobianProduct();
+    const Eigen::MatrixXd& GetJacobianProductInverse();
     void GetEllipsoidAxes(Eigen::Vector3d& /*u1*/, Eigen::Vector3d& /*u2*/, Eigen::Vector3d& /*u3*/);
     void GetEllipsoidAxes(Eigen::Vector3d& /*u1*/, Eigen::Vector3d& /*u2*/, Eigen::Vector3d& /*u3*/, double& /*sig1*/, double& /*sig2*/, double& /*sig3*/);
 
@@ -46,8 +46,8 @@ private:
 	void Invalidate();
 
 private:
-    Eigen::Matrix3d jacobianProductInverse_;
-    Eigen::Matrix3d jacobianProduct_;
+    Eigen::MatrixXd jacobianProductInverse_;
+    Eigen::MatrixXd jacobianProduct_;
     Eigen::MatrixXd jacobian_;
     Eigen::MatrixXd jacobianInverse_;
     Eigen::MatrixXd jacobianInverseNoDls_;

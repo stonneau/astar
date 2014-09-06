@@ -23,6 +23,7 @@ namespace sampling
 
 struct Sample
 {
+     Sample(Node* root);
      Sample(Node* root, const std::vector<double>& values);
     ~Sample();
 

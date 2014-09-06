@@ -1,4 +1,5 @@
 #include "CompleteScenario.h"
+#include "prmpath/PostureSelection.h"
 
 #include <iostream>
 #include <sstream>
@@ -107,7 +108,7 @@ namespace
             {
                 if(i==s.size()-1)
                     s1+=s[i];
-                ret.push_back(s1);
+                if(s1!="") ret.push_back(s1);
                 s1="";
             }
             else
@@ -134,13 +135,30 @@ namespace
         return res;
     }
 
+    Eigen::Matrix3d Read3Transform(const std::string& line)
+    {
+        Eigen::Matrix3d res;
+        std::vector<std::string> matrix = splitSpace(line);
+        if(matrix.size() != 9)
+        {
+            std::cout << "matrix does not contain 9 members" << std::endl;
+        }
+        for(int i =0; i<9; ++i)
+        {
+            char value [10];
+            sscanf(matrix[i].c_str(),"%s", value);
+            res(i/3, i%3) = strtod (value, NULL);
+        }
+        return res;
+    }
+
 }
 
 CompleteScenario* planner::CompleteScenarioFromFile(const std::string& filename)
 {
     CompleteScenario* cScenario = new CompleteScenario;
     bool scenario = false; bool skeleton = false; bool contraints = false;
-    bool from = false; bool to = false; bool limb = false;
+    bool from = false; bool to = false; bool limb = false; bool initstate = false;
     bool samples = false;
     std::ifstream myfile (filename);
     if (myfile.is_open())
@@ -188,6 +206,11 @@ CompleteScenario* planner::CompleteScenarioFromFile(const std::string& filename)
                 cScenario->to->SetPosition(res.block<3,1>(0,3));
                 to = !to;
             }
+            if(line.find("CONSTANT_ROTATION matrix=") != string::npos && cScenario->robot)
+            {
+                Eigen::Matrix3d res = Read3Transform(ExtractQuotes(line));
+                cScenario->robot->SetConstantRotation(res);
+            }
             if(line.find("LIMB") != string::npos && cScenario->robot)
             {
                 Node* res = planner::GetChild(cScenario->robot, ExtractQuotes(line));
@@ -214,6 +237,16 @@ CompleteScenario* planner::CompleteScenarioFromFile(const std::string& filename)
                 }
                 samples = true;
             }
+            if(line.find("INITCONTACTS")!= string::npos && from)
+            {
+                std::vector<string> contacts = splitSpace(line);
+                for(int i =1; i<contacts.size(); ++i)
+                {
+                    char data[10];
+                    sscanf(contacts[i].c_str(),"%s", data);
+                    cScenario->initstate.contactLimbs.push_back((int)strtod(data, NULL));
+                }
+            }
         }
         myfile.close();
     }
@@ -230,6 +263,21 @@ CompleteScenario* planner::CompleteScenarioFromFile(const std::string& filename)
             cScenario->path.push_back(cScenario->from);
             cScenario->path.push_back(cScenario->to);
         }
+        // init first position
+        cScenario->robot->SetConfiguration(cScenario->from);
+        for(std::vector<int>::const_iterator cit = cScenario->initstate.contactLimbs.begin();
+            cit != cScenario->initstate.contactLimbs.end(); ++cit)
+        {
+            // assign contacts
+            planner::sampling::T_Samples candidates
+                    = planner::GetPosturesInContact(*cScenario->robot, cScenario->limbs[*cit],
+                                                    cScenario->limbSamples[*cit], cScenario->scenario->objects_);
+            if(!candidates.empty())
+            {
+                planner::sampling::LoadSample(*candidates.front(), cScenario->limbs[*cit]);
+            }
+        }
+        cScenario->initstate.value= new Robot(*cScenario->robot);
         return cScenario;
     }
     else

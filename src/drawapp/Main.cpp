@@ -8,7 +8,7 @@
 #include "prmpath/Robot.h"
 #include "prmpath/sampling/Sample.h"
 #include "prmpath/JointConstraint.h"
-#include "CompleteScenario.h"
+#include "prmpath/CompleteScenario.h"
 #include "prmpath/PostureSelection.h"
 
 #include <string>
@@ -26,9 +26,9 @@ namespace
 {
     static float xyz[3] = {8,-1.3,2.5};
     static float hpr[3] = {180.0,-10.0,0.0};
-    bool pathOn = false;
-    bool drawObject = true;
-    bool drawPOstures = false;
+    bool pathOn = true;
+    bool drawObject = false;
+    bool drawPOstures = true;
     std::string outpath("../tests/testSerialization.txt");
     std::string outfilename ("../tests/entrance.path");
     Eigen::Matrix3d itompTransform;
@@ -38,6 +38,7 @@ namespace
     planner::CompleteScenario* cScenario = 0;
     std::vector<planner::Node*> postures;
     planner::sampling::T_Samples samples;
+    planner::T_State states;
 }
 namespace
 {
@@ -164,10 +165,10 @@ static void simLoop (int pause)
     DrawNode(cScenario->robot->node);
     if(drawPOstures)
     {
-		for(std::vector<planner::Node*>::iterator it = postures.begin();
-            it != postures.end(); ++ it)
+        for(planner::T_State::iterator it = states.begin();
+            it != states.end(); ++ it)
         {
-            DrawNode(*it);
+            DrawNode((*it)->value->node);
         }
     }
 }
@@ -181,11 +182,18 @@ void start()
     {
         itompTransform(i,i)=1;
     }
+    std::cout << "ca donne" << cScenario->robot->constantRotation << std::endl;
+
+    Eigen::Matrix3d daf = AngleAxisd(-0.5*M_PI, Vector3d::UnitX()) * AngleAxisd(-0.5*M_PI, Vector3d::UnitZ()).matrix();
+    std::cout << "la transform" << std::endl << daf << std::endl;
     itompTransform *= AngleAxisd(0.5*M_PI, Vector3d::UnitX()).matrix();
     cScenario->robot->SetConstantRotation(AngleAxisd(-0.5*M_PI, Vector3d::UnitX()) * AngleAxisd(-0.5*M_PI, Vector3d::UnitZ()).matrix());
     arm = planner::GetChild(cScenario->robot, "upper_right_arm_z_joint");
 
-    for(int i=0; i< cScenario->limbSamples[0].size(); ++i)
+
+    std::cout << "ca EN VRAI" << cScenario->robot->constantRotation << std::endl;
+
+    /*for(int i=0; i< cScenario->limbSamples[0].size(); ++i)
     {
         planner::Node* node = new planner::Node(*arm);
         node->offset = Eigen::Vector3d(0,0,0);
@@ -193,9 +201,10 @@ void start()
         planner::sampling::LoadSample(*cScenario->limbSamples[0][i], node);
         node->Update();
         postures.push_back(node);
-    }
+    }*/
     samples = cScenario->limbSamples[0];
     std::cout << "done creating nodes " << path.size() << std::endl;
+    states = planner::PostureSequence(*cScenario);
 }
 void command(int cmd)   /**  key control function; */
 {
@@ -224,11 +233,17 @@ void command(int cmd)   /**  key control function; */
         }
         case '-' :
         {
-            if(samples.empty()) return;
             current--; if(current <0) current = 0;
             cScenario->robot->SetConfiguration(cScenario->path[current]);
             currentSample = 0;
             samples = planner::GetPosturesInContact(*cScenario->robot, cScenario->limbs[0], cScenario->limbSamples[0], cScenario->scenario->objects_ );
+
+            break;
+        }
+        case 'c' :
+        {
+            currentSample = 0;
+            samples = planner::GetPosturesOnTarget(*cScenario->robot, cScenario->limbs[0], cScenario->limbSamples[0], cScenario->scenario->objects_, planner::GetEffectors(cScenario->limbs[0])[0]->parent->position );
 
             break;
         }
@@ -242,6 +257,7 @@ void command(int cmd)   /**  key control function; */
         break;
         case 't' :
         {
+            if(samples.empty()) return;
             currentSample --; if(currentSample < 0) currentSample = 0;
             planner::sampling::LoadSample(*(samples[currentSample]),arm);
             break;

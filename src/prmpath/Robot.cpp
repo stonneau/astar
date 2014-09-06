@@ -210,6 +210,7 @@ Robot::Robot(const Robot& clone)
         }
         roms.push_back(rom);
     }
+    node->Update();
 }
 
 Robot::~Robot()
