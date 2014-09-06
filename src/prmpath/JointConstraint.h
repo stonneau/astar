@@ -20,6 +20,6 @@ constraint joint_name="JOINT_NAME" min="" max="" default=""
 ...
 rom joint1="JOINT_NAME" joint2="JOINT_NAME" joint3="JOINT_NAME"
 */
-void LoadJointConstraints(Robot& robot, const std::string& filename);
+bool LoadJointConstraints(Robot& robot, const std::string& filename);
 } // namespace planner
 #endif //_CLASS_JOINTCONSTRAINT

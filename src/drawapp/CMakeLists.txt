@@ -10,7 +10,10 @@ LINK_DIRECTORIES(${DRAWSTUFF_LIBRARY_DIR})
 LINK_DIRECTORIES(${PQP_LIBRARY_DIR})
 
 add_executable(
-        drawapp Main.cpp
+        drawapp
+        CompleteScenario.h
+        CompleteScenario.cpp
+        Main.cpp
 )
 
 TARGET_LINK_LIBRARIES(drawapp drawstuff)

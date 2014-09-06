@@ -8,6 +8,8 @@
 #include "prmpath/Robot.h"
 #include "prmpath/sampling/Sample.h"
 #include "prmpath/JointConstraint.h"
+#include "CompleteScenario.h"
+
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -23,35 +25,20 @@ namespace
 {
     static float xyz[3] = {8,-1.3,2.5};
     static float hpr[3] = {180.0,-10.0,0.0};
-    planner::Scenario* scenario;
     bool pathOn = false;
     bool drawObject = true;
     bool drawPOstures = false;
     std::string outpath("../tests/testSerialization.txt");
+    std::string outfilename ("../tests/entrance.path");
     Eigen::Matrix3d itompTransform;
-    planner::Robot* robot = 0;
     int current = 0;
     int currentSample = 0;
-    planner::sampling::T_Samples samples;
     planner::Node * arm = 0;
+    planner::CompleteScenario* cScenario = 0;
     std::vector<planner::Node*> postures;
 }
 namespace
 {
-    void createTransform(const Eigen::Matrix3d& rotation, const Eigen::Vector3d& position, double R [12])
-    {
-        for(int i =0; i< 3; ++i)
-        {
-            for(int j =0; j< 3; ++j)
-            {
-                R[ 4*i + j ] = rotation(i,j);
-            }
-        }
-        for(int i = 0; i<3; ++i)
-        {
-            R[ 4*i + 3 ] = position(i);
-        }
-    }
     void arrayToVect3(const double * tab, Vector3d& vect)
     {
         for(int i =0; i< 3; ++i)
@@ -66,6 +53,7 @@ namespace
             tab[i] =  vect(i);
         }
     }
+
     planner::Object::CT_Object path;
     void DrawObject(const planner::Object* obj, bool useItomp = true)
     {
@@ -73,7 +61,6 @@ namespace
         PQP_REAL p1 [3];
         PQP_REAL p2 [3];
         PQP_REAL p3 [3];
-        //createTransform(obj->GetOrientation(), obj->GetPosition(), R);
         for(int i =0; i< obj->GetModel()->num_tris; ++i)
         {
             const Tri& t = obj->GetModel()->tris[i];
@@ -106,10 +93,11 @@ namespace
         dsDrawLineD(p1, p2);
     }
     void DrawObjects()
+
     {
         dsSetColorAlpha(0,0, 0,1);
-        for(planner::Object::T_Object::iterator it = scenario->objects_.begin();
-            it != scenario->objects_.end();
+        for(planner::Object::T_Object::iterator it = cScenario->scenario->objects_.begin();
+            it != cScenario->scenario->objects_.end();
             ++it)
         {
             DrawObject(*it);
@@ -118,9 +106,9 @@ namespace
         {
             dsSetColorAlpha(0,0, 0,1);
             bool afterfirst = false;
-            planner::Object::CT_Object::iterator it = path.begin();
-            for(planner::Object::CT_Object::iterator it2 = path.begin();
-                it2 != path.end();
+            planner::Object::CT_Object::iterator it = cScenario->path.begin();
+            for(planner::Object::CT_Object::iterator it2 = cScenario->path.begin();
+                it2 != cScenario->path.end();
                 ++it2)
             {
                 dsSetColorAlpha(1,0, 0,1);
@@ -140,102 +128,22 @@ namespace
         else
         {
             int i = 0;
-            for(planner::Object::T_Object::const_iterator it = scenario->prm->GetPRMNodes().begin();
-                it != scenario->prm->GetPRMNodes().end();
+            for(planner::Object::T_Object::const_iterator it = cScenario->scenario->prm->GetPRMNodes().begin();
+                it != cScenario->scenario->prm->GetPRMNodes().end();
                 ++it, ++i)
             {
                 dsSetColorAlpha(1,0, 0,1);
                 if(drawObject) DrawObject(*it);
-                const std::vector< int > connexions = scenario->prm->GetConnections(i);
+                const std::vector< int > connexions = cScenario->scenario->prm->GetConnections(i);
                 dsSetColorAlpha(0,1, 0,1);
                 for(unsigned int j = 0; j< connexions.size(); ++j)
                 {
-                    LineBetweenObjects(*it, scenario->prm->GetPRMNodes()[connexions[j]]);
+                    LineBetweenObjects(*it, cScenario->scenario->prm->GetPRMNodes()[connexions[j]]);
                 }
             }
         }
     }
-    void WriteNodeLine(const Eigen::Matrix3d& rotation, const Eigen::Vector3d& position, std::stringstream& outstream)
-    {
-        for(int i=0; i<3; ++i)
-        {
-            for(int j=0; j<3; ++j)
-            {
-                outstream << rotation(i,j) << " ";
-            }
-            outstream << position(i) << " ";
-        }
-        outstream << std::endl;
-    }
-    Eigen::Matrix4d readNodeLine(const std::string& line)
-    {
-        Eigen::Matrix4d transform;
-        char c11[255],c12[255],c13[255];
-        char c21[255],c22[255],c23[255];
-        char c31[255],c32[255],c33[255];
-        char x[255],y[255],z[255];
-        sscanf(line.c_str(),"%s %s %s %s %s %s %s %s %s %s %s %s",
-               c11, c12, c13, x, c21, c22, c23, y, c31, c32, c33, z);
-        transform << strtod (c11, NULL), strtod (c12, NULL), strtod (c13, NULL), strtod (x, NULL),
-                strtod (c21, NULL), strtod (c22, NULL), strtod (c23, NULL), strtod (y, NULL),
-                strtod (c31, NULL), strtod (c32, NULL), strtod (c33, NULL), strtod (z, NULL),
-                0, 0, 0, 1;
-        return transform;
-    }
-    bool SavePath()
-    {
-        std::string outfilename ("../tests/entrance.path");
-        std::stringstream outstream;
-        outstream << "size " << (int)(path.size()) << std::endl;
-        for(std::vector<const planner::Object*>::const_iterator it = path.begin();
-            it!= path.end(); ++it)
-        {
-            WriteNodeLine((*it)->GetOrientation(),(*it)->GetPosition(), outstream);
-        }
-        ofstream outfile;
-        outfile.open(outfilename.c_str());
-        if (outfile.is_open())
-        {
-            outfile << outstream.rdbuf();
-            outfile.close();
-            return true;
-        }
-        else
-        {
-            std::cout << "Can not open outfile " << outfilename << std::endl;
-            return false;
-        }
-    }
-    std::vector<Eigen::Matrix4d> LoadPath(const std::string& filename)
-    {
-        std::vector<Eigen::Matrix4d> res;
-        ifstream myfile (filename);
-        std::string line;
-        int size = -1;
-        if (myfile.is_open())
-        {
-            while (myfile.good())
-            {
-                getline(myfile, line);
-                if(line.size()==0) break;
-                else if(line.find("size ") == 0)
-                {
-                    line = line.substr(5);
-                    size = std::stoi (line);
-                }
-                else
-                {
-                    res.push_back(readNodeLine(line));
-                }
-            }
-            myfile.close();
-        }
-        else
-        {
-            std::cout << "file not found" << filename << std::endl;
-        }
-        return res;
-    }
+
     void DrawNode(const planner::Node* node)
     {
         if(node->current)
@@ -249,51 +157,22 @@ namespace
 }
 static void simLoop (int pause)
 {
-    //drawManager.Draw();
     DrawObjects();
     dsSetColorAlpha(0,0, 0.7,0.7);
-    DrawNode(robot->node);
+    DrawNode(cScenario->robot->node);
     if(drawPOstures)
     {
-        PQP_REAL p1 [3];
-        PQP_REAL p2 [3];
-        Vect3ToArray(p1, Eigen::Vector3d::Zero());
-        /*for(std::vector<planner::sampling::Sample*>::iterator it = samples.begin();
-            it != samples.end(); ++ it)
-        {
-            Vect3ToArray(p2, (*it)->effectorPosition);
-            dsDrawLineD(p1, p2);
-        }*/
 		for(std::vector<planner::Node*>::iterator it = postures.begin();
             it != postures.end(); ++ it)
         {
-			DrawNode(*it);
-            /*Vect3ToArray(p2, (*it)->);
-            dsDrawLineD(p1, p2);*/
+            DrawNode(*it);
         }
     }
 }
 void start()
 {
-    //dsSetViewpoint (xyz,hpr);
-    //scenario = new planner::Scenario("../tests/testscenario.txt");
-    //scenario = new planner::Scenario("../tests/testscenarioload.txt");
-    //scenario = new planner::Scenario("../tests/evac.txt");
-    scenario = new planner::Scenario("../tests/zombi.txt");
+    cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/fullscenario.scen");
     std::cout << "done" << std::endl;
-    planner::Object* from = new planner::Object(*(scenario->prm->GetPRMNodes()[0]));
-    from->SetOrientation(Eigen::Matrix3d::Identity());
-    planner::Object* to = new planner::Object(*from);
-    Eigen::Vector3d fromd(-17.2, 0.4, -8.7);
-    Eigen::Vector3d tod(-13, 0.4, -8.7);
-    from->SetPosition(fromd);
-    to->SetPosition(tod);
-    path = scenario->prm->GetPath(*from,*to, 10.f, true);
-    if(path.empty())
-    {
-        path.push_back(from);
-        path.push_back(to);
-    }
     dsSetViewpoint (xyz,hpr);
     itompTransform =Eigen::Matrix3d::Identity();
     for(int i =0; i<3; ++i)
@@ -301,37 +180,16 @@ void start()
         itompTransform(i,i)=1;
     }
     itompTransform *= AngleAxisd(0.5*M_PI, Vector3d::UnitX()).matrix();
-    std::string outfilename ("../tests/entrance.path");
-    std::vector<Eigen::Matrix4d> res = LoadPath(outfilename);
-    for(std::vector<Eigen::Matrix4d>::const_iterator it = res.begin();
-        it != res.end(); ++it)
-    {
-        for(int i = 0; i< 4; ++i)
-        {
-            for(int j = 0; j<4; ++j)
-            {
-                std::cout << (*it)(i,j) << " ";
-            }
-        }
-        std::cout << std::endl;
-    }
-    planner::Node* root = planner::LoadRobot("../humandes/human.urdf");
-    robot = new planner::Robot(root);
-    robot->SetConstantRotation(AngleAxisd(-0.5*M_PI, Vector3d::UnitX()) * AngleAxisd(-0.5*M_PI, Vector3d::UnitZ()).matrix());
-    //robot->SetRotation(path[2]->GetOrientation());
-    //robot->SetConfiguration(path[2]);
-    std::cout << "path size " << path.size() << std::endl;
-    arm = planner::GetChild(root, "upper_right_arm_z_joint");
-    planner::LoadJointConstraints(*robot, "../humandes/jointconstraints.txt");
-    samples = planner::sampling::GenerateSamples(*robot, arm, 100);
-    std::cout << "done creating samples " << path.size() << std::endl;
-    for(int i=0; i< samples.size(); ++i)
+    cScenario->robot->SetConstantRotation(AngleAxisd(-0.5*M_PI, Vector3d::UnitX()) * AngleAxisd(-0.5*M_PI, Vector3d::UnitZ()).matrix());
+    arm = planner::GetChild(cScenario->robot, "upper_right_arm_z_joint");
+
+    for(int i=0; i< cScenario->limbSamples[0].size(); ++i)
     {
         planner::Node* node = new planner::Node(*arm);
         node->offset = Eigen::Vector3d(0,0,0);
         node->position = Eigen::Vector3d(0,0,0);
-        planner::sampling::LoadSample(*samples[i], node);
-		node->Update();
+        planner::sampling::LoadSample(*cScenario->limbSamples[0][i], node);
+        node->Update();
         postures.push_back(node);
     }
     std::cout << "done creating nodes " << path.size() << std::endl;
@@ -348,34 +206,34 @@ void command(int cmd)   /**  key control function; */
             drawObject = !drawObject;
         break;
         case 's' :
-            planner::SavePrm(*(scenario->prm), outpath);
+            planner::SavePrm(*(cScenario->scenario->prm), outpath);
         break;
         case 'b' :
-            SavePath();
+            cScenario->SavePath(outfilename);
         break;
         case '+' :
         {
-            current ++; if(path.size() <= current) current = path.size()-1;
-            robot->SetConfiguration(path[current]);
+            current ++; if(cScenario->path.size() <= current) current = cScenario->path.size()-1;
+            cScenario->robot->SetConfiguration(cScenario->path[current]);
             break;
         }
         case '-' :
         {
             current--; if(current <0) current = 0;
-            robot->SetConfiguration(path[current]);
+            cScenario->robot->SetConfiguration(cScenario->path[current]);
             break;
         }
         case 'r' :
         {
-            currentSample ++; if(samples.size() <= currentSample) currentSample = samples.size()-1;
-            planner::sampling::LoadSample(*samples[currentSample],arm);
+            currentSample ++; if(cScenario->limbSamples[0].size() <= currentSample) currentSample = cScenario->limbSamples[0].size()-1;
+            planner::sampling::LoadSample(*(cScenario->limbSamples[0][currentSample]),arm);
             break;
         }
         break;
         case 't' :
         {
             currentSample --; if(currentSample < 0) currentSample = 0;
-            planner::sampling::LoadSample(*samples[currentSample],arm);
+            planner::sampling::LoadSample(*(cScenario->limbSamples[0][currentSample]),arm);
             break;
         }
         case 'm' :
@@ -384,7 +242,7 @@ void command(int cmd)   /**  key control function; */
             break;
         }
         case 'y' :
-        planner::GetChild(robot, "upper_left_arm_x_joint")->SetRotation(planner::GetChild(robot,"upper_left_arm_x_joint")->value-0.1);
+        planner::GetChild(cScenario->robot, "upper_left_arm_x_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_left_arm_x_joint")->value-0.1);
         break;
     }
 }
@@ -400,5 +258,6 @@ int main(int argc, char *argv[])
     fn.stop    = 0;
     fn.path_to_textures = "../textures";
     dsSimulationLoop (argc,argv,800,600,&fn);
+    delete cScenario;
     return 0;
 }

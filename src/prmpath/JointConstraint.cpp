@@ -87,7 +87,7 @@ namespace
     }
 }
 
-void planner::LoadJointConstraints(Robot& robot, const std::string& filename)
+bool planner::LoadJointConstraints(Robot& robot, const std::string& filename)
 {
     /**
     File description:
@@ -95,6 +95,7 @@ void planner::LoadJointConstraints(Robot& robot, const std::string& filename)
     ...
     rom joint1="JOINT_NAME" joint2="JOINT_NAME" joint3="JOINT_NAME" romfile =""
     */
+    bool error = false;
     std::ifstream myfile (filename);
     if (myfile.is_open())
     {
@@ -108,6 +109,7 @@ void planner::LoadJointConstraints(Robot& robot, const std::string& filename)
             {
                 if(!AssignJointLimits(line, robot))
                 {
+                    error = true;
                     std::cout << "There were error in joint limit description file " << filename << " at line " << line_n << ": " << line <<  std::endl;
                 }
             }
@@ -115,6 +117,7 @@ void planner::LoadJointConstraints(Robot& robot, const std::string& filename)
             {
                 if(!CreateGroup(line, robot))
                 {
+                    error = true;
                     std::cout << "There were error in joint limit description file " << filename << " at line " << line_n << ": " << line <<  std::endl;
                 }
             }
@@ -123,6 +126,8 @@ void planner::LoadJointConstraints(Robot& robot, const std::string& filename)
     }
     else
     {
+        error = true;
         std::cout << "can not found joint limit description file " << filename << std::endl;
     }
+    return !error;
 }

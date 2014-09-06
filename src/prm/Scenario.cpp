@@ -54,7 +54,7 @@ Scenario::Scenario(const std::string& filepath)
 			}
 			else if(line.find("OBJECT = ") == 0)
 			{
-				ParseObj(line.substr(9), objects_);
+                ParseObj(line.substr(9), objects_);
 			}
 			else if(line.find("PRMFILE = ") == 0 && !loading)
 			{
@@ -101,5 +101,10 @@ Scenario::Scenario(const std::string& filepath)
 
 Scenario::~Scenario()
 {
+    for(Object::T_Object::iterator it = objects_.begin();
+        it != objects_.end(); ++it)
+    {
+        delete *it;
+    }
 	delete prm;
 }
