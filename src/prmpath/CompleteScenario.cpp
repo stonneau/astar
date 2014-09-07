@@ -128,7 +128,7 @@ namespace
         }
         for(int i =0; i<16; ++i)
         {
-            char value [10];
+            char value [40];
             sscanf(matrix[i].c_str(),"%s", value);
             res(i/4, i%4) = strtod (value, NULL);
         }
@@ -145,7 +145,7 @@ namespace
         }
         for(int i =0; i<9; ++i)
         {
-            char value [10];
+            char value [20];
             sscanf(matrix[i].c_str(),"%s", value);
             res(i/3, i%3) = strtod (value, NULL);
         }
@@ -194,7 +194,7 @@ CompleteScenario* planner::CompleteScenarioFromFile(const std::string& filename)
             {
                 Eigen::Matrix4d res = ReadTransform(ExtractQuotes(line), from);
                 cScenario->from = new Object(*(cScenario->scenario->model_.englobed));
-                cScenario->from->SetOrientation(res.block<3,3>(0,0));
+                //cScenario->from->SetOrientation(res.block<3,3>(0,0));
                 cScenario->from->SetPosition(res.block<3,1>(0,3));
                 from = !from;
             }
@@ -202,7 +202,7 @@ CompleteScenario* planner::CompleteScenarioFromFile(const std::string& filename)
             {
                 Eigen::Matrix4d res = ReadTransform(ExtractQuotes(line), to);
                 cScenario->to = new Object(*(cScenario->scenario->model_.englobed));
-                cScenario->to->SetOrientation(res.block<3,3>(0,0));
+                //cScenario->to->SetOrientation(res.block<3,3>(0,0));
                 cScenario->to->SetPosition(res.block<3,1>(0,3));
                 to = !to;
             }

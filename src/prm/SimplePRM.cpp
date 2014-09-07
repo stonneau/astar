@@ -29,8 +29,8 @@ namespace planner
 
 		const Eigen::Vector3d& ea = obj1->GetOrientation().eulerAngles(0, 1, 2);
         const Eigen::Vector3d& eb = obj2->GetOrientation().eulerAngles(0, 1, 2);
-        float q = (float)(sqrt((eb.x() - ea.x()) * (eb.x() - ea.x()) + (eb.y() - ea.y()) * (eb.y() - ea.y()) + (eb.z() - ea.z()) * (eb.z() - ea.z())));
-		return 0.8f * p + 0.2f * q;
+        float q = (float)(sqrt((eb.x() - ea.x()) * (eb.x() - ea.x()) * 2 + (eb.y() - ea.y()) * (eb.y() - ea.y()) + (eb.z() - ea.z()) * (eb.z() - ea.z())));
+        return 0.6f * p + 0.4f * q;
 		//return p + q;
     }
 	

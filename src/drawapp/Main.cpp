@@ -165,6 +165,11 @@ static void simLoop (int pause)
     DrawNode(cScenario->robot->node);
     if(drawPOstures)
     {
+		for(std::vector<planner::Node*>::iterator it = postures.begin();
+            it != postures.end(); ++ it)
+        {
+            DrawNode((*it));
+        }
         for(planner::T_State::iterator it = states.begin();
             it != states.end(); ++ it)
         {
@@ -187,7 +192,7 @@ void start()
     Eigen::Matrix3d daf = AngleAxisd(-0.5*M_PI, Vector3d::UnitX()) * AngleAxisd(-0.5*M_PI, Vector3d::UnitZ()).matrix();
     std::cout << "la transform" << std::endl << daf << std::endl;
     itompTransform *= AngleAxisd(0.5*M_PI, Vector3d::UnitX()).matrix();
-    cScenario->robot->SetConstantRotation(AngleAxisd(-0.5*M_PI, Vector3d::UnitX()) * AngleAxisd(-0.5*M_PI, Vector3d::UnitZ()).matrix());
+    //cScenario->robot->SetConstantRotation(AngleAxisd(-0.5*M_PI, Vector3d::UnitX()) * AngleAxisd(-0.5*M_PI, Vector3d::UnitZ()).matrix());
     arm = planner::GetChild(cScenario->robot, "upper_right_arm_z_joint");
 
 
@@ -268,7 +273,13 @@ void command(int cmd)   /**  key control function; */
             break;
         }
         case 'y' :
-        planner::GetChild(cScenario->robot, "upper_left_arm_x_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_left_arm_x_joint")->value-0.1);
+        planner::GetChild(cScenario->robot, "upper_right_arm_z_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_right_arm_z_joint")->value-0.1);
+        break;
+        case 'f' :
+        planner::GetChild(cScenario->robot, "upper_right_arm_y_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_right_arm_y_joint")->value-0.1);
+        break;
+        case 'g' :
+        planner::GetChild(cScenario->robot, "upper_right_arm_x_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_right_arm_x_joint")->value-0.1);
         break;
     }
 }

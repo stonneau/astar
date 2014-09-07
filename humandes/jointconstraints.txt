@@ -1,7 +1,9 @@
-constraint joint_name="upper_right_arm_z_joint" min="-120" max="45" default="0"
-constraint joint_name="upper_right_arm_y_joint" min="-120" max="120" default="0"
-constraint joint_name="upper_right_arm_x_joint" min="-75" max="75" default="0"
-constraint joint_name="lower_right_arm_joint"   min="-0" max="90" default="0"
+
+constraint joint_name="upper_right_arm_x_joint" min="-45" max="140" default="0"
+constraint joint_name="upper_right_arm_z_joint" min="-75" max="75" default="0"
+constraint joint_name="upper_right_arm_y_joint" min="-140" max="120" default="0"
+
+constraint joint_name="lower_right_arm_joint"   min="90" max="90" default="0"
 constraint joint_name="right_hand_z_joint"   min="-0" max="0" default="0"
 constraint joint_name="right_hand_y_joint"   min="-90" max="90" default="0"
 constraint joint_name="right_hand_x_joint"   min="-45" max="45" default="0"
@@ -33,4 +35,5 @@ constraint joint_name="right_foot_y_joint"   min="-90" max="90" default="0"
 constraint joint_name="right_foot_x_joint"   min="-45" max="45" default="0"
 
 
-rom joint1="upper_right_arm_z_joint" joint2="upper_right_arm_y_joint" joint3="upper_right_arm_x_joint" romfile ="../humandes/arm.rom"
+
+rom joint1="upper_right_arm_z_joint" joint2="upper_right_arm_y_joint" joint3="upper_right_arm_x_joint" romfile ="../humandes/rightarm_itomp.rom"

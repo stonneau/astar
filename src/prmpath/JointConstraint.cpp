@@ -37,7 +37,7 @@ namespace
         Node* node = planner::GetChild(robot.node, data[0]);
         if(node)
         {
-            char min[4], max[4], defaut[4];
+            char min[10], max[10], defaut[10];
             sscanf(data[1].c_str(),"%s",min);
             sscanf(data[2].c_str(),"%s",max);
             sscanf(data[3].c_str(),"%s",defaut);

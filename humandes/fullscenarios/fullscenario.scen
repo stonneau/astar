@@ -8,5 +8,5 @@ LIMB joint_name="upper_right_arm_z_joint"
 LIMB joint_name="upper_left_arm_z_joint"
 LIMB joint_name="upper_right_leg_z_joint"
 LIMB joint_name="upper_left_leg_z_joint"
-NBSAMPLES N="100"
+NBSAMPLES N="1000"
 INITCONTACTS 2 3
