@@ -81,7 +81,6 @@ rom::ROM::ROM(const Eigen::MatrixXd& A, const Eigen::VectorXd& b, const double m
 	, axis2_(axis2)
 	, axis3_(axis3)
 {
-	// NOTHING
 	vAxis1_ = Eigen::Vector3d((axis1_ == 0) ? 1. : 0.,
 							  (axis1_ == 1) ? 1. : 0.,
 							  (axis1_ == 2) ? 1. : 0.);
