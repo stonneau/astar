@@ -68,14 +68,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../Zoey/pelvis.obj"/>
+        <mesh filename="../humandes/pelvis.obj"/>
       </geometry>
       <material name="Grey2"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../Zoey/pelvis.obj"/>
+        <mesh filename="../humandes/pelvis.obj"/>
       </geometry>
     </collision>
   </link>
@@ -83,7 +83,7 @@
   <joint name="torso_z_joint" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="15" lower="-0.7" upper="0.7" velocity="5"/>
-    <origin rpy="0 0 0" xyz="0 0.005864 0.074074"/>
+    <origin rpy="0 0 0" xyz="0 0 0.26"/>
     <parent link="pelvis_link"/>
     <child link="torso_z_link"/>
   </joint>
@@ -100,13 +100,6 @@
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <parent link="torso_y_link"/>
     <child link="torso_x_link"/>
-  </joint>  
-  <joint name="torso_up_joint" type="revolute">
-    <axis xyz="1 0 0"/>    
-    <limit effort="15" lower="-0.001" upper="0.001" velocity="5"/>
-    <origin rpy="0 0 0" xyz="0 -0.011188 0.131306"/>
-    <parent link="torso_x_link"/>
-    <child link="torso_up_link"/>
   </joint>
 
   <link name="torso_z_link"/>
@@ -115,24 +108,23 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../Zoey/torso.obj"/>
+        <mesh filename="../humandes/torso.obj"/>
       </geometry>
       <material name="Blue"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../Zoey/torso.obj"/>
+        <mesh filename="../humandes/torso.obj"/>
       </geometry>
     </collision>
   </link>
-  <link name="torso_up_link"/>
 
   <joint name="head_z_joint" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="15" lower="-1.2" upper="1.2" velocity="5"/>
-    <origin rpy="0 0 0" xyz="0 -0.031 0.216978"/>
-    <parent link="torso_up_link"/>
+    <origin rpy="0 0 0" xyz="0 0 0.45"/>
+    <parent link="torso_x_link"/>
     <child link="head_z_link"/>
   </joint>
   <joint name="head_y_joint" type="revolute">
@@ -156,23 +148,46 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../Zoey/head.obj"/>
+        <mesh filename="../humandes/head.obj"/>
       </geometry>
       <material name="Blue"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../Zoey/head.obj"/>
+        <mesh filename="../humandes/head.obj"/>
       </geometry>
     </collision>
   </link>
 
+  <joint name="head_endeffector_joint" type="revolute">
+    <axis xyz="0 0 1"/>
+    <limit effort="15" lower="-0.001" upper="0.001" velocity="5"/>
+    <origin rpy="0 0 0" xyz="0 0 0.3"/>
+    <parent link="head_x_link"/>
+    <child link="head_endeffector_link"/>
+  </joint>
+
+  <link name="head_endeffector_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="Blue"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
 
   <joint name="upper_left_leg_z_joint" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="15" lower="-1.57" upper="1" velocity="5"/>
-    <origin rpy="0 0 0" xyz="-0.069112 0 0"/>
+    <origin rpy="0 0 0" xyz="-0.1 0 0"/>
     <parent link="pelvis_link"/>
     <child link="upper_left_leg_z_link"/>
   </joint>
@@ -197,14 +212,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../Zoey/l_lupperleg.obj"/>
+        <mesh filename="../humandes/upperLeftLeg.obj"/>
       </geometry>
       <material name="Blue"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../Zoey/l_lupperleg.obj"/>
+        <mesh filename="../humandes/upperLeftLeg.obj"/>
       </geometry>
     </collision>
   </link>
@@ -212,7 +227,7 @@
   <joint name="lower_left_leg_joint" type="revolute">
     <axis xyz="1 0 0"/>
     <limit effort="15" lower="-2.4" upper="0" velocity="5"/>
-    <origin rpy="0 0 0" xyz="0.011634 -0.010252 -0.331082"/>
+    <origin rpy="0 0 0" xyz="0 0 -0.5"/>
     <parent link="upper_left_leg_x_link"/>
     <child link="lower_left_leg_link"/>
   </joint>
@@ -221,14 +236,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../Zoey/l_lowerleg.obj"/>
+        <mesh filename="../humandes/lowerLeftLeg.obj"/>
       </geometry>
       <material name="Blue"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../Zoey/l_lowerleg.obj"/>
+        <mesh filename="../humandes/lowerLeftLeg.obj"/>
       </geometry>
     </collision>
   </link>
@@ -236,7 +251,7 @@
   <joint name="left_foot_z_joint" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="15" lower="-0.01" upper="0" velocity="5"/>
-    <origin rpy="0 0 0" xyz="0.011414 -0.01328 -0.324846"/>
+    <origin rpy="0 0 0" xyz="0 0 -0.52"/>
     <parent link="lower_left_leg_link"/>
     <child link="left_foot_z_link"/>
   </joint>
@@ -261,14 +276,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../Zoey/l_foot.obj"/>
+        <mesh filename="../humandes/leftFoot.obj"/>
       </geometry>
       <material name="Blue"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../Zoey/l_foot.obj"/>
+        <mesh filename="../humandes/leftFoot.obj"/>
       </geometry>
     </collision>
   </link>
@@ -276,7 +291,7 @@
   <joint name="upper_right_leg_z_joint" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="15" lower="-1" upper="1.57" velocity="5"/>
-    <origin rpy="0 0 0" xyz="0.069112 0 0"/>
+    <origin rpy="0 0 0" xyz="0.1 0 0"/>
     <parent link="pelvis_link"/>
     <child link="upper_right_leg_z_link"/>
   </joint>
@@ -301,14 +316,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../Zoey/r_upperleg.obj"/>
+        <mesh filename="../humandes/upperRightLeg.obj"/>
       </geometry>
       <material name="Blue"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../Zoey/r_upperleg.obj"/>
+        <mesh filename="../humandes/upperRightLeg.obj"/>
       </geometry>
     </collision>
   </link>
@@ -316,7 +331,7 @@
   <joint name="lower_right_leg_joint" type="revolute">
     <axis xyz="1 0 0"/>
     <limit effort="15" lower="-2.4" upper="0" velocity="5"/>
-    <origin rpy="0 0 0" xyz="-0.011634 -0.010452 -0.331082"/>
+    <origin rpy="0 0 0" xyz="0 0 -0.5"/>
     <parent link="upper_right_leg_x_link"/>
     <child link="lower_right_leg_link"/>
   </joint>
@@ -325,14 +340,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../Zoey/r_lowerleg.obj"/>
+        <mesh filename="../humandes/lowerRightLeg.obj"/>
       </geometry>
       <material name="Blue"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../Zoey/r_lowerleg.obj"/>
+        <mesh filename="../humandes/lowerRightLeg.obj"/>
       </geometry>
     </collision>
   </link>
@@ -340,7 +355,7 @@
   <joint name="right_foot_z_joint" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="15" lower="0" upper="0.001" velocity="5"/>
-    <origin rpy="0 0 0" xyz="-0.011414 -0.01328 -0.324846"/>
+    <origin rpy="0 0 0" xyz="0 0 -0.52"/>
     <parent link="lower_right_leg_link"/>
     <child link="right_foot_z_link"/>
   </joint>
@@ -365,33 +380,23 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../Zoey/r_foot.obj"/>
+        <mesh filename="../humandes/rightFoot.obj"/>
       </geometry>
       <material name="Blue"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../Zoey/r_foot.obj"/>
+        <mesh filename="../humandes/rightFoot.obj"/>
       </geometry>
     </collision>
   </link>
 
-  <joint name="upper_left_specula_joint" type="revolute">
-    <axis xyz="0 0 1"/>
-    <limit effort="15" lower="-0.5" upper="0.5" velocity="5"/>
-    <origin rpy="0 0 0" xyz="-0.03 -0.00434 0.19102"/>
-    <parent link="torso_up_link"/>
-    <child link="upper_left_arm_specula_link"/>
-  </joint>
-  
-  <link name="upper_left_arm_specula_link"/>
-  
   <joint name="upper_left_arm_z_joint" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="15" lower="-0.5" upper="0.5" velocity="5"/>
-    <origin rpy="0 0 0" xyz="-0.074958 -0.026976 -0.033798"/>
-    <parent link="upper_left_arm_specula_link"/>
+    <origin rpy="0 0 0" xyz="-0.23 0 0.33"/>
+    <parent link="torso_x_link"/>
     <child link="upper_left_arm_z_link"/>
   </joint>
   <joint name="upper_left_arm_y_joint" type="revolute">
@@ -415,14 +420,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../Zoey/l_upperarm.obj"/>
+        <mesh filename="../humandes/upperLeftArm.obj"/>
       </geometry>
       <material name="Blue"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../Zoey/l_upperarm.obj"/>
+        <mesh filename="../humandes/upperLeftArm.obj"/>
       </geometry>
     </collision>
   </link>
@@ -430,7 +435,7 @@
   <joint name="lower_left_arm_joint" type="revolute">
     <axis xyz="1 0 0"/>
     <limit effort="15" lower="0" upper="3.14" velocity="5"/>
-    <origin rpy="0 0 0" xyz="-0.069024 0.0101 -0.210864"/>
+    <origin rpy="0 0 0" xyz="0 0 -0.35"/>
     <parent link="upper_left_arm_x_link"/>
     <child link="lower_left_arm_link"/>
   </joint>
@@ -439,14 +444,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../Zoey/l_forearm.obj"/>
+        <mesh filename="../humandes/lowerLeftArm.obj"/>
       </geometry>
       <material name="Blue"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../Zoey/l_forearm.obj"/>
+        <mesh filename="../humandes/lowerLeftArm.obj"/>
       </geometry>
     </collision>
   </link>
@@ -454,7 +459,7 @@
   <joint name="left_hand_z_joint" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="15" lower="-1.0" upper="1.0" velocity="5"/>
-    <origin rpy="0 0 0" xyz="-0.060346 0.035716 -0.184354"/>
+    <origin rpy="0 0 0" xyz="0 0 -0.35"/>
     <parent link="lower_left_arm_link"/>
     <child link="left_hand_z_link"/>
   </joint>
@@ -479,14 +484,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../Zoey/l_hand.obj"/>
+        <mesh filename="../humandes/leftHand.obj"/>
       </geometry>
       <material name="Blue"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../Zoey/l_hand.obj"/>
+        <mesh filename="../humandes/leftHand.obj"/>
       </geometry>
     </collision>
   </link>
@@ -494,7 +499,7 @@
   <joint name="left_hand_endeffector_joint" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="15" lower="-0.001" upper="0.001" velocity="5"/>
-    <origin rpy="0 0 0" xyz="-0.006974 0.00016 -0.089562"/>
+    <origin rpy="0 0 0" xyz="0 0 -0.2"/>
     <parent link="left_hand_x_link"/>
     <child link="left_hand_endeffector_link"/>
   </joint>
@@ -515,22 +520,11 @@
     </collision>
   </link>
 
-  
-  <joint name="upper_right_specula_joint" type="revolute">
-    <axis xyz="0 0 1"/>
-    <limit effort="15" lower="-0.5" upper="0.5" velocity="5"/>
-    <origin rpy="0 0 0" xyz="0.03 -0.00434 0.19102"/>
-    <parent link="torso_up_link"/>
-    <child link="upper_right_arm_specula_link"/>
-  </joint>
-    
-  <link name="upper_right_arm_specula_link"/>
-  
   <joint name="upper_right_arm_z_joint" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="15" lower="-0.5" upper="0.5" velocity="5"/>
-    <origin rpy="0 0 0" xyz="0.074956 -0.026976 -0.0338"/>
-    <parent link="upper_right_arm_specula_link"/>
+    <origin rpy="0 0 0" xyz="0.23 0 0.33"/>
+    <parent link="torso_x_link"/>
     <child link="upper_right_arm_z_link"/>
   </joint>
   <joint name="upper_right_arm_y_joint" type="revolute">
@@ -554,14 +548,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../Zoey/r_upperarm.obj"/>
+        <mesh filename="../humandes/upperRightArm.obj"/>
       </geometry>
       <material name="Blue"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../Zoey/r_upperarm.obj"/>
+        <mesh filename="../humandes/upperRightArm.obj"/>
       </geometry>
     </collision>
   </link>
@@ -569,7 +563,7 @@
   <joint name="lower_right_arm_joint" type="revolute">
     <axis xyz="1 0 0"/>
     <limit effort="15" lower="0" upper="3.14" velocity="5"/>
-    <origin rpy="0 0 0" xyz="0.069024 0.010102 -0.210864"/>
+    <origin rpy="0 0 0" xyz="0 0 -0.35"/>
     <parent link="upper_right_arm_x_link"/>
     <child link="lower_right_arm_link"/>
   </joint>
@@ -578,14 +572,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../Zoey/r_forearm.obj"/>
+        <mesh filename="../humandes/lowerRightArm.obj"/>
       </geometry>
       <material name="Blue"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../Zoey/r_forearm.obj"/>
+        <mesh filename="../humandes/lowerRightArm.obj"/>
       </geometry>
     </collision>
   </link>
@@ -593,7 +587,7 @@
   <joint name="right_hand_z_joint" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="15" lower="-1.0" upper="1.0" velocity="5"/>
-    <origin rpy="0 0 0" xyz="0.060348 0.035716 -0.184354"/>
+    <origin rpy="0 0 0" xyz="0 0 -0.35"/>
     <parent link="lower_right_arm_link"/>
     <child link="right_hand_z_link"/>
   </joint>
@@ -618,14 +612,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../Zoey/r_hand.obj"/>
+        <mesh filename="../humandes/rightHand.obj"/>
       </geometry>
       <material name="Blue"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="../Zoey/r_hand.obj"/>
+        <mesh filename="../humandes/rightHand.obj"/>
       </geometry>
     </collision>
   </link>
@@ -633,7 +627,7 @@
   <joint name="right_hand_endeffector_joint" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="15" lower="-0.001" upper="0.001" velocity="5"/>
-    <origin rpy="0 0 0" xyz="0.011072 0.017 -0.099982"/>
+    <origin rpy="0 0 0" xyz="0 0 -0.2"/>
     <parent link="right_hand_x_link"/>
     <child link="right_hand_endeffector_link"/>
   </joint>
@@ -654,4 +648,27 @@
     </collision>
   </link>
 
+<!--
+  <joint name="right_hand_tool_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0.03 -0.01 -0.08"/>
+    <parent link="right_hand_x_link"/>
+    <child link="right_hand_tool_link"/>
+  </joint>
+
+  <link name="right_hand_tool_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../humandes/chisel.obj"/>
+      </geometry>
+      <material name="Blue"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../humandes/chisel.obj"/>
+      </geometry>
+    </collision>
+  </link>
+-->
 </robot>
