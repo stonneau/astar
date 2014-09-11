@@ -4,7 +4,7 @@
 newmtl apartmentstaticfbx-hardwoodfloor.005
 Ns 0.000000
 Ka 0.000000 0.000000 0.000000
-Kd 0.480000 0.480000 0.480000
+Kd 0.384000 0.384000 0.384000
 Ks 0.900000 0.900000 0.900000
 Ni 1.000000
 d 1.000000
@@ -14,7 +14,7 @@ map_Kd /media/6C9E319F9E3162AE/dev/unity_rigid/ExportedObj/woodFloorTexture.tif
 newmtl apartmentstaticfbx-lambert1.005
 Ns 0.000000
 Ka 0.000000 0.000000 0.000000
-Kd 0.480000 0.480000 0.480000
+Kd 0.384000 0.384000 0.384000
 Ks 0.900000 0.900000 0.900000
 Ni 1.000000
 d 1.000000
@@ -23,7 +23,7 @@ illum 2
 newmtl apartmentstaticfbx-pillowmaterial.005
 Ns 0.000000
 Ka 0.000000 0.000000 0.000000
-Kd 0.480000 0.480000 0.480000
+Kd 0.384000 0.384000 0.384000
 Ks 0.900000 0.900000 0.900000
 Ni 1.000000
 d 1.000000
@@ -33,7 +33,7 @@ map_Kd /media/6C9E319F9E3162AE/dev/unity_rigid/ExportedObj/bedSpread.psd
 newmtl apartmentstaticfbx-trimmaterial.005
 Ns 0.000000
 Ka 0.000000 0.000000 0.000000
-Kd 0.480000 0.480000 0.480000
+Kd 0.384000 0.384000 0.384000
 Ks 0.900000 0.900000 0.900000
 Ni 1.000000
 d 1.000000
@@ -42,7 +42,7 @@ illum 2
 newmtl computerdesk-maplematerial.005
 Ns 0.000000
 Ka 0.000000 0.000000 0.000000
-Kd 0.480000 0.480000 0.480000
+Kd 0.384000 0.384000 0.384000
 Ks 0.900000 0.900000 0.900000
 Ni 1.000000
 d 1.000000
@@ -52,7 +52,7 @@ map_Kd /media/6C9E319F9E3162AE/dev/unity_rigid/ExportedObj/mapleWood.psd
 newmtl couch-couchfabricmaterial.005
 Ns 0.000000
 Ka 0.000000 0.000000 0.000000
-Kd 0.480000 0.480000 0.480000
+Kd 0.384000 0.384000 0.384000
 Ks 0.900000 0.900000 0.900000
 Ni 1.000000
 d 1.000000
@@ -62,7 +62,7 @@ map_Kd /media/6C9E319F9E3162AE/dev/unity_rigid/ExportedObj/couchFabric.psd
 newmtl couch-kitchencountermaterial.005
 Ns 0.000000
 Ka 0.000000 0.000000 0.000000
-Kd 0.480000 0.480000 0.480000
+Kd 0.384000 0.384000 0.384000
 Ks 0.900000 0.900000 0.900000
 Ni 1.000000
 d 1.000000

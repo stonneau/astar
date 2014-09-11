@@ -121,7 +121,7 @@ void Simplify(LocalPlanner& planner, int currentIndex, Object::CT_Object& res)
     bool erased = false;
     for(int i = currentIndex+2; i< res.size() && ! erased; ++i)
     {
-        if(planner(obj, res[i], 1))
+        if(Distance(obj, res[i]) > 0.5 &&  planner(obj, res[i], 1))
         {
             erased = true;
             res.erase(res.begin() + currentIndex + 1, res.begin() + i);

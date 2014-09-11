@@ -551,7 +551,7 @@
 
   <joint name="upper_left_specula_joint" type="revolute">
     <axis xyz="0 0 1"/>
-    <limit effort="15" lower="-0.5" upper="0.5" velocity="5"/>
+    <limit effort="15" lower="-0" upper="0" velocity="5"/>
     <origin rpy="0 0 0" xyz="-0.072819 0.03175 -0.12763"/>
     <parent link="head_x_link"/>
     <child link="upper_left_arm_specula_link"/>
@@ -562,7 +562,7 @@
   <joint name="upper_left_arm_z_joint" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="15" lower="-0.5" upper="0.5" velocity="5"/>
-    <origin rpy="0 0 0" xyz="-0.14108 0 0"/>
+    <origin rpy="0 -1.5707 0" xyz="-0.14108 0 0"/>
     <parent link="upper_left_arm_specula_link"/>
     <child link="upper_left_arm_z_link"/>
   </joint>
@@ -690,7 +690,7 @@
   
   <joint name="upper_right_specula_joint" type="revolute">
     <axis xyz="0 0 1"/>
-    <limit effort="15" lower="-0.5" upper="0.5" velocity="5"/>
+    <limit effort="15" lower="0" upper="0" velocity="5"/>
     <origin rpy="0 0 0" xyz="0.072821 0.03175 -0.12776"/>
     <parent link="head_x_link"/>
     <child link="upper_right_arm_specula_link"/>
@@ -701,7 +701,7 @@
   <joint name="upper_right_arm_z_joint" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="15" lower="-0.5" upper="0.5" velocity="5"/>
-    <origin rpy="0 0 0" xyz="0.14105 0.00314 -0.00025"/>
+    <origin rpy="0 1.5707 0" xyz="0.14105 0.00314 -0.00025"/>
     <parent link="upper_right_arm_specula_link"/>
     <child link="upper_right_arm_z_link"/>
   </joint>

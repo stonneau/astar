@@ -1,4 +1,4 @@
-PRMSCENARIO file="../tests/zombi.txt"
+PRMSCENARIO file="../rocketboxmale/zombi.txt"
 ROBOT_SKELETON file="../rocketboxmale/rocketbox_male.urdf"
 ROBOT_CONSTRAINTS file="../humandes/jointconstraints.txt"
 PATH_FROM matrix="-0.80842400000000003 -0.58860100000000004 0 -17.2 0.58860100000000004 -0.80842400000000003 0 0.4 0 0 1 -8.7 0 0 0 1"
@@ -8,5 +8,5 @@ LIMB joint_name="upper_right_arm_z_joint"
 LIMB joint_name="upper_left_arm_z_joint"
 LIMB joint_name="upper_right_leg_z_joint"
 LIMB joint_name="upper_left_leg_z_joint"
-NBSAMPLES N="10"
+NBSAMPLES N="10000"
 INITCONTACTS 2 3

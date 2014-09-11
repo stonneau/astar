@@ -13,6 +13,14 @@ namespace
         }
     }
 
+    void DoubleVectorToEigen(Eigen::Vector3d& to, const PQP_REAL* from)
+    {
+        for(int i=0; i<3; ++i)
+        {
+            to[i] = from[i];
+        }
+    }
+
     void EigenToDoubleMatrix(const Eigen::Matrix3d& from, PQP_REAL to [3][3])
     {
         for(int i=0; i<3; ++i)
@@ -23,6 +31,96 @@ namespace
             }
         }
     }
+
+    Eigen::Vector3d ProjPoint2Triangle(const Eigen::Vector3d &p0, const Eigen::Vector3d &p1,
+                                       const Eigen::Vector3d &p2, const Eigen::Vector3d &source_position)
+    {
+         Eigen::Vector3d edge0 = p1 - p0;
+         Eigen::Vector3d edge1 = p2 - p0;
+         Eigen::Vector3d v0 = p0 - source_position;
+
+         double a = edge0.dot(edge0);
+         double b = edge0.dot(edge1);
+         double c = edge1.dot(edge1);
+         double d = edge0.dot(v0);
+         double e = edge1.dot(v0);
+
+         double det = a*c - b*b;
+         double s = b*e - c*d;
+         double t = b*d - a*e;
+
+         double lower_bound = 0.0, upper_bound = 1.0;
+
+
+         if ( s + t < det )
+         {
+            if ( s < 0.0 )
+            {
+                if ( t < 0.0 )
+                {
+                    if ( d < 0.0 )
+                    {
+                        s = std::min(std::max(-d/a, lower_bound), upper_bound);
+                        t = 0.0;
+                    }
+                    else
+                    {
+                         s = 0.0;
+                         t = std::min(std::max(-e/c, lower_bound), upper_bound);
+                    }
+                 }
+                 else {
+                     s = 0.0;
+                     t = std::min(std::max(-e/c, lower_bound), upper_bound);
+                 }
+             }
+             else if ( t < 0.0 ) {
+                 s = std::min(std::max(-d/a, lower_bound), upper_bound);
+                 t = 0.0;
+             }
+             else {
+                 float invDet = 1.0 / det;
+                 s *= invDet;
+                 t *= invDet;
+             }
+         }
+         else {
+             if ( s < 0.0 ) {
+                 double tmp0 = b+d;
+                 double tmp1 = c+e;
+                 if ( tmp1 > tmp0 ) {
+                     double numer = tmp1 - tmp0;
+                     double denom = a-2*b+c;
+                     s = std::min(std::max(numer/denom, lower_bound), upper_bound);
+                     t = 1-s;
+                 }
+                 else {
+                     t = std::min(std::max(-e/c, lower_bound), upper_bound);
+                     s = 0.f;
+                 }
+             }
+             else if ( t < 0.f ) {
+                 if ( a+d > b+e ) {
+                     double numer = c+e-b-d;
+                     double denom = a-2*b+c;
+                     s = std::min(std::max(numer/denom, lower_bound),upper_bound);
+                     t = 1-s;
+                 }
+                 else {
+                     s = std::min(std::max(-e/c, lower_bound), upper_bound);
+                     t = 0.f;
+                 }
+             }
+             else {
+                 double numer = c+e-b-d;
+                 double denom = a-2*b+c;
+                 s = std::min(std::max(numer/denom, lower_bound), upper_bound);
+                 t = 1.0 - s;
+             }
+         }
+         return p0 + s * edge0 + t * edge1;
+    }
+
 }
 
 using namespace planner;
@@ -87,6 +185,40 @@ bool Object::InContact(Object* object, double epsilon)
                  object->pqpOrientation_, object->pqpPosition_, object->model_,
                  epsilon, 2);
     return result.CloserThanTolerance();
+}
+
+
+#include <iostream>
+
+bool Object::InContact(Object* object, double epsilon, Eigen::Vector3d& normal)
+{
+    PQP_ToleranceResult result;
+    PQP_Tolerance(&result, pqpOrientation_, pqpPosition_, model_,
+                 object->pqpOrientation_, object->pqpPosition_, object->model_,
+                 epsilon, 2);
+    bool res = result.CloserThanTolerance();
+    if(res)
+    {
+        if (object->normals_.empty())
+        {
+            std::cout << "no normals";
+            return res;
+        }
+        int i= 0;
+        double distance = std::numeric_limits<double>::max();
+        double tmp = distance;
+        Eigen::Vector3d p1, p2, p3, source;
+        DoubleVectorToEigen(source, result.P1());
+        for(T_Vector3::const_iterator cit = object->normals_.begin(); cit != object->normals_.end(); ++cit, ++i)
+        {
+            DoubleVectorToEigen(p1, object->model_->tris[i].p1);
+            DoubleVectorToEigen(p1, object->model_->tris[i].p2);
+            DoubleVectorToEigen(p1, object->model_->tris[i].p2);
+            tmp = (ProjPoint2Triangle(p1,p2,p3, source) - source).norm();
+            if(tmp < distance) normal = *cit;
+        }
+    }
+    return res;
 }
 
 bool Object::IsColliding(Object* object)

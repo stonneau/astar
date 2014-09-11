@@ -46,7 +46,7 @@ public:
      ///  \brief Destructor
     ~Object();
 
-    ///  \brief returns whether the current Object collide with another.
+    ///  \brief returns the minimal distance between two objects.
     ///  \param object the object on which to test the collision
     ///  \param return : true if a collision exists, false otherwise
     double Distance(Object* object); // can not be const because of pqp but it is...
@@ -56,6 +56,14 @@ public:
     ///  \param epsilon threshold for contact
     ///  \param return : true if a collision exists, false otherwise
     bool InContact(Object* object, double epsilon); // can not be const because of pqp but it is.
+
+    ///  \brief returns whether the current Object is in contact with another.
+    ///  \param object the object on which to test the collision
+    ///  \param epsilon threshold for contact
+    ///  \param normal reference to a vector that will contain
+    ///     the closest normal vector of the obstacle is the contact exists.
+    ///  \param return : true if a collision exists, false otherwise
+    bool InContact(Object* object, double epsilon, Eigen::Vector3d& normal); // can not be const because of pqp but it is.
 
     ///  \brief returns whether the current Object collide with another.
     ///  \param object the object on which to test the collision

@@ -36,6 +36,7 @@ typedef std::vector<Sample*> T_Samples;
 void LoadSample(const Sample& sample, Node* root);
 
 T_Samples GenerateSamples(const planner::Robot& robot, const Node *root, int nbSamples);
+double Manipulability(const Sample* sample, const Eigen::Vector3d& direction);
 
 } // namespace sampling
 } // namespace planner

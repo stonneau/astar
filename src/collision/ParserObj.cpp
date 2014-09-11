@@ -162,11 +162,15 @@ namespace planner
                 {
                     currentModel_->AddTri(points[0], points[2], points[3], ++currentIndex_);
                 }
+                long int idx = (strtol(termes[2].c_str(),NULL, 10)) - 1;
+                currentNormals_.push_back(normals_[idx]);
             }
         }
 
 		T_Vector3 points_;
 		T_Vector3 normals_;
+        T_Vector3 currentNormals_;
+        std::vector<T_Vector3> objectnormals;
         T_PQPModel models_;
         bool modelOn_;
         PQP_Model* currentModel_;
@@ -203,6 +207,8 @@ void planner::ParseObj(const std::string& filename, std::vector<Object*>& object
                 {
                     // TODO ADD MATRIX !
                     pImpl.currentModel_->EndModel();
+                    pImpl.objectnormals.push_back(pImpl.currentNormals_);
+                    pImpl.currentNormals_.clear();
                 }
                 else
                 {
@@ -235,14 +241,17 @@ void planner::ParseObj(const std::string& filename, std::vector<Object*>& object
         if(pImpl.modelOn_)
         {
             pImpl.currentModel_->EndModel();
+            pImpl.objectnormals.push_back(pImpl.currentNormals_);
+            pImpl.currentNormals_.clear();
             pImpl.modelOn_ = false;
         }
         // now create Objects
+        int i =0;
         for(T_PQPModel::iterator it = pImpl.models_.begin();
             it != pImpl.models_.end();
-            ++it)
+            ++it, ++i)
         {
-            objects.push_back(new Object(*it, pImpl.normals_));
+            objects.push_back(new Object(*it, pImpl.objectnormals[i]));
         }
 	}
     else

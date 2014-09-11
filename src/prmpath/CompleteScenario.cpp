@@ -265,16 +265,21 @@ CompleteScenario* planner::CompleteScenarioFromFile(const std::string& filename)
         }
         // init first position
         cScenario->robot->SetConfiguration(cScenario->from);
-        for(std::vector<int>::const_iterator cit = cScenario->initstate.contactLimbs.begin();
-            cit != cScenario->initstate.contactLimbs.end(); ++cit)
+        Eigen::Vector3d direction = cScenario->path[1]->GetPosition() - cScenario->path[0]->GetPosition();
+        if(direction.norm() > 0)
         {
-            // assign contacts
-            planner::sampling::T_Samples candidates
-                    = planner::GetPosturesInContact(*cScenario->robot, cScenario->limbs[*cit],
-                                                    cScenario->limbSamples[*cit], cScenario->scenario->objects_);
-            if(!candidates.empty())
+            direction.normalize();
+            for(std::vector<int>::const_iterator cit = cScenario->initstate.contactLimbs.begin();
+                cit != cScenario->initstate.contactLimbs.end(); ++cit)
             {
-                planner::sampling::LoadSample(*candidates.front(), cScenario->limbs[*cit]);
+                // assign contacts
+                planner::sampling::Sample* candidate
+                        = planner::GetPosturesInContact(*cScenario->robot, cScenario->limbs[*cit],
+                                                        cScenario->limbSamples[*cit], cScenario->scenario->objects_, direction);
+                if(candidate)
+                {
+                    planner::sampling::LoadSample(*candidate, cScenario->limbs[*cit]);
+                }
             }
         }
         cScenario->initstate.value= new Robot(*cScenario->robot);

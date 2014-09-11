@@ -72,7 +72,7 @@ void Node::free()
 }
 void Node::Update()
 {
-    toWorldRotation = Eigen::AngleAxisd(value, axis).matrix();
+    toWorldRotation = permanentRotation * Eigen::AngleAxisd(value, axis).matrix();
     toParentRotation = toWorldRotation;
     if(parent)
     {
@@ -254,7 +254,21 @@ void Robot::SetConstantRotation(const Eigen::Matrix3d& rotation)
 }
 void Robot::SetPosition(const Eigen::Vector3d& position, bool update)
 {
-    currentPosition = position;
+    // find first object
+    bool found = false;
+    Node* tmp = node;
+    Eigen::Vector3d pos = position;
+    while (!(found || tmp->children.empty()))
+    {
+        if(tmp->current)
+        {
+            found = true;
+            pos = position - (tmp->current->GetPosition() - node->position);
+        }
+        tmp = tmp->children.front();
+    }
+
+    currentPosition = pos;
     node->offset = currentPosition;
     if(update) node->Update();
 }
@@ -296,6 +310,7 @@ struct Joint
     }
     Eigen::Vector3d axis;
     Eigen::Vector3d offset;
+    Eigen::Vector3d rpy;
     std::string name;
     Link* parentLink;
     std::string childLink;
@@ -326,13 +341,36 @@ Eigen::Vector3d ExtractOffset(const std::string& line)
     // skiiping rpy
     int quoteStart = line.find("\"");
     int quoteEnd = line.find("\"", quoteStart +1);
-    quoteStart = line.find("\"", quoteEnd+1);
-    quoteEnd = line.find("\"", quoteStart+1);
-    return VectorFromString(line.substr(quoteStart+1, quoteEnd - quoteStart -1));
+    if(line.substr(0, quoteEnd).find("xyz") != std::string::npos)
+    {
+        return VectorFromString(line.substr(quoteStart+1, quoteEnd - quoteStart -1));
+    }
+    else
+    {
+        quoteStart = line.find("\"", quoteEnd+1);
+        quoteEnd = line.find("\"", quoteStart+1);
+        return VectorFromString(line.substr(quoteStart+1, quoteEnd - quoteStart -1));
+    }
     /*for(int i =0; i<3; ++i)
     {
         joint->offset[i] = res(i);
     }*/
+}
+Eigen::Vector3d ExtractRpy(const std::string& line)
+{
+    // skiiping xyz
+    int quoteStart = line.find("\"");
+    int quoteEnd = line.find("\"", quoteStart +1);
+    if(line.substr(0, quoteEnd).find("rpy") != std::string::npos)
+    {
+        return VectorFromString(line.substr(quoteStart+1, quoteEnd - quoteStart -1));
+    }
+    else
+    {
+        quoteStart = line.find("\"", quoteEnd+1);
+        quoteEnd = line.find("\"", quoteStart+1);
+        return VectorFromString(line.substr(quoteStart+1, quoteEnd - quoteStart -1));
+    }
 }
 void ReadLink(const std::string& firstline, std::ifstream& file, std::map<std::string, Link*>& links)
 {
@@ -389,7 +427,10 @@ void ReadJoint(const std::string& firstline, std::ifstream& file, std::map<std::
             }
             if(line.find("<origin") != std::string::npos)
             {
-                joint->offset =ExtractOffset(line);
+                joint->offset =ExtractOffset(line) * 1;
+                joint->rpy =ExtractRpy(line);
+                std::cout << "joint : " << name << "\n" << joint->offset(0) * 0.01 <<" "<<
+                           joint->offset(1) * 0.01 <<" "<< joint->offset(2) * 0.01 << std::endl;
             }
             if(line.find("<parent link") != std::string::npos)
             {
@@ -428,6 +469,9 @@ void MakeNodeRec(Node* node, Joint* current, std::map<std::string, Link*>& links
         res->axis = current->axis;
         res->tag = current->name;
         res->offset = current->offset;
+        res->permanentRotation = Eigen::AngleAxisd(current->rpy[0],  Eigen::Vector3d::UnitX())
+                 *  Eigen::AngleAxisd(current->rpy[1],  Eigen::Vector3d::UnitY())
+                 *  Eigen::AngleAxisd(current->rpy[2],  Eigen::Vector3d::UnitZ());
         res->parent = node;
         if(next->object)
             res->current = next->object;

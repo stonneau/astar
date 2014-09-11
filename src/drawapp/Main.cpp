@@ -179,7 +179,7 @@ static void simLoop (int pause)
 }
 void start()
 {
-    cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/fullscenario.scen");
+    cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/rocketbox.scen");
     std::cout << "done" << std::endl;
     dsSetViewpoint (xyz,hpr);
     itompTransform =Eigen::Matrix3d::Identity();
@@ -208,8 +208,17 @@ void start()
         postures.push_back(node);
     }*/
     samples = cScenario->limbSamples[0];
+    std::cout << " SAMPLES" << samples.size() << std::endl;
     std::cout << "done creating nodes " << path.size() << std::endl;
     states = planner::PostureSequence(*cScenario);
+    for(int i = 0; i< states.size(); ++i)
+    {
+        std::cout << "state : " << i << std::endl;
+        for(int w = 0; w< states[i]->contactLimbs.size(); ++w)
+        {
+            std::cout << "   contact : " << states[i]->contactLimbs[w] << std::endl;
+        }
+    }
 }
 void command(int cmd)   /**  key control function; */
 {
@@ -230,18 +239,20 @@ void command(int cmd)   /**  key control function; */
         break;
         case '+' :
         {
-            current ++; if(cScenario->path.size() <= current) current = cScenario->path.size()-1;
-            cScenario->robot->SetConfiguration(cScenario->path[current]);
-            currentSample = 0;
-            samples = planner::GetPosturesInContact(*cScenario->robot, cScenario->limbs[0], cScenario->limbSamples[0], cScenario->scenario->objects_ );
+            current ++; if(states.size() <= current) current = states.size()-1;
+            //cScenario->robot->SetConfiguration(cScenario->path[current]);
+            cScenario->robot = states[current]->value;
+            //currentSample = 0;
+            //samples = planner::GetPosturesInContact(*cScenario->robot, cScenario->limbs[0], cScenario->limbSamples[0], cScenario->scenario->objects_ );
             break;
         }
         case '-' :
         {
             current--; if(current <0) current = 0;
-            cScenario->robot->SetConfiguration(cScenario->path[current]);
-            currentSample = 0;
-            samples = planner::GetPosturesInContact(*cScenario->robot, cScenario->limbs[0], cScenario->limbSamples[0], cScenario->scenario->objects_ );
+            //cScenario->robot->SetConfiguration(states[current]);
+            cScenario->robot = states[current]->value;
+            //currentSample = 0;
+            //samples = planner::GetPosturesInContact(*cScenario->robot, cScenario->limbs[0], cScenario->limbSamples[0], cScenario->scenario->objects_ );
 
             break;
         }
@@ -254,17 +265,20 @@ void command(int cmd)   /**  key control function; */
         }
         case 'r' :
         {
+
+        std::cout << " SAMPLES" << samples.size() << std::endl;
             if(samples.empty()) return;
             currentSample ++; if(samples.size() <= currentSample) currentSample = samples.size()-1;
-            planner::sampling::LoadSample(*(samples[currentSample]),arm);
+            planner::sampling::LoadSample(*(samples[currentSample]),planner::GetChild(cScenario->robot, "upper_right_arm_z_joint"));
             break;
         }
         break;
         case 't' :
         {
+        std::cout << " SAMPLES" << samples.size() << std::endl;
             if(samples.empty()) return;
             currentSample --; if(currentSample < 0) currentSample = 0;
-            planner::sampling::LoadSample(*(samples[currentSample]),arm);
+            planner::sampling::LoadSample(*(samples[currentSample]),planner::GetChild(cScenario->robot, "upper_right_arm_z_joint"));
             break;
         }
         case 'm' :

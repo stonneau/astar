@@ -19,25 +19,40 @@ namespace
     const double epsilon = 0.01;
 }
 
-T_Samples planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::T_Samples& samples
-                                         , Object::T_Object& obstacles)
+Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::T_Samples& samples
+                                         , Object::T_Object& obstacles, const Eigen::Vector3d& direction)
 {
-    T_Samples res;
+    Sample* save = new Sample(limb);
+    Sample* res = 0;
     /*Eigen::Matrix4d toWorldCoordinates = Eigen::Matrix4d::Identity();
     toWorldCoordinates.block<3,3>(0,0) = limb->parent->toWorldRotation;
     toWorldCoordinates.block<3,1>(0,3) = limb->parent->position;*/
     Object* effector = GetEffector(limb);
+    double bestManip = std::numeric_limits<double>::min();
+    double tmp_manip, tempweightedmanip;
     for(T_Samples::const_iterator sit = samples.begin(); sit != samples.end(); ++sit)
     {
-        LoadSample(*(*sit),limb);
-        for(Object::T_Object::iterator oit = obstacles.begin(); oit != obstacles.end(); ++oit)
+        Eigen::Vector3d normal;
+        tmp_manip = planner::sampling::Manipulability(*sit, direction);
+        if(tmp_manip > bestManip)
         {
-            if(effector->InContact(*oit,epsilon) && !effector->IsColliding(obstacles))
+            LoadSample(*(*sit),limb);
+            for(Object::T_Object::iterator oit = obstacles.begin(); oit != obstacles.end(); ++oit)
             {
-                res.push_back(*sit);
+                if(effector->InContact(*oit,epsilon, normal) && !effector->IsColliding(obstacles))
+                {
+                    tempweightedmanip = tmp_manip * direction.dot(normal);
+                    if(tempweightedmanip > bestManip)
+                    {
+                        bestManip = tempweightedmanip;
+                        res = *sit;
+                        break;
+                    }
+                }
             }
         }
     }
+    planner::sampling::LoadSample(*save, limb);
     return res;
 }
 
@@ -98,28 +113,99 @@ namespace
             }
         }
         // create contacts then
+        Eigen::Vector3d direction = next->GetPosition() - previous.value->node->position;
+        if(direction.norm() != 0)
+        {
+            direction.normalize();
+        }
+        else
+        {
+            direction = Eigen::Vector3d(1,0,0);
+        }
         std::vector<int> newContacts = GetLimbsToContact(previous.contactLimbs, limbs.size());
         for(std::vector<int>::const_iterator cit = newContacts.begin();
             cit != newContacts.end(); ++cit)
         {
-            T_Samples samples = GetPosturesInContact(*robot, limbs[*cit], scenario.limbSamples[*cit],
-                                                    scenario.scenario->objects_);
-            if(!samples.empty())
+            Sample* sample = GetPosturesInContact(*robot, limbs[*cit], scenario.limbSamples[*cit],
+                                                    scenario.scenario->objects_, direction);
+            if(sample)
             {
                 res->contactLimbs.push_back(*cit);
-                planner::sampling::LoadSample(*(samples.front()),limbs[*cit]);
+                planner::sampling::LoadSample(*sample,limbs[*cit]);
             }
         }
         return res;
     }
+
+    void developPathRec(const Object* a, const Object* b, Object::CT_Object& res)
+    {
+        Eigen::Vector3d line = b->GetPosition() - a->GetPosition();
+        // norm
+        double step = 0.1;
+        if(line.norm() == 0) return;
+        Eigen::Vector3d norm = line;
+        norm.normalize(); line = line * step;
+        Eigen::Vector3d offset;
+        Eigen::Vector3d offrot;
+        Eigen::Matrix3d offrotmat;
+        // TODO rotate
+        //  Vr = Va + t .(Vb - Va )
+
+        // euler angle decomposition
+
+        Eigen::Vector3d ea = a->GetOrientation().eulerAngles(2, 0, 2);
+        Eigen::Vector3d eb = b->GetOrientation().eulerAngles(2, 0, 2);
+        Eigen::Vector3d va = a->GetPosition();
+        Eigen::Vector3d vb = b->GetPosition();
+
+        /*Vector3f ea = mat.eulerAngles(2, 0, 2);
+
+        "2" represents the z axis and "0" the x axis, etc. The returned angles are such that we have the following equality:
+        * mat == AngleAxisf(ea[0], Vector3f::UnitZ())
+        * * AngleAxisf(ea[1], Vector3f::UnitX())
+        * * AngleAxisf(ea[2], Vector3f::UnitZ());*/
+
+        /*Perform linear interpolation*/
+        float linenorm = (float)line.norm();
+        float nbSteps = (float)(linenorm / 0.05);
+        float inc = 1 / nbSteps;
+        for(double t = 0; t < 1; t = t + inc)
+        {
+            offset = va + t * (vb - va);
+            offrot = ea + t * (eb - ea);
+            offrotmat = Eigen::AngleAxisd(offrot[0],  Eigen::Vector3d::UnitZ())
+                     *  Eigen::AngleAxisd(offrot[1],  Eigen::Vector3d::UnitX())
+                     *  Eigen::AngleAxisd(offrot[2],  Eigen::Vector3d::UnitZ());
+            Object* tmp = new Object(*a);
+            tmp->SetPosition(offset);
+            tmp->SetOrientation(offrotmat);
+            res.push_back(tmp);
+        }
+        res.push_back(new Object(*b));
+    }
+
+    Object::CT_Object developPath(const Object::CT_Object& initpath )
+    {
+        Object::CT_Object res;
+        if(initpath.size() <= 2) return initpath;
+        Object::CT_Object::const_iterator it2 = initpath.begin(); ++it2;
+        for(Object::CT_Object::const_iterator it = initpath.begin(); it2!=initpath.end(); ++it, ++it2)
+        {
+            developPathRec(*it, *it2, res);
+        }
+    return res;
+    }
+
 }
+
 
 planner::T_State planner::PostureSequence(planner::CompleteScenario& scenario)
 {
     planner::T_State res;
     State* current = &scenario.initstate;
     res.push_back(current);
-    for(Object::CT_Object::iterator it = scenario.path.begin(); it!=scenario.path.end(); ++it)
+    Object::CT_Object path = developPath(scenario.path);
+    for(Object::CT_Object::iterator it = path.begin(); it!=path.end(); ++it)
     {
         current = Interpolate(scenario, *current, *it);
         res.push_back(current);
