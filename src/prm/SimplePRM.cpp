@@ -31,7 +31,7 @@ namespace planner
         const Eigen::Vector3d& eb = obj2->GetOrientation().eulerAngles(0, 1, 2);
         float q = (float)(sqrt((eb.x() - ea.x()) * (eb.x() - ea.x()) * 2 + (eb.y() - ea.y()) * (eb.y() - ea.y()) + (eb.z() - ea.z()) * (eb.z() - ea.z())));
         return 0.6f * p + 0.4f * q;
-		//return p + q;
+        //return p + q;
     }
 	
     typedef PRM<Object, planner::Generator, LocalPlanner, float, 10000> prm_t;

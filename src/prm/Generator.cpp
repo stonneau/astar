@@ -92,7 +92,7 @@ Object* Generator::operator()()
 		{
 			configuration.SetPosition(P);
 			// random rotation
-			double rx = ((double) rand() / (RAND_MAX)) * M_PI *2; double ry = ((double) rand() / (RAND_MAX)) * M_PI *2; double rz = ((double) rand() / (RAND_MAX))  * M_PI *2;
+            double rx = ((double) rand() / (RAND_MAX)) * M_PI; double ry = ((double) rand() / (RAND_MAX)) * M_PI *2; double rz = ((double) rand() / (RAND_MAX))  * M_PI *2;
 			matrices::Matrix3 tranform = matrices::Rotz3(rz);
 			// find random direction
 			int limit2 = 100;

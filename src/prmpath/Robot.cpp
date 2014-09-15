@@ -72,7 +72,7 @@ void Node::free()
 }
 void Node::Update()
 {
-    toWorldRotation = permanentRotation * Eigen::AngleAxisd(value, axis).matrix();
+    toWorldRotation = /*permanentRotation **/ Eigen::AngleAxisd(value, axis).matrix();
     toParentRotation = toWorldRotation;
     if(parent)
     {
@@ -299,7 +299,9 @@ struct Link
 struct Joint
 {
     Joint()
-        : parentLink(0)
+        : lower(0)
+        , upper(0)
+        , parentLink(0)
         , childLink("")
     {
         // nothing
@@ -311,6 +313,8 @@ struct Joint
     Eigen::Vector3d axis;
     Eigen::Vector3d offset;
     Eigen::Vector3d rpy;
+    double lower;
+    double upper;
     std::string name;
     Link* parentLink;
     std::string childLink;
@@ -335,6 +339,25 @@ Eigen::Vector3d VectorFromString(const std::string& line)
     char x[255],y[255],z[255];
     sscanf(line.c_str(),"%s %s %s",x,y,z);
     return Eigen::Vector3d(strtod (x, NULL), strtod(y, NULL), strtod(z, NULL));
+}
+double ExtractBound(const std::string& line, const bool isLower)
+{
+    // skiiping rpy
+    int quoteStart = line.find("\"");
+    int quoteEnd = line.find("\"", quoteStart +1);
+    if(isLower && line.substr(0, quoteEnd).find("lower") != std::string::npos)
+    {
+        // NOTHING
+    }
+    else
+    {
+        quoteStart = line.find("\"", quoteEnd+1);
+        quoteEnd = line.find("\"", quoteStart+1);
+    }
+    char x[255];
+    std::string res =line.substr(quoteStart+1, quoteEnd - quoteStart -1) ;
+    sscanf(res.c_str(),"%s",x);
+    return strtod (x, NULL);
 }
 Eigen::Vector3d ExtractOffset(const std::string& line)
 {
@@ -424,10 +447,15 @@ void ReadJoint(const std::string& firstline, std::ifstream& file, std::map<std::
             if(line.find("<axis") != std::string::npos)
             {
                 joint->axis = VectorFromString(ExtractQuotes(line));
+            }            
+            if(line.find("<limit") != std::string::npos)
+            {
+                joint->lower = ExtractBound(line, true);
+                joint->upper = ExtractBound(line, false);
             }
             if(line.find("<origin") != std::string::npos)
             {
-                joint->offset =ExtractOffset(line) * 1;
+                joint->offset =ExtractOffset(line) * 1.2;
                 joint->rpy =ExtractRpy(line);
                 std::cout << "joint : " << name << "\n" << joint->offset(0) * 0.01 <<" "<<
                            joint->offset(1) * 0.01 <<" "<< joint->offset(2) * 0.01 << std::endl;
@@ -469,6 +497,8 @@ void MakeNodeRec(Node* node, Joint* current, std::map<std::string, Link*>& links
         res->axis = current->axis;
         res->tag = current->name;
         res->offset = current->offset;
+        res->minAngleValue = current->lower;
+        res->maxAngleValue = current->upper;
         res->permanentRotation = Eigen::AngleAxisd(current->rpy[0],  Eigen::Vector3d::UnitX())
                  *  Eigen::AngleAxisd(current->rpy[1],  Eigen::Vector3d::UnitY())
                  *  Eigen::AngleAxisd(current->rpy[2],  Eigen::Vector3d::UnitZ());

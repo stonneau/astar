@@ -264,7 +264,7 @@ CompleteScenario* planner::CompleteScenarioFromFile(const std::string& filename)
             cScenario->path.push_back(cScenario->to);
         }
         // init first position
-        cScenario->robot->SetConfiguration(cScenario->from);
+        //cScenario->robot->SetConfiguration(cScenario->from);
         Eigen::Vector3d direction = cScenario->path[1]->GetPosition() - cScenario->path[0]->GetPosition();
         if(direction.norm() > 0)
         {

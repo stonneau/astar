@@ -20,6 +20,8 @@
 #include <windows.h>
 #endif
 
+#include "GL/glu.h"
+
 using namespace std;
 using namespace Eigen;
 namespace
@@ -28,6 +30,7 @@ namespace
     static float hpr[3] = {180.0,-10.0,0.0};
     bool pathOn = true;
     bool drawObject = false;
+    bool drawacis = false;
     bool drawPOstures = true;
     std::string outpath("../tests/testSerialization.txt");
     std::string outfilename ("../tests/entrance.path");
@@ -147,10 +150,28 @@ namespace
         }
     }
 
+    void DrawAcis(const planner::Node* node)
+    {
+        Eigen::Matrix3d res = itompTransform * node->toWorldRotation;
+        PQP_REAL p1 [3];
+        Vect3ToArray(p1, itompTransform *  node->position);
+        PQP_REAL p2 [3];
+        dsSetColor(1,0,0);
+        Vect3ToArray(p2, itompTransform *  node->position + res * Eigen::Vector3d(1,0,0));
+        dsDrawLineD(p1, p2);
+        dsSetColor(0,1,0);
+        Vect3ToArray(p2, itompTransform *  node->position +  res * Eigen::Vector3d(0,1,0));
+        dsDrawLineD(p1, p2);
+        dsSetColor(0,0,1);
+        Vect3ToArray(p2, itompTransform *  node->position + res * Eigen::Vector3d(0,0,1));
+        dsDrawLineD(p1, p2);
+    }
+
     void DrawNode(const planner::Node* node)
     {
         if(node->current)
             DrawObject(node->current, true);
+        if (drawacis) DrawAcis(node);
         for(std::vector<planner::Node*>::const_iterator cit = node->children.begin();
             cit != node->children.end(); ++cit)
         {
@@ -170,16 +191,17 @@ static void simLoop (int pause)
         {
             DrawNode((*it));
         }
-        for(planner::T_State::iterator it = states.begin();
+        /*for(planner::T_State::iterator it = states.begin();
             it != states.end(); ++ it)
         {
             DrawNode((*it)->value->node);
-        }
+        }*/
     }
 }
 void start()
 {
     cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/rocketbox.scen");
+    //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/zoey.scen");
     std::cout << "done" << std::endl;
     dsSetViewpoint (xyz,hpr);
     itompTransform =Eigen::Matrix3d::Identity();
@@ -198,12 +220,12 @@ void start()
 
     std::cout << "ca EN VRAI" << cScenario->robot->constantRotation << std::endl;
 
-    /*for(int i=0; i< cScenario->limbSamples[0].size(); ++i)
+   /* for(int i=0; i< cScenario->limbSamples[0].size(); ++i)
     {
-        planner::Node* node = new planner::Node(*arm);
-        node->offset = Eigen::Vector3d(0,0,0);
-        node->position = Eigen::Vector3d(0,0,0);
-        planner::sampling::LoadSample(*cScenario->limbSamples[0][i], node);
+        planner::Node* node = new planner::Node(*cScenario->robot->node);
+        //node->offset = Eigen::Vector3d(0,0,0);
+        //node->position = Eigen::Vector3d(0,0,0);
+        planner::sampling::LoadSample(*cScenario->limbSamples[0][i], planner::GetChild(node, "upper_right_arm_z_joint"));
         node->Update();
         postures.push_back(node);
     }*/
@@ -219,6 +241,7 @@ void start()
             std::cout << "   contact : " << states[i]->contactLimbs[w] << std::endl;
         }
     }
+    glPolygonMode(GL_FRONT_AND_BACK,GL_FILL) ;
 }
 void command(int cmd)   /**  key control function; */
 {
@@ -227,6 +250,9 @@ void command(int cmd)   /**  key control function; */
     {
         case 'e' :
             pathOn = !pathOn;
+        break;
+        case 'q' :
+            drawacis = !drawacis;
         break;
         case 'p' :
             drawObject = !drawObject;
@@ -294,6 +320,9 @@ void command(int cmd)   /**  key control function; */
         break;
         case 'g' :
         planner::GetChild(cScenario->robot, "upper_right_arm_x_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_right_arm_x_joint")->value-0.1);
+        break;
+        case 'h' :
+        planner::GetChild(cScenario->robot, "lower_right_arm_joint")->SetRotation(planner::GetChild(cScenario->robot,"lower_right_arm_joint")->value-0.1);
         break;
     }
 }

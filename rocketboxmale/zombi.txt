@@ -1,5 +1,4 @@
-MODEL = ../rocketboxmale/cenglobed.obj ../tests/collision/cenglobing.obj
+MODEL = ../rocketboxmale/cenglobed.obj ../rocketboxmale/cenglobing.obj
 OBJECT = ../tests/collision/entrance.obj
-PRMFILE = ../tests/entrance_path.txt
-SIZE = 50 0.5 0.5
-VISIBILITY
+PRMFILE = ../rocketboxmale/prm.prm
+VISIBILIT
