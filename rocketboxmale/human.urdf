@@ -69,7 +69,7 @@
   <joint name="pelvis1_z_joint" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="15" lower="0" upper="0" velocity="5"/>
-    <origin rpy="0 0 0" xyz="0.0000 0.1630 12.0260"/>
+    <origin rpy="0 0 0" xyz="0.0000 0.1630 120.0260"/>
     <parent link="pelvis_link"/>
     <child link="pelvis1_z_link"/>
   </joint>
