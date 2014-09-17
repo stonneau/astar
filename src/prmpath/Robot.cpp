@@ -183,6 +183,30 @@ planner::Node* planner::GetChild(Robot* robot, const int id)
 {
     return GetChild(robot->node, id);
 }
+
+namespace
+{
+    void ZeroRec(planner::Node* node)
+    {
+        node->value = 0;
+        for(std::vector<Node*>::iterator it = node->children.begin();
+            it != node->children.end(); ++it)
+        {
+           ZeroRec(*it);
+        }
+    }
+}
+
+void planner::Zero(Robot* robot)
+{
+    ZeroRec(robot->node);
+    robot->SetRotation(Eigen::Matrix3d::Zero(),false);
+    robot->currentPosition = Eigen::Vector3d::Zero();
+    robot->node->offset = Eigen::Vector3d::Zero();
+    robot->node->Update();
+    //robot->SetPosition(Eigen::Vector3d::Zero(),true);
+}
+
 Robot::Robot(Node* root)
     : node(root)
     , constantRotation(Eigen::Matrix3d::Identity())

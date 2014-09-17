@@ -10,6 +10,7 @@
 #include "prmpath/JointConstraint.h"
 #include "prmpath/CompleteScenario.h"
 #include "prmpath/PostureSelection.h"
+#include "prmpath/Export/BVHExporter.h"
 #include "Timer.h"
 
 #include <string>
@@ -200,9 +201,9 @@ static void simLoop (int pause)
 }
 void start()
 {
-    //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/rocketbox.scen");
+    cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/rocketbox.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/zoey.scen");
-    cScenario = planner::CompleteScenarioFromFile("../tests/profile.scen");
+    //cScenario = planner::CompleteScenarioFromFile("../tests/profile.scen");
     std::cout << "done" << std::endl;
     dsSetViewpoint (xyz,hpr);
     itompTransform =Eigen::Matrix3d::Identity();
@@ -242,6 +243,15 @@ void start()
             std::cout << "   contact : " << states[i]->contactLimbs[w] << std::endl;
         }
     }
+
+    /*Export to bvh*/
+    bvh::BVHExporter exporter(cScenario->robot);
+    for(planner::T_State::iterator it = states.begin(); it != states.end(); ++it)
+    {
+        exporter.PushFrame((*it)->value->node, false);
+    }
+    std::string savebvh("../tests/test.bvh");
+    exporter.Save(savebvh);
 }
 void command(int cmd)   /**  key control function; */
 {

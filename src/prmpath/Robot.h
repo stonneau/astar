@@ -120,6 +120,7 @@ Node* GetChild(Node* node, const std::string& tag);
 Node* GetChild(Node* node, const int id);
 Node* GetChild(Robot *robot, const std::string& tag);
 Node* GetChild(Robot *robot, const int id);
+void  Zero(Robot *robot);
 Node* LoadRobot(const std::string& urdfpath);
 } //namespace planner
 #endif //_STRUCT_ROBOT

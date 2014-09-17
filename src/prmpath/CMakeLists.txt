@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 2.6)
 include_directories("${PROJECT_SOURCE_DIR}/include")
 include_directories("${PROJECT_SOURCE_DIR}")
 include_directories("${PROJECT_SOURCE_DIR}/src")
+include_directories("${PROJECT_SOURCE_DIR}/src/prmpath")
 include_directories("${SRC_DIR})
 include_directories("${SRC_TOOLS_DIR})
 include_directories("${PQP_INCLUDE_DIR}")
@@ -31,6 +32,8 @@ set(SOURCES
     ROM.cpp
     sampling/Sample.h
     sampling/Sample.cpp
+    Export/BVHExporter.h Export/BVHExporter.cpp
+    Export/BVHFileHandler.h Export/BVHFileHandler.cpp
         ${SRC_TOOLS_DIR}/MatrixDefs.h ${SRC_TOOLS_DIR}/MatrixDefs.cpp
         ${SRC_TOOLS_DIR}/MatrixDefsInternal.h
 )
