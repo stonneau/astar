@@ -10,6 +10,7 @@
 #include "prmpath/JointConstraint.h"
 #include "prmpath/CompleteScenario.h"
 #include "prmpath/PostureSelection.h"
+#include "Timer.h"
 
 #include <string>
 #include <iostream>
@@ -20,7 +21,6 @@
 #include <windows.h>
 #endif
 
-#include "GL/glu.h"
 
 using namespace std;
 using namespace Eigen;
@@ -200,8 +200,9 @@ static void simLoop (int pause)
 }
 void start()
 {
-    cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/rocketbox.scen");
+    //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/rocketbox.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/zoey.scen");
+    cScenario = planner::CompleteScenarioFromFile("../tests/profile.scen");
     std::cout << "done" << std::endl;
     dsSetViewpoint (xyz,hpr);
     itompTransform =Eigen::Matrix3d::Identity();
@@ -241,7 +242,6 @@ void start()
             std::cout << "   contact : " << states[i]->contactLimbs[w] << std::endl;
         }
     }
-    glPolygonMode(GL_FRONT_AND_BACK,GL_FILL) ;
 }
 void command(int cmd)   /**  key control function; */
 {

@@ -18,6 +18,10 @@
 #include <iostream>
 #include <string>
 
+#if PROFILE
+#include "Timer.h"
+#endif
+
 namespace planner
 {
     float Distance(const Object* obj1, const Object* obj2)
@@ -42,8 +46,19 @@ namespace planner
             : planner_(objects, model)
         {
             Generator* gen = new Generator(objects, model); // TODO MEME
+			
+#if PROFILE
+Timer timer;
+timer.Start();
+#endif
             prm_ = new prm_t(gen, &planner_, Distance, neighbourDistance, size, k, visibility);
             InitPrmNodes();
+#if PROFILE
+timer.Stop();
+std::cout << " PRM Generation log " << std::endl;
+std::cout << " Number of nodes :" << prm_->nodeContents_.size() << std::endl;
+std::cout << " Graph generation time :" << timer.GetTime() << std::endl;
+#endif
             // feel prmNodes
         }
 

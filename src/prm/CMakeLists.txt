@@ -28,6 +28,7 @@ set(SOURCES
     Scenario.cpp
         ${SRC_TOOLS_DIR}/MatrixDefs.h ${SRC_TOOLS_DIR}/MatrixDefs.cpp
         ${SRC_TOOLS_DIR}/MatrixDefsInternal.h
+		${SRC_TOOLS_DIR}/Timer.h ${SRC_TOOLS_DIR}/Timer.cpp
 )
 
 add_library(prm ${SOURCES})
