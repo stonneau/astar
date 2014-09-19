@@ -222,16 +222,16 @@ void start()
 
     std::cout << "ca EN VRAI" << cScenario->robot->constantRotation << std::endl;
 
-   /* for(int i=0; i< cScenario->limbSamples[0].size(); ++i)
+    for(int i=0; i< cScenario->limbSamples[0].size(); ++i)
     {
         planner::Node* node = new planner::Node(*cScenario->robot->node);
         //node->offset = Eigen::Vector3d(0,0,0);
         //node->position = Eigen::Vector3d(0,0,0);
-        planner::sampling::LoadSample(*cScenario->limbSamples[0][i], planner::GetChild(node, "upper_right_arm_z_joint"));
+        planner::sampling::LoadSample(*cScenario->limbSamples[0][i], planner::GetChild(node, "upper_left_arm_z_joint"));
         node->Update();
         postures.push_back(node);
-    }*/
-    samples = cScenario->limbSamples[0];
+    }
+    samples = cScenario->limbSamples[3];
     std::cout << " SAMPLES" << samples.size() << std::endl;
     std::cout << "done creating nodes " << path.size() << std::endl;
     states = planner::PostureSequence(*cScenario);
@@ -305,7 +305,7 @@ void command(int cmd)   /**  key control function; */
         std::cout << " SAMPLES" << samples.size() << std::endl;
             if(samples.empty()) return;
             currentSample ++; if(samples.size() <= currentSample) currentSample = samples.size()-1;
-            planner::sampling::LoadSample(*(samples[currentSample]),planner::GetChild(cScenario->robot, "upper_right_arm_z_joint"));
+            planner::sampling::LoadSample(*(samples[currentSample]),planner::GetChild(cScenario->robot, "upper_left_leg_z_joint"));
             break;
         }
         break;
@@ -314,7 +314,7 @@ void command(int cmd)   /**  key control function; */
         std::cout << " SAMPLES" << samples.size() << std::endl;
             if(samples.empty()) return;
             currentSample --; if(currentSample < 0) currentSample = 0;
-            planner::sampling::LoadSample(*(samples[currentSample]),planner::GetChild(cScenario->robot, "upper_right_arm_z_joint"));
+            planner::sampling::LoadSample(*(samples[currentSample]),planner::GetChild(cScenario->robot, "upper_left_leg_z_joint"));
             break;
         }
         case 'm' :

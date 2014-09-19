@@ -70,7 +70,6 @@ namespace
             rotation *= Eigen::AngleAxisd(node->value, node->axis).matrix();
         }
         Matrix<double,3,1> res = rotation.eulerAngles(2, 0, 1);
-        std::cout << " NODE " << node->tag << std::endl;
         for(int i = 0 ; i<3; ++i)
         {
             if(tpose)

@@ -1,6 +1,8 @@
 #include "PostureSelection.h"
 #include "tools/MatrixDefs.h"
 
+#include <iostream>
+
 using namespace planner;
 using namespace sampling;
 
@@ -66,6 +68,7 @@ T_Samples planner::GetPosturesOnTarget(Robot& robot, Node* limb, const sampling:
         LoadSample(*(*sit),limb);
         if((effector->GetPosition() - worldposition).norm()<epsilon && !effector->IsColliding(obstacles))
         {
+            std::cout << "si si ca arrive " << std::endl;
             res.push_back(*sit);
         }
     }
