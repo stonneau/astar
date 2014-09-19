@@ -32,8 +32,10 @@ set(SOURCES
     ROM.cpp
     sampling/Sample.h
     sampling/Sample.cpp
+    Export/ITOMPExporter.h Export/ITOMPExporter.cpp
+    Export/Exporter.h Export/Exporter.cpp
     Export/BVHExporter.h Export/BVHExporter.cpp
-    Export/BVHFileHandler.h Export/BVHFileHandler.cpp
+    Export/FileHandler.h Export/FileHandler.cpp
         ${SRC_TOOLS_DIR}/MatrixDefs.h ${SRC_TOOLS_DIR}/MatrixDefs.cpp
         ${SRC_TOOLS_DIR}/MatrixDefsInternal.h
 )

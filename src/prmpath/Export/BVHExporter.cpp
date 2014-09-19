@@ -8,7 +8,7 @@
 #include <vector>
 
 using namespace std;
-using namespace bvh;
+using namespace exporter;
 using namespace Eigen;
 
 namespace
@@ -19,82 +19,51 @@ namespace
 
 namespace
 {
-    void WriteOffsetLine(BVHFileHandler& f, const Eigen::Vector3d& offset)
+    void WriteOffsetLine(FileHandler& f, const Eigen::Vector3d& offset)
     {
         f << "OFFSET\t" << offset(0) << "\t" << offset(1) << "\t" << offset(2);
     }
 
-    void WriteJointOffsetRec(BVHFileHandler& f, planner::Node* node)
-        {
-            //Eigen::Vector3d offset = node->evalWorldPos(zero) - node->getParentNode()->evalWorldPos(zero);
-            Eigen::Vector3d offset = node->position - node->parent->position;
-            while(node->children.size() == 1 && node->children[0]->offset == Eigen::Vector3d::Zero())
-            {
-                node = node->children.front();
-            }
-            f << f.nl() << "JOINT " << node->tag << f.nl() << "{";
-            f.AddTab();
-                WriteOffsetLine(f, offset);
-                f << f.nl() << "CHANNELS 3  Zrotation Xrotation Yrotation";
-                if(node->children.empty())
-                {
-                    f << f.nl() << "End Site" << f.nl() << "{";
-                    f.AddTab();
-                        // last offset corresponds to half length of final cube according to ParserBVH.hpp
-                        offset.normalize(); offset *= 0.001 / 2;
-                        WriteOffsetLine(f, offset);
-                    f.RemoveTab();
-                    f << "}";
-                }
-                else
-                {
-                    for(std::vector<planner::Node*>::iterator it = node->children.begin();
-                        it != node->children.end(); ++it)
-                    {
-                        WriteJointOffsetRec(f, *it);
-                    }
-                }
-            f.RemoveTab();
-            f << "}";
-        }
-
-
-    // Blender apparently does not like it if I don't give all the rotations.
-    // Therefore Adding zeros to unexisting dofs
-    void WriteDofRec(planner::Node* node, stringstream& ss, bool tpose)
+    void WriteJointOffsetRec(FileHandler& f, planner::Node* node)
     {
-        Eigen::Matrix3d rotation = Eigen::AngleAxisd(node->value, node->axis).matrix();
+        //Eigen::Vector3d offset = node->evalWorldPos(zero) - node->getParentNode()->evalWorldPos(zero);
+        Eigen::Vector3d offset = node->position - node->parent->position;
         while(node->children.size() == 1 && node->children[0]->offset == Eigen::Vector3d::Zero())
         {
             node = node->children.front();
-            rotation *= Eigen::AngleAxisd(node->value, node->axis).matrix();
         }
-        Matrix<double,3,1> res = rotation.eulerAngles(2, 0, 1);
-        for(int i = 0 ; i<3; ++i)
-        {
-            if(tpose)
+        f << f.nl() << "JOINT " << node->tag << f.nl() << "{";
+        f.AddTab();
+            WriteOffsetLine(f, offset);
+            f << f.nl() << "CHANNELS 3  Zrotation Xrotation Yrotation";
+            if(node->children.empty())
             {
-                ss << "\t" << 0;
+                f << f.nl() << "End Site" << f.nl() << "{";
+                f.AddTab();
+                    // last offset corresponds to half length of final cube according to ParserBVH.hpp
+                    offset.normalize(); offset *= 0.001 / 2;
+                    WriteOffsetLine(f, offset);
+                f.RemoveTab();
+                f << "}";
             }
             else
             {
-                ss << "\t" << res[i] * RAD_TO_DEGREES;
+                for(std::vector<planner::Node*>::iterator it = node->children.begin();
+                    it != node->children.end(); ++it)
+                {
+                    WriteJointOffsetRec(f, *it);
+                }
             }
-        }
-        for(std::vector<planner::Node*>::iterator it = node->children.begin();
-            it != node->children.end(); ++it)
-        {
-            WriteDofRec(*it, ss, tpose);
-        }
+        f.RemoveTab();
+        f << "}";
     }
 }
 
 
-BVHExporter::BVHExporter(planner::Robot* skeleton)
-    : f_()
+BVHExporter::BVHExporter()
+    : Exporter()
 {
-    PushStructure(skeleton);
-    PushFrame(skeleton->node, true); // this is one to easily align pose in blender
+    // NOTHING
 }
 
 BVHExporter::~BVHExporter()
@@ -121,25 +90,4 @@ void BVHExporter::PushStructure(planner::Robot* robot)
         WriteJointOffsetRec(f_, node->children[0]);
     f_.RemoveTab();
     f_ << "}";
-}
-
-void BVHExporter::PushFrame(planner::Node* node, bool tpose)
-{
-    std::stringstream frame;
-     // Write translations...
-    frame << node->position[0] << "\t" << node->position[1] << "\t" << node->position[2];
-    WriteDofRec(node->children.front(), frame, tpose);
-    frames_.push_back(frame.str());
-}
-
-
-bool BVHExporter::Save(const std::string& filename)
-{
-    // saving frames
-    f_ << f_.nl() << "MOTION\nFrames:\t" << (double)(frames_.size()) << "\nFrame Time: 1\n";
-    for(std::vector<string>::const_iterator it = frames_.begin(); it!=frames_.end(); ++it)
-    {
-        f_ << (*it) << f_.nl();
-    }
-    return f_.Save(filename);
 }

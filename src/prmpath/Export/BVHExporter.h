@@ -2,7 +2,7 @@
 #define  _BVHEXPORTER_H_
 
 
-#include "prmpath/Export/BVHFileHandler.h"
+#include "prmpath/Export/Exporter.h"
 
 #include <string>
 #include <vector>
@@ -17,27 +17,19 @@ class Robot;
 *  \class BVHExporter
 *  \brief Export A robot to a readable BVH file format
 */
-namespace bvh
+namespace exporter
 {
-class  BVHExporter
+class  BVHExporter : public Exporter
 {
 public:
-     BVHExporter(planner::Robot* /*skeleton*/);
+     BVHExporter();
     ~BVHExporter();
 
 public:
-    void PushFrame(planner::Node* /*rootNode*/, bool tpose=false);
-    bool Save(const std::string& /*filename*/);
-
-private:
-    void PushStructure(planner::Robot*/*skeleton*/);
+    virtual void PushStructure(planner::Robot*/*skeleton*/);
 private:
     BVHExporter(const BVHExporter&);
     BVHExporter& operator=(const BVHExporter&);
-
-private:
-    BVHFileHandler f_;
-    std::vector< std::string > frames_;
 };
-} //namespace bvh
+} //namespace exporter
 #endif // _BVHEXPORTER_H_

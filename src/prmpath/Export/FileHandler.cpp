@@ -1,9 +1,9 @@
-#include "Export/BVHFileHandler.h"
+#include "Export/FileHandler.h"
 
-using namespace bvh;
+using namespace exporter;
 using namespace std;
 
-BVHFileHandler::BVHFileHandler()
+FileHandler::FileHandler()
     : bvhStr_()
     , tabs_("")
     , depth_(0)
@@ -11,12 +11,12 @@ BVHFileHandler::BVHFileHandler()
     // NOTHING
 }
 
-BVHFileHandler::~BVHFileHandler()
+FileHandler::~FileHandler()
 {
     // NOTHING
 }
 
-bool BVHFileHandler::Save(const string & filename)
+bool FileHandler::Save(const string & filename)
 {
     ofstream myfile;
     myfile.open (filename.c_str());
@@ -29,7 +29,7 @@ bool BVHFileHandler::Save(const string & filename)
     return false;
 }
 
-const std::string BVHFileHandler::AddTab(bool newLine)
+const std::string FileHandler::AddTab(bool newLine)
 {
     tabs_ += "\t";
     ++depth_;
@@ -37,24 +37,24 @@ const std::string BVHFileHandler::AddTab(bool newLine)
     return tabs_;
 }
 
-BVHFileHandler& BVHFileHandler::operator<< (const std::string& val)
+FileHandler& FileHandler::operator<< (const std::string& val)
 {
     bvhStr_ << val;
     return *this;
 }
 
-BVHFileHandler& BVHFileHandler::operator<< (const double& val)
+FileHandler& FileHandler::operator<< (const double& val)
 {
     bvhStr_ << val;
     return *this;
 }
 
-const std::string BVHFileHandler::nl() const
+const std::string FileHandler::nl() const
 {
     return std::string( "\n" + tabs_);
 }
 
-const std::string BVHFileHandler::RemoveTab(bool newLine)
+const std::string FileHandler::RemoveTab(bool newLine)
 {
     if(depth_>0)
     {

@@ -11,6 +11,7 @@
 #include "prmpath/CompleteScenario.h"
 #include "prmpath/PostureSelection.h"
 #include "prmpath/Export/BVHExporter.h"
+#include "prmpath/Export/ITOMPExporter.h"
 #include "Timer.h"
 
 #include <string>
@@ -245,14 +246,75 @@ void start()
     }
 
     /*Export to bvh*/
-    bvh::BVHExporter exporter(cScenario->robot);
+    exporter::BVHExporter exporter;
+    exporter.PushStructure(cScenario->robot);
     for(planner::T_State::iterator it = states.begin(); it != states.end(); ++it)
     {
         exporter.PushFrame((*it)->value->node, false);
     }
     std::string savebvh("../tests/test.bvh");
     exporter.Save(savebvh);
+
+    /*Export to ITOMP*/
+
+    Eigen::Matrix3d inverse = itompTransform;
+    inverse.inverse();
+    exporter::ITOMPExporter itompexporter(inverse, Eigen::Vector3d(12,-8,-0.5));
+    itompexporter.PushStructure(cScenario->robot);
+    for(planner::T_State::iterator it = states.begin()+1; it != states.end(); ++it)
+    {
+        itompexporter.PushFrame((*it)->value->node, false);
+    }
+    savebvh ="../tests/test.path";
+    itompexporter.Save(savebvh);
 }
+
+void WriteNodeLine(const Eigen::Matrix3d& rotation, const Eigen::Vector3d& position, std::stringstream& outstream)
+{
+    for(int i=0; i<3; ++i)
+    {
+        for(int j=0; j<3; ++j)
+        {
+            outstream << rotation(i,j) << " ";
+        }
+        outstream << position(i) << " ";
+    }
+    outstream << std::endl;
+}
+
+bool SavePath()
+{
+    std::stringstream outstream;
+    outstream << "size " << (int)(path.size()) << std::endl;
+    /*for(Object::CT_Object::const_iterator it = path.begin();
+        it!= path.end(); ++it)
+    {
+        WriteNodeLine((*it)->GetOrientation(),(*it)->GetPosition(), outstream);
+    }*/
+    planner::Robot* tmp(0) ;
+    for(int i = 0; i< states.size(); ++i)
+    {
+        planner::Robot* tmp =states[i]->value;
+        Eigen::Matrix3d wtf = itompTransform;
+        Eigen::Vector3d putain(-12,8,0.5);
+        wtf.inverse();
+        WriteNodeLine(wtf * tmp->currentRotation, wtf * tmp->currentPosition - putain, outstream);
+    }
+    ofstream outfile;
+    outfile.open(outfilename.c_str());
+    if (outfile.is_open())
+    {
+        outfile << outstream.rdbuf();
+        outfile.close();
+        return true;
+    }
+    else
+    {
+        std::cout << "Can not open outfile " << outfilename << std::endl;
+        return false;
+    }
+}
+
 void command(int cmd)   /**  key control function; */
 {
     std::cout << "path size " << path.size() << std::endl;
@@ -271,7 +333,7 @@ void command(int cmd)   /**  key control function; */
             planner::SavePrm(*(cScenario->scenario->prm), outpath);
         break;
         case 'b' :
-            cScenario->SavePath(outfilename);
+            SavePath();
         break;
         case '+' :
         {
