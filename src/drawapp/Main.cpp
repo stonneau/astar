@@ -250,7 +250,7 @@ void start()
     exporter.PushStructure(cScenario->robot);
     for(planner::T_State::iterator it = states.begin(); it != states.end(); ++it)
     {
-        exporter.PushFrame((*it)->value->node, false);
+        exporter.PushFrame((*it)->value, false);
     }
     std::string savebvh("../tests/test.bvh");
     exporter.Save(savebvh);
@@ -263,7 +263,7 @@ void start()
     itompexporter.PushStructure(cScenario->robot);
     for(planner::T_State::iterator it = states.begin()+1; it != states.end(); ++it)
     {
-        itompexporter.PushFrame((*it)->value->node, false);
+        itompexporter.PushFrame((*it)->value, false);
     }
     savebvh ="../tests/test.path";
     itompexporter.Save(savebvh);

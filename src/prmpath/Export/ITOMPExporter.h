@@ -29,6 +29,7 @@ public:
 
 public:
     virtual void PushStructure(planner::Robot*/*skeleton*/);
+    virtual void PushFrame(planner::Robot * /*robot*/, bool tpose = false);
 
 private:
     ITOMPExporter(const ITOMPExporter&);

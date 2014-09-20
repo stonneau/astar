@@ -25,11 +25,11 @@ class  Exporter
 {
 public:
      Exporter(bool useRadians=false);
-     Exporter(const Eigen::Matrix3d& rotation, const Eigen::Vector3d& offset, bool useRadians=false);
+     Exporter(const Eigen::Matrix3d& rotation, const Eigen::Vector3d& offset, bool useRadians=true);
     virtual ~Exporter();
 
 public:
-    void PushFrame(planner::Node* /*rootNode*/, bool tpose = false);
+    virtual void PushFrame(planner::Robot* robot, bool tpose = false);
     bool Save(const std::string& /*filename*/);
     virtual void PushStructure(planner::Robot*/*skeleton*/)=0;
 
@@ -41,7 +41,7 @@ protected:
     FileHandler f_;
     std::vector< std::string > frames_;
 
-private:
+protected:
     const bool useRadians_;
     const Eigen::Matrix3d rotation_;
     const Eigen::Vector3d offset_;

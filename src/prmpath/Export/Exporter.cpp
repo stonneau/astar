@@ -72,13 +72,13 @@ Exporter::~Exporter()
     // NOTHING
 }
 
-void Exporter::PushFrame(planner::Node* node, bool tpose)
+void Exporter::PushFrame(planner::Robot *robot, bool tpose)
 {
     std::stringstream frame;
      // Write translations...
-    Eigen::Vector3d res = rotation_ * node->position + offset_;
+    Eigen::Vector3d res = rotation_ * robot->node->position + offset_;
     frame << res[0] << "\t" << res[1] << "\t" << res[2];
-    WriteDofRec(node->children.front(), frame, tpose, useRadians_);
+    WriteDofRec(robot->node->children.front(), frame, tpose, useRadians_);
     frames_.push_back(frame.str());
 }
 

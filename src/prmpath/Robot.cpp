@@ -552,13 +552,13 @@ Node* MakeNode(Link* roots, std::map<std::string, Link*>& links)
     // create 3 dummy nodes for rotation + 1 for translation
     // make X
     {
-        res->tag = "root_x_joint";
+        res->tag = "base_revolute_joint_x";
         res->axis = Eigen::Vector3d::UnitX();
         res->offset = Eigen::Vector3d::Zero();
     }
     Node* ynode = new Node(2);
     {
-        ynode->tag = "root_y_joint";
+        ynode->tag = "base_revolute_joint_y";
         ynode->axis = Eigen::Vector3d::UnitY();
         ynode->offset = Eigen::Vector3d::Zero();
         ynode->children.push_back(res);
@@ -566,7 +566,7 @@ Node* MakeNode(Link* roots, std::map<std::string, Link*>& links)
     }
     Node* znode = new Node(1);
     {
-        znode->tag = "root_z_joint";
+        znode->tag = "base_revolute_joint_z";
         znode->axis = Eigen::Vector3d::UnitZ();
         znode->offset = Eigen::Vector3d::Zero();
         znode->children.push_back(ynode);
