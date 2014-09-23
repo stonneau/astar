@@ -42,15 +42,15 @@ Scenario::Scenario(const std::string& filepath)
 				std::string englobed = line.substr(0, line.find(" "));
 				std::string englobing = line.substr(line.find(" ") +1);
 				Object::T_Object modelobjs = ParseObj(englobed);
-				planner::ParseObj(englobing, modelobjs);
-				if(modelobjs.size() != 2)
+                planner::ParseObj(englobing, model_.englobing);
+                if(modelobjs.size() != 1)
 				{
 					std::string error("ERROR: MODEL FILE CONTAINS MORE THAN TWO OBJECTS ");
 					error += filepath;
 					throw ScenarioException(error);
 				}
 				model_.englobed  = modelobjs[0];
-				model_.englobing = modelobjs[1];
+                //model_.englobing = modelobjs[1];
 			}
 			else if(line.find("OBJECT = ") == 0)
 			{

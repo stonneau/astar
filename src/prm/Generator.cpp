@@ -69,9 +69,9 @@ Object* Generator::operator()()
     while(limit > 0)
     {
         -- limit;
-        Model configuration;
-        configuration.englobed = new Object(*model_.englobed);
-        configuration.englobing = new Object(*model_.englobing);
+        Model configuration(model_);
+        /*configuration.englobed = new Object(*model_.englobed);
+        configuration.englobing = new Object(*model_.englobing);*/
         // pick one object randomly
         std::pair<Object*, const Tri*> sampled;
         double r = ((double) rand() / (RAND_MAX));
@@ -105,7 +105,7 @@ Object* Generator::operator()()
 				if(dir.norm() == 0) break;
 				dir.normalize();
 				// add random direction and check for collision
-				while(configuration.englobing->IsColliding(sampled.first))
+                while(sampled.first->IsColliding(configuration.englobing))
 				{
 					if(!collider_.IsColliding(configuration.englobed))
 					{
@@ -143,7 +143,7 @@ Object* Generator::operator()()
 					dir.normalize();
 				}
 				// add random direction and check for collision
-				while(configuration.englobing->IsColliding(sampled.first))
+                while(sampled.first->IsColliding(configuration.englobing))
 				{
 					if(!collider_.IsColliding(configuration.englobed))
 					{

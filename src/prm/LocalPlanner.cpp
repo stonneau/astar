@@ -60,7 +60,7 @@ namespace planner
                      *  Eigen::AngleAxisd(offrot[2],  Eigen::Vector3d::UnitZ());
             tmp.SetPosition(offset);
             tmp.SetOrientation(offrotmat);
-			if(planner.IsColliding(tmp.englobed) || !planner.IsColliding(tmp.englobing))
+            if(planner.IsColliding(tmp.englobed) || planner.IsColliding(tmp.englobing).empty())
             {
                 return false;
             }

@@ -18,26 +18,42 @@ struct Model
 {
     Model(const Model& model)
 	{
-		englobed = new Object(*model.englobed);
-		englobing = new Object(*model.englobing);
+        englobed = new Object(*model.englobed);
+        for(Object::T_Object::const_iterator it = model.englobing.begin();
+            it != model.englobing.end(); ++it)
+        {
+            englobing.push_back(new Object(*(*it)));
+        }
 	}
     Model(){}
     ~Model()
     {
 		if(englobed) delete englobed;
-		if(englobing)delete englobing;
+        for(Object::T_Object::iterator it = englobing.begin();
+            it != englobing.end(); ++it)
+        {
+            delete(*it);
+        }
     }
 
     void SetOrientation(const Eigen::Matrix3d& orientation)
     {
         englobed->SetOrientation(orientation);
-        englobing->SetOrientation(orientation);
+        for(Object::T_Object::iterator it = englobing.begin();
+            it != englobing.end(); ++it)
+        {
+            (*it)->SetOrientation(orientation);
+        }
     }
 
     void SetPosition(const Eigen::Vector3d& position)
     {
         englobed->SetPosition(position);
-        englobing->SetPosition(position);
+        for(Object::T_Object::iterator it = englobing.begin();
+            it != englobing.end(); ++it)
+        {
+            (*it)->SetPosition(position);
+        }
     }
 
     const Eigen::Matrix3d& GetOrientation() const
@@ -50,7 +66,7 @@ struct Model
     }
 
     Object* englobed;
-    Object* englobing;
+    Object::T_Object englobing;
 };
 
 } //namespace planner

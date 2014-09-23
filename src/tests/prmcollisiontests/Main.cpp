@@ -92,7 +92,8 @@ void LocalPlannerTest(bool& error)
 	
     planner::Model robot;
     robot.englobed = objects[0];
-    robot.englobing = objects2[0];
+    planner::ParseObj(model2, robot.englobing);
+    robot.englobing = objects2;
     planner::LocalPlanner lPlanner(objects, robot);
 
     Eigen::Vector3d collisionA(-3,0,0);
@@ -129,11 +130,11 @@ void SerializeSimplePRMTest(bool& error)
     planner::Object::T_Object objects = planner::ParseObj(targetFile, true);
 
     planner::Object::T_Object objects2 = planner::ParseObj(model);
-    planner::ParseObj(model2, objects2);
 
     planner::Model robot;
     robot.englobed = objects2[0];
-    robot.englobing = objects2[1];
+    planner::ParseObj(model2, robot.englobing);
+    //robot.englobing = objects2[1];
     planner::SimplePRM* prm = new planner::SimplePRM(robot, objects, 10, 10, 4);
     planner::SavePrm(*prm, outpath);
     planner::SimplePRM* prm2 = planner::LoadPRM(outpath, objects, robot);
@@ -141,8 +142,7 @@ void SerializeSimplePRMTest(bool& error)
 }
 
 int main(int argc, char *argv[])
-{
-	std::cout << "performing tests... \n";
+{	std::cout << "performing tests... \n";
     bool error = false;
     ObjParserCanLoadFileTest(error);
     ObstacleCreationTest(error);
