@@ -161,8 +161,9 @@ namespace
 
 double planner::sampling::Manipulability(const Sample* sample, const Eigen::Vector3d& direction)
 {
+// GROS HACK DE MERDE
     double r = (direction.transpose()*sample->jacobianProduct*direction);
-    return 1/sqrt(r);
+    return (direction.y() < 0) ? -1/sqrt(r) :  1/sqrt(r);
 }
 
 T_Samples planner::sampling::GenerateSamples(const Robot &robot, const Node* root, int nbSamples)

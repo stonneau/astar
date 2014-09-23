@@ -18,7 +18,43 @@ namespace
         return limb->current;
     }
 
-    const double epsilon = 0.01;
+    void GetEffectorsRec(Node* limb, std::vector<Eigen::Vector3d>& res)
+    {
+        if(limb->children.size() != 0)
+        {
+            for(std::vector<Node*>::iterator cit = limb->children.begin();
+                cit != limb->children.end(); ++cit)
+            {
+                GetEffectorsRec(*cit,res);
+            }
+        }
+        else
+        {
+            res.push_back(limb->position);
+        }
+    }
+
+    std::vector<Eigen::Vector3d> GetEffectorsRec(Node* limb)
+    {
+        std::vector<Eigen::Vector3d> res;
+        GetEffectorsRec(limb,res);
+        return res;
+    }
+
+    bool InContact(Object::T_Object& effectors, Object* obj, const double epsilon, Eigen::Vector3d&  normal)
+    {
+        for(Object::T_Object::iterator it = effectors.begin();
+            it != effectors.end(); ++it)
+        {
+            if(!(*it)->InContact(obj,epsilon, normal))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    const double epsilon = 0.001;
 }
 
 Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::T_Samples& samples
@@ -30,6 +66,7 @@ Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::
     toWorldCoordinates.block<3,3>(0,0) = limb->parent->toWorldRotation;
     toWorldCoordinates.block<3,1>(0,3) = limb->parent->position;*/
     Object* effector = GetEffector(limb);
+    std::vector<Eigen::Vector3d> effectorPos = GetEffectorsRec(limb);
     double bestManip = std::numeric_limits<double>::min();
     double tmp_manip, tempweightedmanip;
     for(T_Samples::const_iterator sit = samples.begin(); sit != samples.end(); ++sit)
@@ -41,7 +78,7 @@ Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::
             LoadSample(*(*sit),limb);
             for(Object::T_Object::iterator oit = obstacles.begin(); oit != obstacles.end(); ++oit)
             {
-                if(effector->InContact(*oit,epsilon, normal) && !effector->IsColliding(obstacles))
+                if(effector->InContact(*oit,epsilon, normal) && !planner::IsSelfColliding(&robot, limb) && !effector->IsColliding(obstacles))
                 {
                     tempweightedmanip = tmp_manip * direction.dot(normal);
                     if(tempweightedmanip > bestManip)
@@ -68,7 +105,7 @@ T_Samples planner::GetPosturesOnTarget(Robot& robot, Node* limb, const sampling:
         LoadSample(*(*sit),limb);
         if((effector->GetPosition() - worldposition).norm()<epsilon && !effector->IsColliding(obstacles))
         {
-            std::cout << "si si ca arrive " << std::endl;
+            //std::cout << "si si ca arrive " << std::endl;
             res.push_back(*sit);
         }
     }
@@ -83,7 +120,7 @@ namespace
         std::vector<int> res;
         for(int i=0; i < nbLimbs; ++i)
         {
-            if(std::find(inContactBefore.begin(), inContactBefore.end(), i)==inContactBefore.end())
+           // if(std::find(inContactBefore.begin(), inContactBefore.end(), i)==inContactBefore.end())
             {
                 res.push_back(i);
             }

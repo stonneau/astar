@@ -202,7 +202,7 @@ static void simLoop (int pause)
 }
 void start()
 {
-    cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/rocketbox.scen");
+    cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/kitchen.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/zoey.scen");
     //cScenario = planner::CompleteScenarioFromFile("../tests/profile.scen");
     std::cout << "done" << std::endl;
@@ -228,11 +228,11 @@ void start()
         planner::Node* node = new planner::Node(*cScenario->robot->node);
         //node->offset = Eigen::Vector3d(0,0,0);
         //node->position = Eigen::Vector3d(0,0,0);
-        planner::sampling::LoadSample(*cScenario->limbSamples[0][i], planner::GetChild(node, "upper_left_arm_z_joint"));
+        planner::sampling::LoadSample(*cScenario->limbSamples[0][i], planner::GetChild(node, "upper_right_arm_z_joint"));
         node->Update();
         postures.push_back(node);
     }
-    samples = cScenario->limbSamples[3];
+    samples = cScenario->limbSamples[0];
     std::cout << " SAMPLES" << samples.size() << std::endl;
     std::cout << "done creating nodes " << path.size() << std::endl;
     states = planner::PostureSequence(*cScenario);
@@ -306,33 +306,56 @@ bool SavePath()
     {
         outfile << outstream.rdbuf();
         outfile.close();
-        return true;
+        //return true;
     }
     else
     {
         std::cout << "Can not open outfile " << outfilename << std::endl;
-        return false;
+        //return false;
     }
+
+    /*Export to bvh*/
+    exporter::BVHExporter exporter;
+    exporter.PushStructure(cScenario->robot);
+    for(planner::T_State::iterator it = states.begin(); it != states.end(); ++it)
+    {
+        exporter.PushFrame((*it)->value, false);
+    }
+    std::string savebvh("../tests/test.bvh");
+    exporter.Save(savebvh);
+
+    /*Export to ITOMP*/
+
+    Eigen::Matrix3d inverse = itompTransform;
+    inverse.inverse();
+    exporter::ITOMPExporter itompexporter(inverse, Eigen::Vector3d(12,-8,-0.5));
+    itompexporter.PushStructure(cScenario->robot);
+    for(planner::T_State::iterator it = states.begin()+1; it != states.end(); ++it)
+    {
+        (*it)->value->node->Update();
+        itompexporter.PushFrame((*it)->value, false);
+    }
+    savebvh ="../tests/itomp.path";
+    itompexporter.Save(savebvh);
 }
 
 void command(int cmd)   /**  key control function; */
 {
-    std::cout << "path size " << path.size() << std::endl;
     switch (cmd)
     {
-        case 'e' :
+        case 't' :
             pathOn = !pathOn;
         break;
         case 'q' :
             drawacis = !drawacis;
         break;
-        case 'p' :
+        case 'y' :
             drawObject = !drawObject;
         break;
         case 's' :
             planner::SavePrm(*(cScenario->scenario->prm), outpath);
         break;
-        case 'b' :
+        case 'd' :
             SavePath();
         break;
         case '+' :
@@ -354,29 +377,29 @@ void command(int cmd)   /**  key control function; */
 
             break;
         }
-        case 'c' :
+        case 'b' :
         {
             currentSample = 0;
             samples = planner::GetPosturesOnTarget(*cScenario->robot, cScenario->limbs[0], cScenario->limbSamples[0], cScenario->scenario->objects_, planner::GetEffectors(cScenario->limbs[0])[0]->parent->position );
 
             break;
         }
-        case 'r' :
+        case '1' :
         {
 
         std::cout << " SAMPLES" << samples.size() << std::endl;
             if(samples.empty()) return;
             currentSample ++; if(samples.size() <= currentSample) currentSample = samples.size()-1;
-            planner::sampling::LoadSample(*(samples[currentSample]),planner::GetChild(cScenario->robot, "upper_left_leg_z_joint"));
+            planner::sampling::LoadSample(*(samples[currentSample]),planner::GetChild(cScenario->robot, "upper_right_arm_z_joint"));
             break;
         }
         break;
-        case 't' :
+        case '2' :
         {
         std::cout << " SAMPLES" << samples.size() << std::endl;
             if(samples.empty()) return;
             currentSample --; if(currentSample < 0) currentSample = 0;
-            planner::sampling::LoadSample(*(samples[currentSample]),planner::GetChild(cScenario->robot, "upper_left_leg_z_joint"));
+            planner::sampling::LoadSample(*(samples[currentSample]),planner::GetChild(cScenario->robot, "upper_right_arm_z_joint"));
             break;
         }
         case 'm' :
@@ -384,17 +407,58 @@ void command(int cmd)   /**  key control function; */
             drawPOstures = ! drawPOstures;
             break;
         }
-        case 'y' :
+        case 'a' :
         planner::GetChild(cScenario->robot, "upper_right_arm_z_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_right_arm_z_joint")->value-0.1);
         break;
-        case 'f' :
+        case 'z' :
         planner::GetChild(cScenario->robot, "upper_right_arm_y_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_right_arm_y_joint")->value-0.1);
         break;
-        case 'g' :
+        case 'e' :
         planner::GetChild(cScenario->robot, "upper_right_arm_x_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_right_arm_x_joint")->value-0.1);
         break;
-        case 'h' :
+        case 'r' :
         planner::GetChild(cScenario->robot, "lower_right_arm_joint")->SetRotation(planner::GetChild(cScenario->robot,"lower_right_arm_joint")->value-0.1);
+        break;
+
+        case 'u' :
+        planner::GetChild(cScenario->robot, "upper_right_arm_z_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_right_arm_z_joint")->value-0.1);
+        break;
+        case 'i' :
+        planner::GetChild(cScenario->robot, "upper_left_arm_y_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_left_arm_y_joint")->value-0.1);
+        break;
+        case 'o' :
+        planner::GetChild(cScenario->robot, "upper_left_arm_x_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_left_arm_x_joint")->value-0.1);
+        break;
+        case 'p' :
+        planner::GetChild(cScenario->robot, "lower_left_arm_joint")->SetRotation(planner::GetChild(cScenario->robot,"lower_left_arm_joint")->value-0.1);
+        break;
+
+
+        case 'w' :
+        planner::GetChild(cScenario->robot, "upper_right_arm_z_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_right_arm_z_joint")->value-0.1);
+        break;
+        case 'x' :
+        planner::GetChild(cScenario->robot, "upper_left_leg_y_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_left_leg_y_joint")->value-0.1);
+        break;
+        case 'c' :
+        planner::GetChild(cScenario->robot, "upper_left_leg_x_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_left_leg_x_joint")->value-0.1);
+        break;
+        case 'v' :
+        planner::GetChild(cScenario->robot, "lower_left_leg_joint")->SetRotation(planner::GetChild(cScenario->robot,"lower_left_leg_joint")->value-0.1);
+        break;
+
+
+        case 'h' :
+        planner::GetChild(cScenario->robot, "upper_right_arm_z_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_right_arm_z_joint")->value-0.1);
+        break;
+        case 'j' :
+        planner::GetChild(cScenario->robot, "upper_right_leg_y_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_right_leg_y_joint")->value-0.1);
+        break;
+        case 'k' :
+        planner::GetChild(cScenario->robot, "upper_right_leg_x_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_right_leg_x_joint")->value-0.1);
+        break;
+        case 'l' :
+        planner::GetChild(cScenario->robot, "lower_right_leg_joint")->SetRotation(planner::GetChild(cScenario->robot,"lower_right_leg_joint")->value-0.1);
         break;
     }
 }

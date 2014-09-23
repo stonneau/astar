@@ -30,6 +30,7 @@ set(SOURCES
     Jacobian.cpp
     ROM.h
     ROM.cpp
+    EffectorROM.cpp
     sampling/Sample.h
     sampling/Sample.cpp
     Export/ITOMPExporter.h Export/ITOMPExporter.cpp

@@ -625,3 +625,54 @@ planner::Node* planner::LoadRobot(const std::string& urdfpath)
     }
     return 0;
 }
+
+
+void GetOtherObjectsRec(planner::Node* current, planner::Node* limb, Object::T_Object& objects )
+{
+    if(current->tag == limb->tag)
+        return;
+    else if(current->current)
+        objects.push_back(current->current);
+    for(std::vector<planner::Node*>::iterator it = current->children.begin(); it != current->children.end(); ++it)
+    {
+        GetOtherObjectsRec(*it, limb, objects);
+    }
+}
+
+Object::T_Object GetOtherObjects(planner::Node* current, planner::Node* limb )
+{
+    Object::T_Object objects;
+    GetOtherObjectsRec(current, limb, objects);
+    return objects;
+}
+
+void GetLimbObjectsRec(planner::Node* current, Object::T_Object& objects)
+{
+    if(current->current)
+        objects.push_back(current->current);
+    for(std::vector<planner::Node*>::iterator it = current->children.begin(); it != current->children.end(); ++it)
+    {
+        GetLimbObjectsRec(*it, objects);
+    }
+}
+
+Object::T_Object GetLimbObjects(planner::Node* limb)
+{
+    Object::T_Object objects;
+    GetLimbObjectsRec(limb, objects);
+    return objects;
+}
+
+bool planner::IsSelfColliding(planner::Robot* robot, planner::Node* limb)
+{
+    Object::T_Object otherObjects = GetOtherObjects(robot->node, limb);
+    Object::T_Object limbObjects = GetLimbObjects(limb);
+    for(Object::T_Object::iterator lit = limbObjects.begin();
+        lit != limbObjects.end(); ++lit)
+    {
+        if((*lit)->IsColliding(otherObjects))
+            return true;
+    }
+    return false;
+}
+

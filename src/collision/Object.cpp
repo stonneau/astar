@@ -212,11 +212,56 @@ bool Object::InContact(Object* object, double epsilon, Eigen::Vector3d& normal)
         for(T_Vector3::const_iterator cit = object->normals_.begin(); cit != object->normals_.end(); ++cit, ++i)
         {
             DoubleVectorToEigen(p1, object->model_->tris[i].p1);
-            DoubleVectorToEigen(p1, object->model_->tris[i].p2);
-            DoubleVectorToEigen(p1, object->model_->tris[i].p2);
+            DoubleVectorToEigen(p2, object->model_->tris[i].p2);
+            DoubleVectorToEigen(p3, object->model_->tris[i].p3);
             tmp = (ProjPoint2Triangle(p1,p2,p3, source) - source).norm();
             if(tmp < distance) normal = *cit;
         }
+    }
+    return res;
+}
+
+bool Object::InContact(Object* object, double epsilon, Eigen::Vector3d& normal, const std::vector<Eigen::Vector3d>& positions)
+{
+    PQP_ToleranceResult result;
+    PQP_Tolerance(&result, pqpOrientation_, pqpPosition_, model_,
+                 object->pqpOrientation_, object->pqpPosition_, object->model_,
+                 epsilon, 2);
+    bool res = result.CloserThanTolerance();
+    if(res)
+    {
+        if (object->normals_.empty())
+        {
+            std::cout << "no normals";
+            return res;
+        }
+        int i= 0;
+        double distance = std::numeric_limits<double>::max();
+        double tmp = distance;
+        Eigen::Vector3d p1, p2, p3, source;
+        DoubleVectorToEigen(source, result.P1());
+        for(T_Vector3::const_iterator cit = object->normals_.begin(); cit != object->normals_.end(); ++cit, ++i)
+        {
+            DoubleVectorToEigen(p1, object->model_->tris[i].p1);
+            DoubleVectorToEigen(p2, object->model_->tris[i].p2);
+            DoubleVectorToEigen(p3, object->model_->tris[i].p3);
+            tmp = (ProjPoint2Triangle(p1,p2,p3, source) - source).norm();
+            if(tmp < distance)
+            {
+                normal = *cit;
+            }
+        }
+        int nbfalse = 0;
+        for(std::vector<Eigen::Vector3d>::const_iterator cit = positions.begin()
+            ; cit != positions.end(); ++cit)
+        {
+            if((ProjPoint2Triangle(p1,p2,p3, *cit) -(*cit)).norm() > epsilon)
+            {
+               ++nbfalse;
+            }
+            else --nbfalse;
+        }
+        res = res && nbfalse <=2;
     }
     return res;
 }

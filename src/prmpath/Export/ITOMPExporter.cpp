@@ -41,6 +41,15 @@ namespace
         }
         else
         {
+            /*if(node->axis == Eigen::Vector3d::UnitX() && node->parent && node->offset.norm() != 0)
+            {
+                ss << "\t" << node->parent->value;
+            }
+            else if(node->axis == Eigen::Vector3d::UnitX())
+            {
+
+            }
+            else*/
             ss << "\t" << node->value;
         }
         for(std::vector<planner::Node*>::iterator it = node->children.begin();
@@ -59,9 +68,13 @@ namespace
             node = node->children.front();
             rotation *= Eigen::AngleAxisd(node->value, node->axis).matrix();
         }
-        Matrix<double,3,1> res = (rotation * rot).eulerAngles(2, 1, 0);
-        ss << res[0] << "\t" << res[1] << "\t" << res[2];
-        WriteDofRecNoFantomJoint(node->children.front(), ss, tpose);
+        Matrix<double,3,1> res = (rot * rotation).eulerAngles(2, 1, 0);
+        ss << res[0] << "\t" << -res[2] << "\t" << res[1];
+        for(std::vector<planner::Node*>::iterator it = node->children.begin();
+            it != node->children.end(); ++it)
+        {
+            WriteDofRecNoFantomJoint(*it, ss, tpose);
+        }
     }
 }
 
@@ -84,8 +97,9 @@ void ITOMPExporter::PushFrame(planner::Robot* robot, bool tpose)
      // Write translations...
     Eigen::Vector3d res = rotation_ * robot->node->position + offset_;
     Eigen::Matrix3d rot =AngleAxisd(-0.5*M_PI, Vector3d::UnitY()).matrix();
-    frame << res[0] << "\t" << res[1] << "\t" << res[2];
+    frame << res[0] << "\t" << res[1] << "\t" << res[2]<< "\t";
     WriteDofNoFantomJoint(robot->node->children.front(), frame, rotation_, tpose);
+    //WriteDofRecNoFantomJoint(robot->node->children.front(), frame, tpose);
     //WriteDofNoFantomJoint(robot->node->children.front(), frame, rot, tpose);
     //WriteDofRecNoFantomJoint(robot->node->children.front(), frame, tpose);
     frames_.push_back(frame.str());

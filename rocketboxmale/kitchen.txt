@@ -1,7 +1,7 @@
 MODEL = ../rocketboxmale/cenglobed.obj ../rocketboxmale/cenglobing.obj
-OBJECT = ../tests/collision/entrance.obj
+OBJECT = ../tests/collision/kitchen.obj
 PRMFIL = ../rocketboxmale/prm.prm
 qs = ../tests/fullscenarios/zombi_room.prm
-PRMFILE = ../tests/testSerialization.txt
-SIZ = 1500 4 40
+PRMFIE = ../tests/testSerialization.txt
+SIZE = 300 2 40
 VISIBILI

@@ -34,4 +34,5 @@ add_subdirectory (src/tests/equilibrium)
 add_subdirectory (src/tests/astar)
 add_subdirectory (src/tests/prmcollisiontests)
 add_subdirectory (src/drawapp)
+add_subdirectory (src/generateEffectorRom)
 
