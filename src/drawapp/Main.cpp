@@ -92,7 +92,17 @@ namespace
             dsDrawLineD(p3, p1);
         }
     }
-    void LineBetweenObjects(const planner::Object* a, const planner::Object* b)
+    void DrawModel(const planner::Model* model, bool useItomp = true)
+    {
+        DrawObject(model->englobed, useItomp);
+        for(planner::Object::T_Object::const_iterator it3 = model->englobing.begin();
+            it3 != model->englobing.end(); ++it3)
+        {
+            DrawObject(*it3, useItomp);
+        }
+    }
+
+    void LineBetweenObjects(const planner::Model* a, const planner::Model* b)
     {
         PQP_REAL p1 [3];
         PQP_REAL p2 [3];
@@ -114,13 +124,16 @@ namespace
         {
             dsSetColorAlpha(0,0, 0,1);
             bool afterfirst = false;
-            planner::Object::CT_Object::iterator it = cScenario->path.begin();
-            for(planner::Object::CT_Object::iterator it2 = cScenario->path.begin();
+            planner::CT_Model::iterator it = cScenario->path.begin();
+            for(planner::CT_Model::iterator it2 = cScenario->path.begin();
                 it2 != cScenario->path.end();
                 ++it2)
             {
                 dsSetColorAlpha(1,0, 0,1);
-                if(drawObject) DrawObject(*it2);
+                if(drawObject)
+                {
+                    DrawModel(*it2);
+                }
                 if(afterfirst)
                 {
                     dsSetColorAlpha(0,1, 0,1);
@@ -136,12 +149,12 @@ namespace
         else
         {
             int i = 0;
-            for(planner::Object::T_Object::const_iterator it = cScenario->scenario->prm->GetPRMNodes().begin();
+            for(planner::T_Model::const_iterator it = cScenario->scenario->prm->GetPRMNodes().begin();
                 it != cScenario->scenario->prm->GetPRMNodes().end();
                 ++it, ++i)
             {
                 dsSetColorAlpha(1,0, 0,1);
-                if(drawObject) DrawObject(*it);
+                if(drawObject) DrawModel(*it);
                 const std::vector< int > connexions = cScenario->scenario->prm->GetConnections(i);
                 dsSetColorAlpha(0,1, 0,1);
                 for(unsigned int j = 0; j< connexions.size(); ++j)

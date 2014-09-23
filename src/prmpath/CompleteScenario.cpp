@@ -52,7 +52,7 @@ bool CompleteScenario::SavePath(const std::string& outfilename)
     //std::string outfilename ("../tests/entrance.path");
     std::stringstream outstream;
     outstream << "size " << (int)(path.size()) << std::endl;
-    for(Object::CT_Object::const_iterator it = path.begin();
+    for(CT_Model::const_iterator it = path.begin();
         it!= path.end(); ++it)
     {
         WriteNodeLine((*it)->GetOrientation(),(*it)->GetPosition(), outstream);
@@ -193,7 +193,7 @@ CompleteScenario* planner::CompleteScenarioFromFile(const std::string& filename)
             if(line.find("PATH_FROM matrix=") != string::npos && scenario)
             {
                 Eigen::Matrix4d res = ReadTransform(ExtractQuotes(line), from);
-                cScenario->from = new Object(*(cScenario->scenario->model_.englobed));
+                cScenario->from = new Model((cScenario->scenario->model_));
                 //cScenario->from->SetOrientation(res.block<3,3>(0,0));
                 cScenario->from->SetPosition(res.block<3,1>(0,3));
                 from = !from;
@@ -201,7 +201,7 @@ CompleteScenario* planner::CompleteScenarioFromFile(const std::string& filename)
             if(line.find("PATH_TO matrix=") != string::npos && scenario)
             {
                 Eigen::Matrix4d res = ReadTransform(ExtractQuotes(line), to);
-                cScenario->to = new Object(*(cScenario->scenario->model_.englobed));
+                cScenario->to = new Model((cScenario->scenario->model_));
                 //cScenario->to->SetOrientation(res.block<3,3>(0,0));
                 cScenario->to->SetPosition(res.block<3,1>(0,3));
                 to = !to;

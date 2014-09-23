@@ -60,7 +60,7 @@ Generator::~Generator()
     // NOTHING
 }
 
-Object* Generator::operator()()
+Model* Generator::operator()()
 {
     // en v0, juste les positions
     int limit = 10000;
@@ -110,7 +110,7 @@ Object* Generator::operator()()
 					if(!collider_.IsColliding(configuration.englobed))
 					{
                         if(configuration.GetPosition().y() < 2.)
-							return new Object(*configuration.englobed);
+                            return new Model(configuration);
 						break;
 					}
 					configuration.SetPosition(configuration.GetPosition() + (double) rand() / (RAND_MAX) / 2 * dir);
@@ -147,8 +147,8 @@ Object* Generator::operator()()
 				{
 					if(!collider_.IsColliding(configuration.englobed))
 					{
-                        if(configuration.GetPosition().y() < 2.)
-							return new Object(*configuration.englobed);
+                        if(configuration.GetPosition().y() < 2.)                            
+                            return new Model(configuration);
 						break;
 					}
 					configuration.SetPosition(configuration.GetPosition() + (double) rand() / (RAND_MAX) / 2 * dir);

@@ -27,7 +27,7 @@ public:
     ~Generator();
 
 public:
-    Object* operator()();
+    Model* operator()();
 
 public:
     const Model& model_;

@@ -14,6 +14,11 @@
 namespace planner
 {
 
+struct Model;
+typedef std::vector<Model*> T_Model;
+typedef T_Model::iterator IT_Model;
+typedef std::vector<const Model*> CT_Model;
+
 struct Model
 {
     Model(const Model& model)

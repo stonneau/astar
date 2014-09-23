@@ -160,8 +160,11 @@ LocalPlanner::~LocalPlanner()
 	// NOTHING
 }
 
-bool LocalPlanner::operator ()(const Object* a, const Object* b, int stage)
+bool LocalPlanner::operator ()(const Model *ma, const Model *mb, int stage)
 {
+
+    const Object * a = ma->englobed;
+    const Object * b = mb->englobed;
 	std::vector<Eigen::Matrix4d> path;
     bool found = StraightLine(a, b, *this, path);
     if(!found && stage >0)
@@ -175,8 +178,11 @@ bool LocalPlanner::operator ()(const Object* a, const Object* b, int stage)
     return found;
 }
 
-std::vector<Eigen::Matrix4d> LocalPlanner::Interpolate(const Object* a, const Object* b, int nbSteps)
+std::vector<Eigen::Matrix4d> LocalPlanner::Interpolate(const Model *ma, const Model *mb, int nbSteps)
 {
+    // tmp before actual planning
+    const Object * a = ma->englobed;
+    const Object * b = mb->englobed;
 	std::vector<Eigen::Matrix4d> path;
     bool found = StraightLine(a, b, *this, path, 1./nbSteps);
     if(!found)

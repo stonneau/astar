@@ -24,7 +24,7 @@
 
 namespace planner
 {
-    float Distance(const Object* obj1, const Object* obj2)
+    float Distance(const Model* obj1, const Model* obj2)
     {
         // TODO include angles
         const Eigen::Vector3d& a = obj1->GetPosition();
@@ -38,7 +38,7 @@ namespace planner
         //return p + q;
     }
 	
-    typedef PRM<Object, planner::Generator, LocalPlanner, float, 10000> prm_t;
+    typedef PRM<Model, planner::Generator, LocalPlanner, float, 10000> prm_t;
 
 	struct PImpl
 	{
@@ -88,7 +88,7 @@ std::cout << " Graph generation time :" << timer.GetTime() << std::endl;
 
         prm_t* prm_;
         LocalPlanner planner_;
-        Object::T_Object prmNodes_;
+        T_Model prmNodes_;
 
 	};
 }
@@ -114,7 +114,7 @@ SimplePRM::~SimplePRM()
 	// NOTHING
 }
 
-const Object::T_Object& SimplePRM::GetPRMNodes() const
+const T_Model &SimplePRM::GetPRMNodes() const
 {
     return pImpl_->prmNodes_;
 }
@@ -127,12 +127,11 @@ const std::vector<int> &SimplePRM::GetConnections(int node) const
 
 namespace
 {
-typedef std::list<const Object*> L_Object;
 
-void Simplify(LocalPlanner& planner, int currentIndex, Object::CT_Object& res)
+void Simplify(LocalPlanner& planner, int currentIndex, CT_Model& res)
 {
     if(currentIndex >= res.size()) return;
-    const Object* obj = res[currentIndex];
+    const Model* obj = res[currentIndex];
     bool erased = false;
     for(int i = currentIndex+2; i< res.size() && ! erased; ++i)
     {
@@ -153,9 +152,9 @@ void Simplify(LocalPlanner& planner, int currentIndex, Object::CT_Object& res)
 }
 }
 
-Object::CT_Object SimplePRM::GetPath(const Object &from, const Object &to, float neighbourDistance, bool simplify)
+CT_Model SimplePRM::GetPath(const Model &from, const Model &to, float neighbourDistance, bool simplify)
 {
-    Object::CT_Object res = pImpl_->prm_->ComputePath(&from, &to, Distance, &pImpl_->planner_, neighbourDistance);
+    CT_Model res = pImpl_->prm_->ComputePath(&from, &to, Distance, &pImpl_->planner_, neighbourDistance);
     if(simplify && !res.empty())
     {
         Simplify(pImpl_->planner_, 0, res);
@@ -163,12 +162,12 @@ Object::CT_Object SimplePRM::GetPath(const Object &from, const Object &to, float
     return res;
 }
 
-std::vector<Eigen::Matrix4d> SimplePRM::Interpolate(const Object::CT_Object& path, int steps)
+std::vector<Eigen::Matrix4d> SimplePRM::Interpolate(const CT_Model &path, int steps)
 {
     std::vector<Eigen::Matrix4d> res, tmp;
 	int each = steps/(int)path.size();
-	Object::CT_Object::const_iterator it2= path.begin(); ++it2;
-	for(Object::CT_Object::const_iterator it= path.begin(); it2!= path.end(); ++it, ++it2)
+    CT_Model::const_iterator it2= path.begin(); ++it2;
+    for(CT_Model::const_iterator it= path.begin(); it2!= path.end(); ++it, ++it2)
 	{
 		tmp = pImpl_->planner_.Interpolate(*it, *it2, each);
 		
@@ -240,7 +239,7 @@ bool planner::SavePrm(SimplePRM& prm, const std::string& outfilename)
     size_t size = prm.GetPRMNodes().size();
     std::stringstream outstream;
     outstream << "size " << (int)(size) << std::endl;
-    for(std::vector<Object*>::const_iterator it = prm.GetPRMNodes().begin();
+    for(T_Model::const_iterator it = prm.GetPRMNodes().begin();
         it!= prm.GetPRMNodes().end(); ++it)
     {
         WriteNodeLine((*it)->GetOrientation(),(*it)->GetPosition(), outstream);
@@ -275,7 +274,7 @@ bool planner::SavePrm(SimplePRM& prm, const std::string& outfilename)
 SimplePRM* planner::LoadPRM(const std::string& filename, Object::T_Object& objects, const Model& model)
 {
     SimplePRM* prm(0);
-    const Object& target = *model.englobed;
+    //const Object& target = *model.englobed;
     ifstream myfile (filename);
     string line;
     int size = -1;
@@ -308,7 +307,7 @@ SimplePRM* planner::LoadPRM(const std::string& filename, Object::T_Object& objec
             else
             {
                 tmp = readNodeLine(line);
-                Object* obj = new Object(target);
+                Model* obj = new Model(model);
                 obj->SetOrientation(tmp.block<3,3>(0,0));
                 obj->SetPosition(tmp.block<3,1>(0,3));
                 prm->pImpl_->prm_->AddNode(obj);

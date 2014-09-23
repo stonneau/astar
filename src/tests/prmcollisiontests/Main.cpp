@@ -87,14 +87,17 @@ void LocalPlannerTest(bool& error)
     planner::Object::T_Object objects = planner::ParseObj(targetFile);
     std::string model2("../tests/collision/cubeenglob.obj");
     planner::Object::T_Object objects2 = planner::ParseObj(model2);
-    planner::Object a(*objects[0]);
-    planner::Object b(*objects[0]);
+    /*planner::Object a(*objects[0]);
+    planner::Object b(*objects[0]);*/
 	
     planner::Model robot;
     robot.englobed = objects[0];
     planner::ParseObj(model2, robot.englobing);
     robot.englobing = objects2;
     planner::LocalPlanner lPlanner(objects, robot);
+
+    planner::Model a(robot);
+    planner::Model b(robot);
 
     Eigen::Vector3d collisionA(-3,0,0);
     Eigen::Vector3d collisionB(3,0,0);

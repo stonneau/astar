@@ -47,19 +47,19 @@ public:
     ///\param to Goal configuration
     ///\param neighbourDistance maximum distance for which a node can be a neighbour of another
     ///\return a list of Object corresponding to the path. If no path was found the list is empty
-     Object::CT_Object GetPath(const Object& /*from*/, const Object& /*to*/, float /*neighbourDistance*/, bool simplify = true);
+     CT_Model GetPath(const Model & /*from*/, const Model & /*to*/, float /*neighbourDistance*/, bool simplify = true);
 
 	///\brief Interpolated configurations along path
     ///\param path path
     ///\param steps number of computed configurations
     ///\return a list of Object corresponding to the path. If no path was found the list is empty
-	 std::vector<Eigen::Matrix4d> Interpolate(const Object::CT_Object& path, int /*steps*/);
+     std::vector<Eigen::Matrix4d> Interpolate(const CT_Model &path, int /*steps*/);
 
 public:
      const Model& model_;
 
 public:
-     const Object::T_Object& GetPRMNodes() const;
+     const T_Model& GetPRMNodes() const;
      const std::vector< int >& GetConnections(int node) const;
 
 private:

@@ -41,9 +41,9 @@ struct CompleteScenario
     Robot* robot;
     std::vector<planner::Node*> limbs;
     std::vector<sampling::T_Samples> limbSamples;
-    Object* from;
-    Object* to;
-    Object::CT_Object path;
+    Model* from;
+    Model* to;
+    CT_Model path;
     std::vector<planner::Robot*> completePath;
     State initstate;
 };

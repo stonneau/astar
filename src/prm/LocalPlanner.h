@@ -27,8 +27,8 @@ public:
     ~LocalPlanner();
 
 public:
-    bool operator ()(const Object* /*a*/, const Object* /*b*/, int stage =0);
-    std::vector<Eigen::Matrix4d> Interpolate(const Object* /*a*/, const Object* /*b*/, int nbSteps);
+    bool operator ()(const Model* /*a*/, const Model* /*b*/, int stage =0);
+    std::vector<Eigen::Matrix4d> Interpolate(const Model* /*a*/, const Model* /*b*/, int nbSteps);
 	
 public:
 	const Model& model_;

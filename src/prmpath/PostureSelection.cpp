@@ -128,11 +128,11 @@ namespace
         return res;
     }
 
-    planner::State* Interpolate(planner::CompleteScenario& scenario, const State& previous, const Object* next)
+    planner::State* Interpolate(planner::CompleteScenario& scenario, const State& previous, const Model* next)
     {
         planner::State* res = new State;
         Robot * robot = new planner::Robot(*(previous.value));
-        robot->SetConfiguration(next);
+        robot->SetConfiguration(next->englobed);
         res->value = robot;
         std::vector<Node*> limbs;
         for(std::vector<Node*>::iterator it = scenario.limbs.begin()
@@ -177,7 +177,7 @@ namespace
         return res;
     }
 
-    void developPathRec(const Object* a, const Object* b, Object::CT_Object& res)
+    void developPathRec(const Model* a, const Model* b, CT_Model& res)
     {
         Eigen::Vector3d line = b->GetPosition() - a->GetPosition();
         // norm
@@ -216,20 +216,20 @@ namespace
             offrotmat = Eigen::AngleAxisd(offrot[0],  Eigen::Vector3d::UnitZ())
                      *  Eigen::AngleAxisd(offrot[1],  Eigen::Vector3d::UnitX())
                      *  Eigen::AngleAxisd(offrot[2],  Eigen::Vector3d::UnitZ());
-            Object* tmp = new Object(*a);
+            Model* tmp = new Model(*a);
             tmp->SetPosition(offset);
             tmp->SetOrientation(offrotmat);
             res.push_back(tmp);
         }
-        res.push_back(new Object(*b));
+        res.push_back(new Model(*b));
     }
 
-    Object::CT_Object developPath(const Object::CT_Object& initpath )
+    CT_Model developPath(const CT_Model& initpath )
     {
-        Object::CT_Object res;
+        CT_Model res;
         if(initpath.size() <= 2) return initpath;
-        Object::CT_Object::const_iterator it2 = initpath.begin(); ++it2;
-        for(Object::CT_Object::const_iterator it = initpath.begin(); it2!=initpath.end(); ++it, ++it2)
+        CT_Model::const_iterator it2 = initpath.begin(); ++it2;
+        for(CT_Model::const_iterator it = initpath.begin(); it2!=initpath.end(); ++it, ++it2)
         {
             developPathRec(*it, *it2, res);
         }
@@ -244,8 +244,8 @@ planner::T_State planner::PostureSequence(planner::CompleteScenario& scenario)
     planner::T_State res;
     State* current = &scenario.initstate;
     res.push_back(current);
-    Object::CT_Object path = developPath(scenario.path);
-    for(Object::CT_Object::iterator it = path.begin(); it!=path.end(); ++it)
+    CT_Model path = developPath(scenario.path);
+    for(CT_Model::iterator it = path.begin(); it!=path.end(); ++it)
     {
         current = Interpolate(scenario, *current, *it);
         res.push_back(current);
