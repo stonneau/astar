@@ -87,7 +87,12 @@ void BVHExporter::PushStructure(planner::Robot* robot)
         {
             node = node->children.front();
         }
-        WriteJointOffsetRec(f_, node->children[0]);
+        //WriteJointOffsetRec(f_, node->children[0]);
+        for(std::vector<planner::Node*>::iterator it = node->parent->children.begin();
+            it != node->parent->children.end(); ++it)
+        {
+            WriteJointOffsetRec(f_, *it);
+        }
     f_.RemoveTab();
     f_ << "}";
 }

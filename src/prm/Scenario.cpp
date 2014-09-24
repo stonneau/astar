@@ -56,6 +56,10 @@ Scenario::Scenario(const std::string& filepath)
 			{
                 ParseObj(line.substr(9), objects_);
 			}
+            else if(line.find("OBJECTCONTACT = ") == 0)
+            {
+                ParseObj(line.substr(16), contactObjects_);
+            }
 			else if(line.find("PRMFILE = ") == 0 && !loading)
 			{
 				loading = true;
@@ -84,11 +88,25 @@ Scenario::Scenario(const std::string& filepath)
 		}
 		else if(generating)
 		{
-			prm = new SimplePRM(model_, objects_, neighbourDistance, size, neighbours, visibility);
+            if(contactObjects_.empty())
+            {
+                prm = new SimplePRM(model_, objects_, neighbourDistance, size, neighbours, visibility);
+            }
+            else
+            {
+                prm = new SimplePRM(model_, contactObjects_, objects_, neighbourDistance, size, neighbours, visibility);
+            }
 		}
 		else
 		{
-			prm = planner::LoadPRM(prmfile, objects_, model_);
+            if(contactObjects_.empty())
+            {
+                prm = planner::LoadPRM(prmfile, contactObjects_, objects_, model_);
+            }
+            else
+            {
+                prm = planner::LoadPRM(prmfile, objects_, model_);
+            }
 		}
 	}
 	else

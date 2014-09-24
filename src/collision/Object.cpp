@@ -252,16 +252,15 @@ bool Object::InContact(Object* object, double epsilon, Eigen::Vector3d& normal, 
             }
         }
         int nbfalse = 0;
+        Eigen::Vector3d barycenter(0,0,0);
         for(std::vector<Eigen::Vector3d>::const_iterator cit = positions.begin()
             ; cit != positions.end(); ++cit)
         {
-            if((ProjPoint2Triangle(p1,p2,p3, *cit) -(*cit)).norm() > epsilon)
-            {
-               ++nbfalse;
-            }
-            else --nbfalse;
+            barycenter += *cit;
         }
-        res = res && nbfalse <=2;
+        barycenter = barycenter / positions.size();
+        if((ProjPoint2Triangle(p1,p2,p3, barycenter) -(barycenter)).norm() > 2 * epsilon)
+            return false;
     }
     return res;
 }

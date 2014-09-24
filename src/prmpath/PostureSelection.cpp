@@ -95,6 +95,33 @@ Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::
     return res;
 }
 
+sampling::T_Samples planner::GetContactCandidates(Robot& robot, Node* limb, const sampling::T_Samples& samples
+                                         , Object::T_Object& obstacles, const Eigen::Vector3d& direction)
+{
+    Sample* save = new Sample(limb);
+    sampling::T_Samples res;
+    /*Eigen::Matrix4d toWorldCoordinates = Eigen::Matrix4d::Identity();
+    toWorldCoordinates.block<3,3>(0,0) = limb->parent->toWorldRotation;
+    toWorldCoordinates.block<3,1>(0,3) = limb->parent->position;*/
+    Object* effector = GetEffector(limb);
+    std::vector<Eigen::Vector3d> effectorPos = GetEffectorsRec(limb);
+    for(T_Samples::const_iterator sit = samples.begin(); sit != samples.end(); ++sit)
+    {
+        Eigen::Vector3d normal;
+        for(Object::T_Object::iterator oit = obstacles.begin(); oit != obstacles.end(); ++oit)
+        {
+            if(effector->InContact(*oit,epsilon, normal) && !planner::IsSelfColliding(&robot, limb) && !effector->IsColliding(obstacles))
+            {
+                res.push_back(*sit);
+                break;
+            }
+        }
+    }
+    planner::sampling::LoadSample(*save, limb);
+    return res;
+}
+
+
 T_Samples planner::GetPosturesOnTarget(Robot& robot, Node* limb, const sampling::T_Samples &samples
                                          , Object::T_Object& obstacles, Eigen::Vector3d worldposition)
 {
@@ -120,7 +147,7 @@ namespace
         std::vector<int> res;
         for(int i=0; i < nbLimbs; ++i)
         {
-           // if(std::find(inContactBefore.begin(), inContactBefore.end(), i)==inContactBefore.end())
+            if(std::find(inContactBefore.begin(), inContactBefore.end(), i)==inContactBefore.end())
             {
                 res.push_back(i);
             }

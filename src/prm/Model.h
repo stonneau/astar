@@ -61,6 +61,22 @@ struct Model
         }
     }
 
+    std::vector<size_t> EnglobingCollision(Object* obj) // updates collision indexes
+    {
+        std::vector<size_t> res;
+        collisionIndexes.clear();
+        size_t id = 0;
+        for(Object::T_Object::iterator it = englobing.begin();
+            it != englobing.end(); ++it, ++id)
+        {
+            if((*it)->IsColliding(obj))
+            {
+                res.push_back(id);
+            }
+        }
+        return res;
+    }
+
     const Eigen::Matrix3d& GetOrientation() const
     {
         return englobed->GetOrientation();
@@ -72,6 +88,8 @@ struct Model
 
     Object* englobed;
     Object::T_Object englobing;
+// TMP SERIOUSLY THIS NEEDS TO GET OUT OF HERE FOR PRM TYPE
+    std::vector<size_t> collisionIndexes;
 };
 
 } //namespace planner

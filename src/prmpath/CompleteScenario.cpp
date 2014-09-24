@@ -154,9 +154,13 @@ namespace
 
 }
 
+
+
+
 CompleteScenario* planner::CompleteScenarioFromFile(const std::string& filename)
 {
     CompleteScenario* cScenario = new CompleteScenario;
+    cScenario->relocateEnglobing = false;
     bool scenario = false; bool skeleton = false; bool contraints = false;
     bool from = false; bool to = false; bool limb = false; bool initstate = false;
     bool samples = false;
@@ -174,6 +178,10 @@ CompleteScenario* planner::CompleteScenarioFromFile(const std::string& filename)
                 {
                     scenario = true;
                 }
+            }
+            if(line.find("RELOCATE_ENGLOBING") != string::npos)
+            {
+                cScenario->relocateEnglobing = true;
             }
             if(line.find("ROBOT_SKELETON file=") != string::npos)
             {
@@ -254,10 +262,12 @@ CompleteScenario* planner::CompleteScenarioFromFile(const std::string& filename)
     {
         std::cout << "can not found complete scenario file" << filename << std::endl;
     }
+
+    std::cout << "cherche" << filename << std::endl;
     if(scenario && skeleton && contraints && to && from && limb && samples )
     {
         // Generate path
-        cScenario->path = cScenario->scenario->prm->GetPath(*(cScenario->from), *(cScenario->to), 10, true);
+        cScenario->path = cScenario->scenario->prm->GetPath(*(cScenario->from), *(cScenario->to), 10, true, true);
         if(cScenario->path.empty())
         {
             cScenario->path.push_back(cScenario->from);

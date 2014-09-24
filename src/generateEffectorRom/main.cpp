@@ -49,6 +49,19 @@ namespace
 		Eigen::Vector3d pos = limb->toLocalRotation * Effectorcentroid(limb);
 		outstream << pos(0) << "," << pos(1) << "," << pos(2) <<'\n';
 	}
+
+	
+	planner::Node* RootObj(planner::Node* limb)
+	{
+		planner::Node* node = limb;
+		planner::Node* res(0);
+		while(node)
+		{			
+			if(node->current) res = node;
+			node = node->parent;
+		}
+		return res;
+	}
 }
 
 
@@ -62,6 +75,7 @@ int main(int argc, char *argv[])
 	std::string robotfile = argv[1];
 	planner::CompleteScenario* scenario = planner::CompleteScenarioFromFile(robotfile);
 	
+	planner::Node* root = RootObj((*scenario->limbs.begin()));
 	std::vector<planner::sampling::T_Samples>::iterator sit = scenario->limbSamples.begin();
 	for(std::vector<Node*>::iterator it = scenario->limbs.begin();
 		it != scenario->limbs.end(); ++it, ++sit)
@@ -70,7 +84,7 @@ int main(int argc, char *argv[])
 		for(planner::sampling::T_Samples::iterator sample = (*sit).begin();
 			sample != (*sit).end(); ++ sample)
 		{
-			WriteSamplePosition(*sample, *it, outstream);
+			WriteSamplePosition(*sample, root, outstream);
 		}
 		ofstream outfile;
 		std::string outfilename = (*it)->tag + ".erom";
@@ -79,7 +93,6 @@ int main(int argc, char *argv[])
 		{
 			outfile << outstream.rdbuf();
 			outfile.close();
-			return true;
 		}
 		else
 		{

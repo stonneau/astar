@@ -34,6 +34,7 @@ namespace
     bool drawObject = false;
     bool drawacis = false;
     bool drawPOstures = true;
+    bool drawScene = false;
     std::string outpath("../tests/testSerialization.txt");
     std::string outfilename ("../tests/entrance.path");
     Eigen::Matrix3d itompTransform;
@@ -113,12 +114,22 @@ namespace
     void DrawObjects()
 
     {
-        dsSetColorAlpha(0,0, 0,1);
-        for(planner::Object::T_Object::iterator it = cScenario->scenario->objects_.begin();
-            it != cScenario->scenario->objects_.end();
-            ++it)
+        if(drawScene)
         {
-            DrawObject(*it);
+            dsSetColorAlpha(0,0, 0,1);
+            for(planner::Object::T_Object::iterator it = cScenario->scenario->objects_.begin();
+                it != cScenario->scenario->objects_.end();
+                ++it)
+            {
+                DrawObject(*it);
+            }
+
+            for(planner::Object::T_Object::iterator it = cScenario->scenario->contactObjects_.begin();
+                it != cScenario->scenario->contactObjects_.end();
+                ++it)
+            {
+                DrawObject(*it);
+            }
         }
         if(pathOn)
         {
@@ -215,7 +226,8 @@ static void simLoop (int pause)
 }
 void start()
 {
-    cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/kitchen.scen");
+    //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/rocketbox.scen");
+    cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/climbing.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/zoey.scen");
     //cScenario = planner::CompleteScenarioFromFile("../tests/profile.scen");
     std::cout << "done" << std::endl;
@@ -236,7 +248,7 @@ void start()
 
     std::cout << "ca EN VRAI" << cScenario->robot->constantRotation << std::endl;
 
-    for(int i=0; i< cScenario->limbSamples[0].size(); ++i)
+    /*for(int i=0; i< cScenario->limbSamples[0].size(); ++i)
     {
         planner::Node* node = new planner::Node(*cScenario->robot->node);
         //node->offset = Eigen::Vector3d(0,0,0);
@@ -244,7 +256,7 @@ void start()
         planner::sampling::LoadSample(*cScenario->limbSamples[0][i], planner::GetChild(node, "upper_right_arm_z_joint"));
         node->Update();
         postures.push_back(node);
-    }
+    }*/
     samples = cScenario->limbSamples[0];
     std::cout << " SAMPLES" << samples.size() << std::endl;
     std::cout << "done creating nodes " << path.size() << std::endl;
@@ -350,6 +362,7 @@ bool SavePath()
     }
     savebvh ="../tests/itomp.path";
     itompexporter.Save(savebvh);
+	return true;
 }
 
 void command(int cmd)   /**  key control function; */
@@ -358,6 +371,9 @@ void command(int cmd)   /**  key control function; */
     {
         case 't' :
             pathOn = !pathOn;
+        break;
+        case '3' :
+            drawScene = !drawScene;
         break;
         case 'q' :
             drawacis = !drawacis;

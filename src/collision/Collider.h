@@ -26,9 +26,6 @@ public:
      /// brief collision testing between an Object and the Objects of the Collider
      bool IsColliding(Object* object);
 
-     /// brief collision testing between several Object and the Objects of the Collider
-     std::vector<size_t> IsColliding(Object::T_Object &objects);
-
      /// brief collision testing between all the Objects of the Collider
      bool IsColliding();
 

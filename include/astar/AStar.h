@@ -73,7 +73,7 @@ public:
 	///  \param dist Function used to measure the distance between two nodes. It 
 	///  has the signature Numeric (*Distance) (const NodeContent*, const NodeContent* )
 	///  \param return : true if a path was found, false otherwise
-	bool ComputePath(const Index from, const Index to, Path& path, Distance dist, Numeric costPerNode = 0) const
+    bool ComputePath(const Index from, const Index to, Path& path, Distance dist, Numeric costPerNode = 0) const
 	{
 		OpenSet openSet;
 		T_Node closedSet;

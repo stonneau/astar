@@ -60,7 +60,7 @@ namespace planner
                      *  Eigen::AngleAxisd(offrot[2],  Eigen::Vector3d::UnitZ());
             tmp.SetPosition(offset);
             tmp.SetOrientation(offrotmat);
-            if(planner.IsColliding(tmp.englobed) || planner.IsColliding(tmp.englobing).empty())
+            if(planner.IsColliding(tmp.englobed) || planner.IsInContact(tmp.englobing).empty())
             {
                 return false;
             }
@@ -147,9 +147,10 @@ namespace planner
 
 using namespace planner;
 
-LocalPlanner::LocalPlanner(Object::T_Object& objects, const Model& model)
-    : Collider(objects)
+LocalPlanner::LocalPlanner(Object::T_Object& objects, Object::T_Object &collisionObjects, const Model & model)
+    : Collider(collisionObjects)
 	, model_(model)
+    , contactObjects_(objects)
 {
 	// NOTHING
 }
@@ -176,6 +177,20 @@ bool LocalPlanner::operator ()(const Model *ma, const Model *mb, int stage)
 		}
     }
     return found;
+}
+
+
+std::vector<size_t> LocalPlanner::IsInContact(Object::T_Object& objects)
+{
+    size_t id = 0;
+    std::vector<size_t> res;
+    for(Object::T_Object::iterator it = objects.begin();
+        it != objects.end(); ++it, ++id)
+    {
+        if((*it)->IsColliding(contactObjects_))
+            res.push_back(id);
+    }
+    return res;
 }
 
 std::vector<Eigen::Matrix4d> LocalPlanner::Interpolate(const Model *ma, const Model *mb, int nbSteps)

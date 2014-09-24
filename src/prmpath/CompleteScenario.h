@@ -46,6 +46,7 @@ struct CompleteScenario
     CT_Model path;
     std::vector<planner::Robot*> completePath;
     State initstate;
+    bool relocateEnglobing;
 };
 
 /*

@@ -58,6 +58,7 @@ struct Scenario
 	//bool SaveScenario(const std::string& filepath);
 
 	Object::T_Object objects_;
+    Object::T_Object contactObjects_;
 	Model model_;
 	SimplePRM* prm;
 };

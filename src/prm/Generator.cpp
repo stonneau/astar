@@ -42,10 +42,11 @@ namespace
 
 using namespace planner;
 
-Generator::Generator(Object::T_Object &objects, const Model &model)
+Generator::Generator(Object::T_Object &objects, Object::T_Object &collisionObjects, const Model &model)
     : model_(model)
     , objects_(objects)
-    , collider_(objects)
+    , contactObjects_(collisionObjects)
+    , collider_(collisionObjects)
 {
     if(! ::generatorInit)
     {
@@ -88,7 +89,7 @@ Model* Generator::operator()()
         double r1, r2;
         r1 = ((double) rand() / (RAND_MAX)); r2 = ((double) rand() / (RAND_MAX));
         Eigen::Vector3d P = (1 - sqrt(r1)) * A + (sqrt(r1) * (1 - r2)) * B + (sqrt(r1) * r2) * C;
-        if(P.y() < 2.5)
+ //if(P.y() < 2.5)
 		{
 			configuration.SetPosition(P);
 			// random rotation
@@ -104,16 +105,18 @@ Model* Generator::operator()()
 				Eigen::Vector3d dir((double) rand() / (RAND_MAX), (double) rand() / (RAND_MAX), (double) rand() / (RAND_MAX));
 				if(dir.norm() == 0) break;
 				dir.normalize();
-				// add random direction and check for collision
-                while(sampled.first->IsColliding(configuration.englobing))
+                // add random direction and check for collision
+                std::vector<size_t> collisions = configuration.EnglobingCollision(sampled.first);
+                while(collisions.size()>0)
 				{
 					if(!collider_.IsColliding(configuration.englobed))
 					{
-                        if(configuration.GetPosition().y() < 2.)
+//if(configuration.GetPosition().y() < 2.)
                             return new Model(configuration);
 						break;
 					}
 					configuration.SetPosition(configuration.GetPosition() + (double) rand() / (RAND_MAX) / 2 * dir);
+                    collisions = configuration.EnglobingCollision(sampled.first);
 				}
 				--limitstraight;
 			}
@@ -143,15 +146,18 @@ Model* Generator::operator()()
 					dir.normalize();
 				}
 				// add random direction and check for collision
-                while(sampled.first->IsColliding(configuration.englobing))
+
+                std::vector<size_t> collisions = configuration.EnglobingCollision(sampled.first);
+                while(collisions.size()>0)
 				{
 					if(!collider_.IsColliding(configuration.englobed))
 					{
-                        if(configuration.GetPosition().y() < 2.)                            
+//if(configuration.GetPosition().y() < 2.)
                             return new Model(configuration);
 						break;
 					}
 					configuration.SetPosition(configuration.GetPosition() + (double) rand() / (RAND_MAX) / 2 * dir);
+                    collisions = configuration.EnglobingCollision(sampled.first);
 				}
 				--limit2;
 			}
@@ -163,7 +169,7 @@ Model* Generator::operator()()
 
 std::pair<Object*, const Tri*>  Generator::RandomPointIntriangle()
 {
-    Object* sampled = objects_[rand() % (objects_.size())];
+    Object* sampled = contactObjects_[rand() % (contactObjects_.size())];
     return std::make_pair(sampled, &(sampled->GetModel()->tris[rand() % (sampled->GetModel()->num_tris)]));
 }
 
@@ -186,8 +192,8 @@ const std::pair<Object*, const Tri*>& Generator::WeightedTriangles()
 void Generator::InitWeightedTriangles()
 {
     float sum = 0;
-    for(Object::T_Object::iterator objit = objects_.begin();
-        objit != objects_.end(); ++objit)
+    for(Object::T_Object::iterator objit = contactObjects_.begin();
+        objit != contactObjects_.end(); ++objit)
     {
         for(int i =0; i < (*objit)->GetModel()->num_tris; ++i)
         {

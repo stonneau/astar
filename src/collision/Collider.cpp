@@ -19,19 +19,6 @@ bool Collider::IsColliding(Object *model)
     return model->IsColliding(objects_);
 }
 
-std::vector<size_t> Collider::IsColliding(Object::T_Object& objects)
-{
-    size_t id = 0;
-    std::vector<size_t> res;
-    for(Object::T_Object::iterator it = objects.begin();
-        it != objects.end(); ++it, ++id)
-    {
-        if(IsColliding(*it))
-            res.push_back(id);
-    }
-    return res;
-}
-
 bool Collider::IsColliding()
 {
     for(Object::T_Object::iterator it = objects_.begin();

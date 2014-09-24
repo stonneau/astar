@@ -21,7 +21,7 @@ class Generator
 {
 public:
     ///\brief Constructor
-    Generator(Object::T_Object& objects, const Model& model);
+    Generator(Object::T_Object& objects, Object::T_Object& collisionObjects,  const Model& model);
 
     ///\brief Destructor
     ~Generator();
@@ -32,6 +32,7 @@ public:
 public:
     const Model& model_;
     Object::T_Object& objects_;
+    Object::T_Object& contactObjects_;
     Collider collider_;
 
 private:

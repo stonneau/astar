@@ -94,7 +94,7 @@ void LocalPlannerTest(bool& error)
     robot.englobed = objects[0];
     planner::ParseObj(model2, robot.englobing);
     robot.englobing = objects2;
-    planner::LocalPlanner lPlanner(objects, robot);
+    planner::LocalPlanner lPlanner(objects, objects, robot);
 
     planner::Model a(robot);
     planner::Model b(robot);

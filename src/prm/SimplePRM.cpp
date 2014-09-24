@@ -42,10 +42,10 @@ namespace planner
 
 	struct PImpl
 	{
-        PImpl(const Model& model, Object::T_Object& objects, float neighbourDistance, int size, int k, bool visibility)
-            : planner_(objects, model)
+        PImpl(const Model& model, Object::T_Object& objects, Object::T_Object& collisionObjects, float neighbourDistance, int size, int k, bool visibility)
+            : planner_(objects, collisionObjects, model)
         {
-            Generator* gen = new Generator(objects, model); // TODO MEME
+            Generator* gen = new Generator(objects, collisionObjects, model); // TODO MEME
 			
 #if PROFILE
 Timer timer;
@@ -62,8 +62,8 @@ std::cout << " Graph generation time :" << timer.GetTime() << std::endl;
             // feel prmNodes
         }
 
-        PImpl(const Model& model, Object::T_Object& objects, int size)
-            : planner_(objects, model)
+        PImpl(const Model& model, Object::T_Object& objects, Object::T_Object& collisionObjects, int size)
+            : planner_(objects, collisionObjects, model)
         {
            prm_ = new prm_t(size);
         }
@@ -98,15 +98,33 @@ using namespace planner;
 SimplePRM::SimplePRM(const Model &model, Object::T_Object &objects, float neighbourDistance, int size, int k, bool visibility)
     : model_(model)
     , objects_(objects)
+    , CollisionObjects_(objects)
 {
-    pImpl_.reset(new PImpl(model_, objects_, neighbourDistance, size, k, visibility));
+    pImpl_.reset(new PImpl(model_, objects_, CollisionObjects_, neighbourDistance, size, k, visibility));
+}
+
+SimplePRM::SimplePRM(const Model &model, Object::T_Object &objects, Object::T_Object &collisionObjects, float neighbourDistance, int size, int k, bool visibility)
+    : model_(model)
+    , objects_(objects)
+    , CollisionObjects_(collisionObjects)
+{
+    pImpl_.reset(new PImpl(model_, objects_, CollisionObjects_, neighbourDistance, size, k, visibility));
 }
 
 SimplePRM::SimplePRM(const Model& model, Object::T_Object &objects, int size)
     : model_(model)
     , objects_(objects)
+    , CollisionObjects_(objects)
 {
-    pImpl_.reset(new PImpl(model_, objects_, size));
+    pImpl_.reset(new PImpl(model_, objects_, CollisionObjects_, size));
+}
+
+SimplePRM::SimplePRM(const Model& model, Object::T_Object &objects, Object::T_Object &collisionObjects, int size)
+    : model_(model)
+    , objects_(objects)
+    , CollisionObjects_(collisionObjects)
+{
+    pImpl_.reset(new PImpl(model_, objects_, CollisionObjects_, size));
 }
 
 SimplePRM::~SimplePRM()
@@ -152,7 +170,7 @@ void Simplify(LocalPlanner& planner, int currentIndex, CT_Model& res)
 }
 }
 
-CT_Model SimplePRM::GetPath(const Model &from, const Model &to, float neighbourDistance, bool simplify)
+CT_Model SimplePRM::GetPath(const Model &from, const Model &to, float neighbourDistance, bool simplify, bool ingraph)
 {
     CT_Model res = pImpl_->prm_->ComputePath(&from, &to, Distance, &pImpl_->planner_, neighbourDistance);
     if(simplify && !res.empty())
@@ -271,7 +289,7 @@ bool planner::SavePrm(SimplePRM& prm, const std::string& outfilename)
     }
 }
 
-SimplePRM* planner::LoadPRM(const std::string& filename, Object::T_Object& objects, const Model& model)
+SimplePRM* planner::LoadPRM(const std::string& filename, Object::T_Object& objects, Object::T_Object& collisionObjects, const Model& model)
 {
     SimplePRM* prm(0);
     //const Object& target = *model.englobed;
@@ -290,7 +308,7 @@ SimplePRM* planner::LoadPRM(const std::string& filename, Object::T_Object& objec
             {
                 line = line.substr(5);
                 size = std::stoi (line);
-                prm = new SimplePRM(model, objects, size);
+                prm = new SimplePRM(model, objects, collisionObjects, size);
             }
             else if(line.find("connections ") == 0)
             {
@@ -321,4 +339,10 @@ SimplePRM* planner::LoadPRM(const std::string& filename, Object::T_Object& objec
     }
     prm->pImpl_->InitPrmNodes();
     return prm;
+}
+
+
+SimplePRM* planner::LoadPRM(const std::string& filename, Object::T_Object& objects, const Model& model)
+{
+    return planner::LoadPRM(filename, objects, objects, model);
 }
