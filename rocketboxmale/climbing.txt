@@ -3,6 +3,6 @@ OBJECT = ../rocketboxmale/wall.obj
 OBJECTCONTACT = ../rocketboxmale/grasps.obj
 PRMFIL = ../rocketboxmale/prm.prm
 qs = ../tests/fullscenarios/zombi_room.prm
-PRMFIE = ../tests/climbingvisibillity.txt
+PRMFIL = ../tests/climbingvisibillity.txt
 SIZE = 500 5 20
 VISIBILIT

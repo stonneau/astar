@@ -172,7 +172,7 @@ void Simplify(LocalPlanner& planner, int currentIndex, CT_Model& res)
 
 CT_Model SimplePRM::GetPath(const Model &from, const Model &to, float neighbourDistance, bool simplify, bool ingraph)
 {
-    CT_Model res = pImpl_->prm_->ComputePath(&from, &to, Distance, &pImpl_->planner_, neighbourDistance);
+    CT_Model res = pImpl_->prm_->ComputePath(&from, &to, Distance, &pImpl_->planner_, neighbourDistance, ingraph);
     if(simplify && !res.empty())
     {
         Simplify(pImpl_->planner_, 0, res);
