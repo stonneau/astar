@@ -30,28 +30,44 @@ void Jacobian::Invalidate()
 	computeJacSVD_ = true; computeNullSpace_ = true;
 }
 
+namespace
+{
+    Eigen::Vector3d ComputeRotationAxis(Node* node, Node* root)
+    {
+        Node* y = node->parent;
+        Eigen::Vector3d w_ = node->axis;							// Initialize to local rotation axis
+        while (y) {
+            Rotate(y->axis, w_, y->value);
+            //if(y->id == root->id) break;
+            y = y->parent;
+        }
+        return w_;
+    }
+}
+
 void Jacobian::ComputeJacobian(Node* root)
 {
     Eigen::Matrix4d toRootCoordinates = Eigen::Matrix4d::Identity();
     toRootCoordinates.block<3,3>(0,0) = root->toLocalRotation;
-    toRootCoordinates.block<3,1>(0,3) = root->position;
-    toRootCoordinates.inverse();
+    toRootCoordinates.block<3,1>(0,3) = -root->position;
+    Eigen::Matrix4d toWorldCoordinates = toRootCoordinates;
+    toWorldCoordinates.inverse();
 	Invalidate();
     int dim = planner::GetNumChildren(root);
-    std::vector<Node*> effectors = planner::GetEffectors(root);
+    std::vector<Node*> effectors = planner::GetEffectors(root, true);
     jacobian_ = MatrixX(3 * effectors.size(), dim);
     // Traverse this to find all end effectors
     for(int i=0; i!=effectors.size(); ++i)
     {
         Node* nodeEffector = effectors[i];
         Node* currentNode = nodeEffector;
-        Eigen::Vector3d effectorPos = matrices::matrix4TimesVect3(toRootCoordinates, nodeEffector->position);
+        Eigen::Vector3d effectorPos = nodeEffector->position;
         do
         {
             currentNode = currentNode->parent;
             Eigen::Vector3d siMinuspj = effectorPos -
-                    matrices::matrix4TimesVect3(toRootCoordinates, currentNode->position);
-            Eigen::Vector3d vj = currentNode->toWorldRotation * currentNode->axis;
+                    currentNode->position; //);
+            Eigen::Vector3d vj = ComputeRotationAxis(currentNode, root);//root->toLocalRotation * currentNode->axis; // ComputeRotationAxis(currentNode); //currentNode->toWorldRotation * currentNode->axis;
             jacobian_.block<3,1>(3*i,currentNode->id - root->id) = vj.cross(siMinuspj);
         }
         while(currentNode->id != root->id);

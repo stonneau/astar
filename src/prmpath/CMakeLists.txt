@@ -37,6 +37,8 @@ set(SOURCES
     Export/Exporter.h Export/Exporter.cpp
     Export/BVHExporter.h Export/BVHExporter.cpp
     Export/FileHandler.h Export/FileHandler.cpp
+    ik/IKSolver.h ik/IKSolver.cpp
+    ik/PartialDerivativeConstraint.h ik/PartialDerivativeConstraint.cpp
         ${SRC_TOOLS_DIR}/MatrixDefs.h ${SRC_TOOLS_DIR}/MatrixDefs.cpp
         ${SRC_TOOLS_DIR}/MatrixDefsInternal.h
 )

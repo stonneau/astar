@@ -1,7 +1,7 @@
 # Blender MTL File: 'None'
-# Material Count: 7
+# Material Count: 6
 
-newmtl apartmentstaticfbx-hardwoodfloor.005
+newmtl apartmentstaticfbx-hardwoodfloor
 Ns 0.000000
 Ka 0.000000 0.000000 0.000000
 Kd 0.384000 0.384000 0.384000
@@ -9,28 +9,9 @@ Ks 0.900000 0.900000 0.900000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd /media/6C9E319F9E3162AE/dev/unity_rigid/ExportedObj/woodFloorTexture.tif
+map_Kd woodFloorTexture.tif
 
-newmtl apartmentstaticfbx-lambert1.005
-Ns 0.000000
-Ka 0.000000 0.000000 0.000000
-Kd 0.384000 0.384000 0.384000
-Ks 0.900000 0.900000 0.900000
-Ni 1.000000
-d 1.000000
-illum 2
-
-newmtl apartmentstaticfbx-pillowmaterial.005
-Ns 0.000000
-Ka 0.000000 0.000000 0.000000
-Kd 0.384000 0.384000 0.384000
-Ks 0.900000 0.900000 0.900000
-Ni 1.000000
-d 1.000000
-illum 2
-map_Kd /media/6C9E319F9E3162AE/dev/unity_rigid/ExportedObj/bedSpread.psd
-
-newmtl apartmentstaticfbx-trimmaterial.005
+newmtl apartmentstaticfbx-lambert1
 Ns 0.000000
 Ka 0.000000 0.000000 0.000000
 Kd 0.384000 0.384000 0.384000
@@ -39,7 +20,7 @@ Ni 1.000000
 d 1.000000
 illum 2
 
-newmtl computerdesk-maplematerial.005
+newmtl apartmentstaticfbx-trimmaterial
 Ns 0.000000
 Ka 0.000000 0.000000 0.000000
 Kd 0.384000 0.384000 0.384000
@@ -47,9 +28,8 @@ Ks 0.900000 0.900000 0.900000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd /media/6C9E319F9E3162AE/dev/unity_rigid/ExportedObj/mapleWood.psd
 
-newmtl couch-couchfabricmaterial.005
+newmtl computerdesk-maplematerial
 Ns 0.000000
 Ka 0.000000 0.000000 0.000000
 Kd 0.384000 0.384000 0.384000
@@ -57,9 +37,9 @@ Ks 0.900000 0.900000 0.900000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd /media/6C9E319F9E3162AE/dev/unity_rigid/ExportedObj/couchFabric.psd
+map_Kd mapleWood.psd
 
-newmtl couch-kitchencountermaterial.005
+newmtl couch-couchfabricmaterial
 Ns 0.000000
 Ka 0.000000 0.000000 0.000000
 Kd 0.384000 0.384000 0.384000
@@ -67,4 +47,14 @@ Ks 0.900000 0.900000 0.900000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd /media/6C9E319F9E3162AE/dev/unity_rigid/ExportedObj/kitchenButcherBlock.psd
+map_Kd couchFabric.psd
+
+newmtl couch-kitchencountermaterial
+Ns 0.000000
+Ka 0.000000 0.000000 0.000000
+Kd 0.384000 0.384000 0.384000
+Ks 0.900000 0.900000 0.900000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd kitchenButcherBlock.psd

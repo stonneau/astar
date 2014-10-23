@@ -20,6 +20,9 @@ namespace planner
 sampling::Sample* GetPosturesInContact(Robot& robot, Node* limb, const sampling::T_Samples &samples
                                          , Object::T_Object& obstacles, const Eigen::Vector3d& direction);
 
+sampling::Sample* GetPosturesInContact(Robot& robot, Node* limb, const sampling::T_Samples &samples
+                                         , Object::T_Object& obstacles, const Eigen::Vector3d& direction, Eigen::Vector3d& position);
+
 sampling::T_Samples GetContactCandidates(Robot& robot, Node* limb, const sampling::T_Samples &samples
                                          , Object::T_Object& obstacles, const Eigen::Vector3d& direction);
 

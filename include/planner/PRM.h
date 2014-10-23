@@ -97,13 +97,13 @@ public:
 			astar_t astar(*this);
 			if(astar.ComputePath(start_id, goal_id, path, dist))
 			{
-                if(!ingraph)
+                //if(!ingraph)
                     res.push_back(from);
 				for(std::list<int>::const_iterator it = path.begin(); it != path.end(); ++it)
 				{
                     res.push_back(graph_t::nodeContents_[*it]);
 				}
-                if(!ingraph)
+                //if(!ingraph)
                     res.push_back(to);
 			}
 		 }

@@ -90,6 +90,7 @@ Model* Generator::operator()()
         r1 = ((double) rand() / (RAND_MAX)); r2 = ((double) rand() / (RAND_MAX));
         Eigen::Vector3d P = (1 - sqrt(r1)) * A + (sqrt(r1) * (1 - r2)) * B + (sqrt(r1) * r2) * C;
  //if(P.y() < 2.5)
+if(P.y() > -0.3 && P.y() < 2.5)
 		{
 			configuration.SetPosition(P);
 			// random rotation
@@ -102,7 +103,7 @@ Model* Generator::operator()()
 			configuration.SetOrientation(tranform);
 			while (limitstraight >0)
 			{
-				Eigen::Vector3d dir((double) rand() / (RAND_MAX), (double) rand() / (RAND_MAX), (double) rand() / (RAND_MAX));
+                Eigen::Vector3d dir((double) rand() / (RAND_MAX) - 0.5, (double) rand() / (RAND_MAX) - 0.5, (double) rand() / (RAND_MAX) - 0.5);
 				if(dir.norm() == 0) break;
 				dir.normalize();
                 // add random direction and check for collision
@@ -112,6 +113,7 @@ Model* Generator::operator()()
 					if(!collider_.IsColliding(configuration.englobed))
 					{
 //if(configuration.GetPosition().y() < 2.)
+if(configuration.GetPosition().y() > -0.3 && configuration.GetPosition().y() < 2.)
                             return new Model(configuration);
 						break;
 					}
@@ -153,6 +155,7 @@ Model* Generator::operator()()
 					if(!collider_.IsColliding(configuration.englobed))
 					{
 //if(configuration.GetPosition().y() < 2.)
+if(configuration.GetPosition().y() > -0.3 && configuration.GetPosition().y() < 2.)
                             return new Model(configuration);
 						break;
 					}

@@ -25,6 +25,7 @@ struct State
     State():value(0){}
     ~State(){if(value)delete value;}
     std::vector<int> contactLimbs;
+    std::vector<Eigen::Vector3d> contactLimbPositions;
     Robot* value;
 };
 

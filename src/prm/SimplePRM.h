@@ -86,6 +86,7 @@ public:
 };
 
 bool SavePrm(SimplePRM& prm, const std::string& outfilename);
+bool SavePrm(SimplePRM& prm, const std::string& outfilename, const Eigen::Matrix3d& transform);
 SimplePRM* LoadPRM(const std::string& filename, Object::T_Object& objects, const Model& model);
 SimplePRM* LoadPRM(const std::string& filename, Object::T_Object& objects, Object::T_Object &collisionObjects, const Model& model);
 

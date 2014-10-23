@@ -45,6 +45,7 @@ Eigen::Matrix3d GetJacobianProduct(Node* root)
 
 void ValuesFromNodeRec(Node* node, std::vector<double>& values)
 {
+    if(node->children.empty()) return;
     values.push_back(node->value);
     for(std::vector<Node*>::iterator it = node->children.begin();
         it != node->children.end(); ++it)

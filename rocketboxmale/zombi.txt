@@ -1,7 +1,7 @@
-MODEL = ../rocketboxmale/cenglobed.obj ../rocketboxmale/effectorroms.obj
-OBJECT = ../tests/collision/entrance.obj
+MODEL = ../rocketboxmale/cenglobed.obj ../rocketboxmale/cenglobing.obj
+OBJECT = ../tests/collision/sofa.obj
 PRMFIL = ../rocketboxmale/prm.prm
 qs = ../tests/fullscenarios/zombi_room.prm
-PRMFIL = ../tests/on_left_wall.txt
-SIZE = 300 4 20
-VISIBILI
+PRMFIL = ../tests/sunday.prm
+SIZE = 50 1 20
+VISIBILITY

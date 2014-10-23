@@ -18,6 +18,17 @@ namespace
         return limb->current;
     }
 
+    bool LimbColliding(Node* limb, planner::Object::T_Object& obstacles)
+    {
+        if(limb->current && limb->current->IsColliding(obstacles))
+        {
+                return true;
+        }
+        if(limb->children.size() == 0)
+            return false;
+        return LimbColliding(limb->children[0], obstacles);
+    }
+
     void GetEffectorsRec(Node* limb, std::vector<Eigen::Vector3d>& res)
     {
         if(limb->children.size() != 0)
@@ -58,7 +69,7 @@ namespace
 }
 
 Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::T_Samples& samples
-                                         , Object::T_Object& obstacles, const Eigen::Vector3d& direction)
+                                         , Object::T_Object& obstacles, const Eigen::Vector3d& direction, Eigen::Vector3d& position)
 {
     Sample* save = new Sample(limb);
     Sample* res = 0;
@@ -78,13 +89,14 @@ Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::
             LoadSample(*(*sit),limb);
             for(Object::T_Object::iterator oit = obstacles.begin(); oit != obstacles.end(); ++oit)
             {
-                if(effector->InContact(*oit,epsilon, normal) && !planner::IsSelfColliding(&robot, limb) && !effector->IsColliding(obstacles))
+                if(effector->InContact(*oit,epsilon, normal) && !planner::IsSelfColliding(&robot, limb) && !LimbColliding(limb, obstacles))
                 {
                     tempweightedmanip = tmp_manip * direction.dot(normal);
                     if(tempweightedmanip > bestManip)
                     {
                         bestManip = tempweightedmanip;
                         res = *sit;
+                        position = effector->GetPosition();
                         break;
                     }
                 }
@@ -93,6 +105,13 @@ Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::
     }
     planner::sampling::LoadSample(*save, limb);
     return res;
+}
+
+Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::T_Samples& samples
+                                         , Object::T_Object& obstacles, const Eigen::Vector3d& direction)
+{
+    Eigen::Vector3d dummmy;
+    return GetPosturesInContact(robot, limb, samples, obstacles, direction, dummmy);
 }
 
 sampling::T_Samples planner::GetContactCandidates(Robot& robot, Node* limb, const sampling::T_Samples& samples
@@ -147,7 +166,7 @@ namespace
         std::vector<int> res;
         for(int i=0; i < nbLimbs; ++i)
         {
-            if(std::find(inContactBefore.begin(), inContactBefore.end(), i)==inContactBefore.end())
+            //if(std::find(inContactBefore.begin(), inContactBefore.end(), i)==inContactBefore.end())
             {
                 res.push_back(i);
             }
@@ -168,7 +187,7 @@ namespace
             limbs.push_back(planner::GetChild(robot,(*it)->id));
         }
         //try to get back to previous state for starters.
-        for(std::vector<int>::const_iterator cit = previous.contactLimbs.begin();
+        /*for(std::vector<int>::const_iterator cit = previous.contactLimbs.begin();
             cit != previous.contactLimbs.end(); ++cit)
         {
             T_Samples samples = GetPosturesOnTarget(*robot, limbs[*cit], scenario.limbSamples[*cit],
@@ -178,7 +197,7 @@ namespace
                 res->contactLimbs.push_back(*cit);
                 planner::sampling::LoadSample(*(samples.front()),limbs[*cit]);
             }
-        }
+        }*/
         // create contacts then
         Eigen::Vector3d direction = next->GetPosition() - previous.value->node->position;
         if(direction.norm() != 0)
@@ -189,15 +208,17 @@ namespace
         {
             direction = Eigen::Vector3d(1,0,0);
         }
-        std::vector<int> newContacts = GetLimbsToContact(previous.contactLimbs, limbs.size());
+        std::vector<int> newContacts = GetLimbsToContact(res->contactLimbs, limbs.size());
+        Eigen::Vector3d tmp;
         for(std::vector<int>::const_iterator cit = newContacts.begin();
             cit != newContacts.end(); ++cit)
         {
             Sample* sample = GetPosturesInContact(*robot, limbs[*cit], scenario.limbSamples[*cit],
-                                                    scenario.scenario->objects_, direction);
+                                                    scenario.scenario->objects_, direction, tmp);
             if(sample)
             {
                 res->contactLimbs.push_back(*cit);
+                res->contactLimbPositions.push_back(tmp);
                 planner::sampling::LoadSample(*sample,limbs[*cit]);
             }
         }

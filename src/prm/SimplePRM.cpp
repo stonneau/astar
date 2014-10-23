@@ -252,7 +252,7 @@ namespace
 }
 
 
-bool planner::SavePrm(SimplePRM& prm, const std::string& outfilename)
+bool planner::SavePrm(SimplePRM& prm, const std::string& outfilename, const Eigen::Matrix3d& transform)
 {
     size_t size = prm.GetPRMNodes().size();
     std::stringstream outstream;
@@ -260,7 +260,7 @@ bool planner::SavePrm(SimplePRM& prm, const std::string& outfilename)
     for(T_Model::const_iterator it = prm.GetPRMNodes().begin();
         it!= prm.GetPRMNodes().end(); ++it)
     {
-        WriteNodeLine((*it)->GetOrientation(),(*it)->GetPosition(), outstream);
+        WriteNodeLine(transform * (*it)->GetOrientation(),transform * (*it)->GetPosition(), outstream);
     }
     outstream << "connections " << std::endl;
     for(size_t i =0; i< size; ++i)
@@ -287,6 +287,12 @@ bool planner::SavePrm(SimplePRM& prm, const std::string& outfilename)
         std::cout << "Can not open outfile " << outfilename << std::endl;
         return false;
     }
+}
+
+bool planner::SavePrm(SimplePRM& prm, const std::string& outfilename)
+{
+	Eigen::Matrix3d id = Eigen::Matrix3d::Identity();
+	return planner::SavePrm(prm, outfilename, id);
 }
 
 SimplePRM* planner::LoadPRM(const std::string& filename, Object::T_Object& objects, Object::T_Object& collisionObjects, const Model& model)

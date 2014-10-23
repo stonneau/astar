@@ -12,6 +12,7 @@
 #include "prmpath/PostureSelection.h"
 #include "prmpath/Export/BVHExporter.h"
 #include "prmpath/Export/ITOMPExporter.h"
+#include "prmpath/ik/IKSolver.h"
 #include "Timer.h"
 
 #include <string>
@@ -45,6 +46,8 @@ namespace
     std::vector<planner::Node*> postures;
     planner::sampling::T_Samples samples;
     planner::T_State states;
+    ik::IKSolver ikSolver;
+    Eigen::Vector3d target = Eigen::Vector3d(0.1,-0.1, 0.2);
 }
 namespace
 {
@@ -101,6 +104,27 @@ namespace
         {
             DrawObject(*it3, useItomp);
         }
+    }
+
+    void DrawPoint(const Eigen::Vector3d& target)
+    {
+        dsSetColor(1,0,0);
+        PQP_REAL p1 [3];
+        PQP_REAL p2 [3];
+        Eigen::Vector3d tmp(target);
+        tmp(2)+=0.1;
+        Vect3ToArray(p1,tmp);
+        tmp(2)-=0.2;
+        Vect3ToArray(p2,tmp);
+        dsDrawLineD(p1, p2);
+
+        tmp(2)+=0.1;
+        tmp(1)+=0.1;
+        Vect3ToArray(p1,tmp);
+        tmp(1)-=0.2;
+        Vect3ToArray(p2,tmp);
+        dsDrawLineD(p1, p2);
+        dsSetColor(0,0,1);
     }
 
     void LineBetweenObjects(const planner::Model* a, const planner::Model* b)
@@ -210,6 +234,11 @@ static void simLoop (int pause)
     DrawObjects();
     dsSetColorAlpha(0,0, 0.7,0.7);
     DrawNode(cScenario->robot->node);
+    for(std::vector<Eigen::Vector3d>::iterator it = states[current]->contactLimbPositions.begin();
+        it != states[current]->contactLimbPositions.end(); ++it)
+    {
+        DrawPoint(itompTransform * (*it));
+    }
     if(drawPOstures)
     {
 		for(std::vector<planner::Node*>::iterator it = postures.begin();
@@ -223,11 +252,13 @@ static void simLoop (int pause)
             DrawNode((*it)->value->node);
         }*/
     }
+    //Eigen::Vector3d target = planner::GetChild(cScenario->robot, "torso_x_joint")->toWorldRotation* Eigen::Vector3d(0.3,0,0);
+    DrawPoint(itompTransform*target);
 }
 void start()
 {
-    //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/rocketbox.scen");
-    cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/climbing.scen");
+    cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/tunnel.scen");
+    //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/climbing.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/zoey.scen");
     //cScenario = planner::CompleteScenarioFromFile("../tests/profile.scen");
     std::cout << "done" << std::endl;
@@ -321,7 +352,7 @@ bool SavePath()
     {
         planner::Robot* tmp =states[i]->value;
         Eigen::Matrix3d wtf = itompTransform;
-        Eigen::Vector3d putain(-12,8,0.5);
+        Eigen::Vector3d putain(0,0,0);
         wtf.inverse();
         WriteNodeLine(wtf * tmp->currentRotation, wtf * tmp->currentPosition - putain, outstream);
     }
@@ -353,7 +384,7 @@ bool SavePath()
 
     Eigen::Matrix3d inverse = itompTransform;
     inverse.inverse();
-    exporter::ITOMPExporter itompexporter(inverse, Eigen::Vector3d(12,-8,-0.5));
+    exporter::ITOMPExporter itompexporter(inverse, Eigen::Vector3d(0,0,0.472064));
     itompexporter.PushStructure(cScenario->robot);
     for(planner::T_State::iterator it = states.begin()+1; it != states.end(); ++it)
     {
@@ -367,6 +398,7 @@ bool SavePath()
 
 void command(int cmd)   /**  key control function; */
 {
+    //Eigen::Vector3d target = planner::GetChild(cScenario->robot, "torso_x_joint")->toWorldRotation* Eigen::Vector3d(0.5,0.5,0.5);
     switch (cmd)
     {
         case 't' :
@@ -375,6 +407,12 @@ void command(int cmd)   /**  key control function; */
         case '3' :
             drawScene = !drawScene;
         break;
+        case '4' :
+        {
+            ikSolver.StepClamping(planner::GetChild(cScenario->robot, "upper_right_arm_z_joint"),target,target ,false);
+        }
+
+        break;
         case 'q' :
             drawacis = !drawacis;
         break;
@@ -382,7 +420,7 @@ void command(int cmd)   /**  key control function; */
             drawObject = !drawObject;
         break;
         case 's' :
-            planner::SavePrm(*(cScenario->scenario->prm), outpath);
+            planner::SavePrm(*(cScenario->scenario->prm), outpath);//, (AngleAxisd(M_PI, Vector3d::UnitZ()) * AngleAxisd(0.5*M_PI, Vector3d::UnitX())).matrix());
         break;
         case 'd' :
             SavePath();

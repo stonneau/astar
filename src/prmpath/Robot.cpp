@@ -116,20 +116,22 @@ void Node::SetTranslation(const Eigen::Vector3d& position)
 
 int planner::GetNumChildren(const Node* node)
 {
-    int tmp = 0;
+    int tmp = node->children.empty() ? 0 : 1;
     for(std::vector<Node*>::const_iterator cit = node->children.begin();
         cit != node->children.end(); ++cit)
     {
-        tmp += 1 + planner::GetNumChildren(*cit);
+        tmp += planner::GetNumChildren(*cit);
     }
     return tmp;
 }
 
 namespace
 {
-    void GetEffectorsRec(Node* node, std::vector<Node*>& effectors)
+    void GetEffectorsRec(Node* node, std::vector<Node*>& effectors, bool onePerLimb)
     {
-        if(node->children.size() == 0)
+        bool ok = (node->children.empty() && !onePerLimb) || node->tag.find("effector") != std::string::npos
+                || node->tag.find("foot_x") != std::string::npos;
+        if(ok)
         {
             effectors.push_back(node);
         }
@@ -138,16 +140,16 @@ namespace
             for(std::vector<Node*>::iterator it = node->children.begin();
                 it != node->children.end(); ++it)
             {
-                GetEffectorsRec(*it, effectors);
+                GetEffectorsRec(*it, effectors, onePerLimb);
             }
         }
     }
 }
 
-std::vector<Node*> planner::GetEffectors(Node* node)
+std::vector<Node*> planner::GetEffectors(Node* node, bool onePerLimb)
 {
     std::vector<Node*> effectors;
-    GetEffectorsRec(node, effectors);
+    GetEffectorsRec(node, effectors, onePerLimb);
     return effectors;
 }
 
@@ -676,3 +678,40 @@ bool planner::IsSelfColliding(planner::Robot* robot, planner::Node* limb)
     return false;
 }
 
+
+void GetEffectorsRec(Node* limb, std::vector<Eigen::Vector3d>& res)
+{
+    if(limb->children.size() != 0)
+    {
+        for(std::vector<Node*>::iterator cit = limb->children.begin();
+            cit != limb->children.end(); ++cit)
+        {
+            GetEffectorsRec(*cit,res);
+        }
+    }
+    else
+    {
+        res.push_back(limb->position);
+    }
+}
+
+std::vector<Eigen::Vector3d> GetEffectorsRec(Node* limb)
+{
+    std::vector<Eigen::Vector3d> res;
+    GetEffectorsRec(limb,res);
+    return res;
+}
+
+
+Eigen::Vector3d planner::GetEffectorCenter(Node* node)
+{
+    std::vector<Eigen::Vector3d> res = GetEffectorsRec(node);
+    Eigen::Vector3d bary(0,0,0);
+    for(std::vector<Eigen::Vector3d>::iterator it = res.begin(); it != res.end();
+        ++it)
+    {
+        //bary += *it;
+        return *it;
+    }
+    return bary / res.size();
+}

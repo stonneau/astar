@@ -1,10 +1,10 @@
-# Blender MTL File: 'reduced_wall.blend'
+# Blender MTL File: 'None'
 # Material Count: 1
 
-newmtl Default-Diffuse.001
+newmtl Default-Diffuse.007
 Ns 0.000000
 Ka 0.000000 0.000000 0.000000
-Kd 0.245760 0.245760 0.245760
+Kd 0.196608 0.196608 0.196608
 Ks 0.900000 0.900000 0.900000
 Ni 1.000000
 d 1.000000
