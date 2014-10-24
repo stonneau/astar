@@ -2,7 +2,7 @@
 #ifndef _CLASS_PDCONSTRAINT
 #define _CLASS_PDCONSTRAINT
 
-#include "Jacobian.h"
+#include "prmpath/Jacobian.h"
 #include "prmpath/Robot.h"
 #include <Eigen/Dense>
 

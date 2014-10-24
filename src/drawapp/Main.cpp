@@ -13,6 +13,8 @@
 #include "prmpath/Export/BVHExporter.h"
 #include "prmpath/Export/ITOMPExporter.h"
 #include "prmpath/ik/IKSolver.h"
+#include "prmpath/ik/VectorAlignmentConstraint.h"
+#include "prmpath/ik/ForceManipulabilityConstraint.h"
 #include "Timer.h"
 
 #include <string>
@@ -47,7 +49,11 @@ namespace
     planner::sampling::T_Samples samples;
     planner::T_State states;
     ik::IKSolver ikSolver;
-    Eigen::Vector3d target = Eigen::Vector3d(0.1,-0.1, 0.2);
+    Eigen::Vector3d target = Eigen::Vector3d(0.1,0.2, 0.5);
+    Eigen::Vector3d axisAlign = Eigen::Vector3d(1,0,0);
+    Eigen::Vector3d directionManip = Eigen::Vector3d(0,0,1);
+    bool optimize = true;
+    std::vector<ik::PartialDerivativeConstraint*> constraints;
 }
 namespace
 {
@@ -257,6 +263,9 @@ static void simLoop (int pause)
 }
 void start()
 {
+    constraints.push_back(new ik::VectorAlignmentConstraint(Eigen::Vector3d(0,1,0)));
+    //constraints.push_back(new ik::ForceManipulabilityConstraint);
+    //ikSolver.AddConstraint(ik::ForceManip);
     cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/tunnel.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/climbing.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/zoey.scen");
@@ -407,12 +416,16 @@ void command(int cmd)   /**  key control function; */
         case '3' :
             drawScene = !drawScene;
         break;
+        case '5':
+        {
+            optimize = !optimize;
+            break;
+        }
         case '4' :
         {
-            ikSolver.StepClamping(planner::GetChild(cScenario->robot, "upper_right_arm_z_joint"),target,target ,false);
+            ikSolver.StepClamping(planner::GetChild(cScenario->robot, "upper_right_arm_z_joint"),target,directionManip, constraints ,optimize);
+            break;
         }
-
-        break;
         case 'q' :
             drawacis = !drawacis;
         break;

@@ -30,6 +30,13 @@ namespace
         return res;
     }
 
+    Eigen::Vector3d VectorFromString(const std::string& line)
+    {
+        char x[255],y[255],z[255];
+        sscanf(line.c_str(),"%s %s %s",x,y,z);
+        return Eigen::Vector3d(strtod (x, NULL), strtod(y, NULL), strtod(z, NULL));
+    }
+
     bool AssignJointLimits(const std::string line, Robot& robot)
     {
         vector<string> data = ExtractQuotesRec(line,4);
@@ -85,6 +92,19 @@ namespace
             return false;
         }
     }
+
+    bool CreateNormal(const std::string line, Robot& robot)
+    {
+        vector<string> data = ExtractQuotesRec(line,2);
+        if(data.size()!=2) return false;
+        Node* node = planner::GetChild(robot.node, data[0]);
+        if(node)
+        {
+            node->effectorNormal = VectorFromString(data[1]);
+            return true;
+        }
+        return false;
+    }
 }
 
 bool planner::LoadJointConstraints(Robot& robot, const std::string& filename)
@@ -116,6 +136,14 @@ bool planner::LoadJointConstraints(Robot& robot, const std::string& filename)
             else if(line.find("rom") != std::string::npos)
             {
                 if(!CreateGroup(line, robot))
+                {
+                    error = true;
+                    std::cout << "There were error in joint limit description file " << filename << " at line " << line_n << ": " << line <<  std::endl;
+                }
+            }
+            else if(line.find("normal") != std::string::npos)
+            {
+                if(!CreateNormal(line, robot))
                 {
                     error = true;
                     std::cout << "There were error in joint limit description file " << filename << " at line " << line_n << ": " << line <<  std::endl;

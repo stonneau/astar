@@ -286,10 +286,10 @@ CompleteScenario* planner::CompleteScenarioFromFile(const std::string& filename)
                 planner::sampling::Sample* candidate
                         = planner::GetPosturesInContact(*cScenario->robot, cScenario->limbs[*cit],
                                                         cScenario->limbSamples[*cit], cScenario->scenario->objects_, direction);
-                if(candidate)
+                /*if(candidate)
                 {
                     planner::sampling::LoadSample(*candidate, cScenario->limbs[*cit]);
-                }
+                }*/
             }
         }
         cScenario->initstate.value= new Robot(*cScenario->robot);

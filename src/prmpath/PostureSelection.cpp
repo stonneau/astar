@@ -1,5 +1,7 @@
 #include "PostureSelection.h"
 #include "tools/MatrixDefs.h"
+#include "ik/IKSolver.h"
+#include "ik/VectorAlignmentConstraint.h"
 
 #include <iostream>
 
@@ -73,19 +75,17 @@ Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::
 {
     Sample* save = new Sample(limb);
     Sample* res = 0;
-    /*Eigen::Matrix4d toWorldCoordinates = Eigen::Matrix4d::Identity();
-    toWorldCoordinates.block<3,3>(0,0) = limb->parent->toWorldRotation;
-    toWorldCoordinates.block<3,1>(0,3) = limb->parent->position;*/
+    Eigen::Vector3d sampleNormal;
     Object* effector = GetEffector(limb);
     std::vector<Eigen::Vector3d> effectorPos = GetEffectorsRec(limb);
     double bestManip = std::numeric_limits<double>::min();
     double tmp_manip, tempweightedmanip;
     for(T_Samples::const_iterator sit = samples.begin(); sit != samples.end(); ++sit)
     {
-        Eigen::Vector3d normal;
         tmp_manip = planner::sampling::Manipulability(*sit, direction);
         if(tmp_manip > bestManip)
         {
+            Eigen::Vector3d normal;
             LoadSample(*(*sit),limb);
             for(Object::T_Object::iterator oit = obstacles.begin(); oit != obstacles.end(); ++oit)
             {
@@ -97,13 +97,35 @@ Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::
                         bestManip = tempweightedmanip;
                         res = *sit;
                         position = effector->GetPosition();
+                        sampleNormal = normal;
                         break;
                     }
                 }
             }
         }
     }
-    planner::sampling::LoadSample(*save, limb);
+    /*So we have our sample. Time to perform some IK to align pose*/
+    if(res)
+    {
+        ik::VectorAlignmentConstraint constraint(sampleNormal);
+        std::vector<ik::PartialDerivativeConstraint*> constraints;
+        constraints.push_back(&constraint);
+        ik::IKSolver solver;
+        //solver.AddConstraint(ik::ForceManip);
+        {
+            int limit = 100;
+            //int limit2 = 100;
+            while(limit > 0)
+            {
+                solver.StepClamping(limb, position, position, constraints, true);
+                limit--;
+            }
+        }
+    }
+    else
+    {
+        planner::sampling::LoadSample(*save, limb);
+    }
     return res;
 }
 
@@ -219,7 +241,7 @@ namespace
             {
                 res->contactLimbs.push_back(*cit);
                 res->contactLimbPositions.push_back(tmp);
-                planner::sampling::LoadSample(*sample,limbs[*cit]);
+                //planner::sampling::LoadSample(*sample,limbs[*cit]);
             }
         }
         return res;

@@ -39,6 +39,8 @@ set(SOURCES
     Export/FileHandler.h Export/FileHandler.cpp
     ik/IKSolver.h ik/IKSolver.cpp
     ik/PartialDerivativeConstraint.h ik/PartialDerivativeConstraint.cpp
+    ik/VectorAlignmentConstraint.h ik/VectorAlignmentConstraint.cpp
+    ik/ForceManipulabilityConstraint.h ik/ForceManipulabilityConstraint.cpp
         ${SRC_TOOLS_DIR}/MatrixDefs.h ${SRC_TOOLS_DIR}/MatrixDefs.cpp
         ${SRC_TOOLS_DIR}/MatrixDefsInternal.h
 )

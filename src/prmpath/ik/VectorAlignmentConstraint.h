@@ -5,17 +5,19 @@
 #include "PartialDerivativeConstraint.h"
 
 namespace ik{
-class Jacobian;
 
 class VectorAlignmentConstraint : public PartialDerivativeConstraint
 {
 
 public:
-	 VectorAlignmentConstraint();
+     VectorAlignmentConstraint(const Eigen::Vector3d& alignmentAxis);
 	~VectorAlignmentConstraint();
 
 public:
-    virtual double Evaluate(ftr::Limb* /*limb*/, Eigen::VectorXd /*minDofs*/, Eigen::VectorXd /*maxDofs*/,  const int joint, Jacobian& /*jacobianMinus*/, Jacobian& /*jacobianPlus*/, float /*epsilon*/, const Eigen::Vector3d& /*direction*/);
+    virtual double Evaluate(planner::Node* /*limb*/, Eigen::VectorXd /*minDofs*/, Eigen::VectorXd /*maxDofs*/,  const int joint, Jacobian& /*jacobianMinus*/, Jacobian& /*jacobianPlus*/, float /*epsilon*/, const Eigen::Vector3d& /*direction*/);
+
+public:
+    const Eigen::Vector3d alignmentAxis_;
 
 };
 }

@@ -3,7 +3,6 @@
 #define _CLASS_FMCONSTRAINT
 
 #include "PartialDerivativeConstraint.h"
-class Jacobian;
 
 namespace ik{
 
@@ -15,7 +14,7 @@ public:
 	~ForceManipulabilityConstraint();
 
 public:
-    virtual double Evaluate(ftr::Limb* /*limb*/, Eigen::VectorXd /*minDofs*/, Eigen::VectorXd /*maxDofs*/,  const int joint, Jacobian& /*jacobianMinus*/, Jacobian& /*jacobianPlus*/, float /*epsilon*/, const Eigen::Vector3d& /*direction*/);
+    virtual double Evaluate(planner::Node* /*limb*/, Eigen::VectorXd /*minDofs*/, Eigen::VectorXd /*maxDofs*/,  const int joint, Jacobian& /*jacobianMinus*/, Jacobian& /*jacobianPlus*/, float /*epsilon*/, const Eigen::Vector3d& /*direction*/);
 
 private:
     double ForceManipulability(Jacobian& /*jacobian*/, const Eigen::Vector3d& /*direction*/);

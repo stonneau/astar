@@ -51,6 +51,7 @@ public: //*should be const*/
     const int id;
     Eigen::Vector3d axis;
     Eigen::Vector3d offset;
+    Eigen::Vector3d effectorNormal;
     Eigen::Matrix3d permanentRotation;
     int romId;
     std::vector<Node*> children;
