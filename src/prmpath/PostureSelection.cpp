@@ -107,13 +107,14 @@ Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::
     /*So we have our sample. Time to perform some IK to align pose*/
     if(res)
     {
+        LoadSample(*res,limb);
         ik::VectorAlignmentConstraint constraint(sampleNormal);
         std::vector<ik::PartialDerivativeConstraint*> constraints;
         constraints.push_back(&constraint);
         ik::IKSolver solver;
         //solver.AddConstraint(ik::ForceManip);
         {
-            int limit = 100;
+            int limit = 1000;
             //int limit2 = 100;
             while(limit > 0)
             {
