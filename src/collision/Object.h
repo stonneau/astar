@@ -116,7 +116,9 @@ private:
     PQP_REAL pqpPosition_ [3];
 
 public:
+    friend double MinDistance(const Eigen::Vector3d& point, Object* object, Eigen::Vector3d& projection, Eigen::Vector3d& normal);
 };
+double MinDistance(const Eigen::Vector3d& point, Object* object, Eigen::Vector3d& projection, Eigen::Vector3d& normal);
 
 }//namespace planner;
 #endif //_CLASS_COLLIDER

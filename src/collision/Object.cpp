@@ -140,6 +140,7 @@ Object::Object(PQP_Model* model, const T_Vector3& normals)
     , position_(Eigen::Vector3d::Zero())
     , orientation_(Eigen::Matrix3d::Identity())
 {
+    assert(normals_.empty() || normals_.size() == model->num_tris);
     EigenToDoubleMatrix(orientation_, pqpOrientation_);
     EigenToDoubleVector(position_, pqpPosition_);
 }
@@ -147,6 +148,7 @@ Object::Object(PQP_Model* model, const T_Vector3& normals)
 Object::Object(const Object& parent)
     : position_(Eigen::Vector3d::Zero())
     , orientation_(Eigen::Matrix3d::Identity())
+    , normals_(parent.normals_)
 {
     model_ = new PQP_Model;
     model_->BeginModel();
@@ -192,11 +194,11 @@ bool Object::InContact(Object* object, double epsilon)
 
 bool Object::InContact(Object* object, double epsilon, Eigen::Vector3d& normal, Eigen::Vector3d& proj)
 {
-    PQP_DistanceResult result;
-    PQP_Distance(&result,pqpOrientation_,pqpPosition_,model_,
-                 object->pqpOrientation_, object->pqpPosition_, object->model_,  2*epsilon, 2*epsilon,2);
-    double val = result.Distance();
-    if(val > epsilon) return false;
+    PQP_ToleranceResult result;
+    PQP_Tolerance(&result, pqpOrientation_, pqpPosition_, model_,
+                 object->pqpOrientation_, object->pqpPosition_, object->model_,
+                 epsilon, 2);
+    if(!result.CloserThanTolerance()) return false;
     if(object->normals_.empty())
     {
         std::cout << "no normals";
@@ -209,17 +211,18 @@ bool Object::InContact(Object* object, double epsilon, Eigen::Vector3d& normal, 
     double currentDistance;
     Eigen::Vector3d currentProjection;
     Eigen::Vector3d p1, p2, p3;
-    int i=0;
-    for(T_Vector3::const_iterator cit = object->normals_.begin(); cit != object->normals_.end(); ++cit, ++i)
+    // triangles in model not in the order they were inserted ! check ID
+    for(int i=0; i < object->model_->num_tris; ++i)
     {
-        DoubleVectorToEigen(p1, object->model_->tris[i].p1);
-        DoubleVectorToEigen(p2, object->model_->tris[i].p2);
-        DoubleVectorToEigen(p3, object->model_->tris[i].p3);
+        const Tri& t = object->model_->tris[i];
+        DoubleVectorToEigen(p1, t.p1);
+        DoubleVectorToEigen(p2, t.p2);
+        DoubleVectorToEigen(p3, t.p3);
         currentProjection = ProjPoint2Triangle(p1,p2,p3, this->position_);
         currentDistance = (currentProjection - this->position_).norm();
         if(currentDistance < minDistance)
         {
-            normal = *cit;
+            normal = object->normals_[t.id];
             proj = currentProjection;
             minDistance = currentDistance;
         }
@@ -379,4 +382,29 @@ const Eigen::Vector3d& Object::GetPosition() const
 const PQP_Model* Object::GetModel() const
 {
     return model_;
+}
+
+double planner::MinDistance(const Eigen::Vector3d& point, Object* object, Eigen::Vector3d& projection, Eigen::Vector3d& normal)
+{
+    assert(object->model_->num_tris == object->normals_.size());
+    double minDistance = std::numeric_limits<double>::max();
+    double currentDistance;
+    Eigen::Vector3d currentProjection;
+    Eigen::Vector3d p1, p2, p3;
+    for(int i =0; i<object->model_->num_tris; ++i)
+    {
+        const Tri& t = object->model_->tris[i];
+        DoubleVectorToEigen(p1, t.p1);
+        DoubleVectorToEigen(p2, t.p2);
+        DoubleVectorToEigen(p3, t.p3);
+        currentProjection = ProjPoint2Triangle(p1,p2,p3, point);
+        currentDistance = (currentProjection - point).norm();
+        if(currentDistance < minDistance)
+        {
+            normal = object->normals_[t.id];
+            projection = currentProjection;
+            minDistance = currentDistance;
+        }
+    }
+    return minDistance;
 }

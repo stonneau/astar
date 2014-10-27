@@ -77,7 +77,8 @@ Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::
     Sample* res = 0;
     Eigen::Vector3d sampleNormal; //, tmpPosition;
     Object* effector = GetEffector(limb);
-    std::vector<Eigen::Vector3d> effectorPos = GetEffectorsRec(limb);
+    //std::vector<Eigen::Vector3d> effectorPos = GetEffectorsRec(limb);
+    Eigen::Vector3d effectorCentroid = planner::GetEffectorCenter(limb);
     double bestManip = std::numeric_limits<double>::min();
     double tmp_manip, tempweightedmanip;
     for(T_Samples::const_iterator sit = samples.begin(); sit != samples.end(); ++sit)
@@ -90,6 +91,7 @@ Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::
             for(Object::T_Object::iterator oit = obstacles.begin(); oit != obstacles.end(); ++oit)
             {
                 if(effector->InContact(*oit,epsilon, normal, projection) && !planner::IsSelfColliding(&robot, limb) && !LimbColliding(limb, obstacles))
+                //if(planner::MinDistance(effectorCentroid, *oit, projection, normal) < epsilon && !planner::IsSelfColliding(&robot, limb) && !LimbColliding(limb, obstacles))
                 {
                     tempweightedmanip = tmp_manip * direction.dot(normal);
                     if(tempweightedmanip > bestManip)
@@ -115,7 +117,7 @@ Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::
         ik::IKSolver solver;
         //solver.AddConstraint(ik::ForceManip);
         {
-            int limit = 1000;
+            int limit = 100;
             //int limit2 = 100;
             while(limit > 0)
             {

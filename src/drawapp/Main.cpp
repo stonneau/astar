@@ -38,6 +38,7 @@ namespace
     bool drawacis = false;
     bool drawPOstures = true;
     bool drawScene = false;
+    bool drawNormals = false;
     std::string outpath("../tests/testSerialization.txt");
     std::string outfilename ("../tests/entrance.path");
     Eigen::Matrix3d itompTransform;
@@ -79,6 +80,9 @@ namespace
         PQP_REAL p1 [3];
         PQP_REAL p2 [3];
         PQP_REAL p3 [3];
+        PQP_REAL center [3];
+        PQP_REAL normal [3];
+        bool drNormals = drawNormals &! obj->normals_.empty();
         for(int i =0; i< obj->GetModel()->num_tris; ++i)
         {
             const Tri& t = obj->GetModel()->tris[i];
@@ -91,15 +95,31 @@ namespace
             {
                 Vect3ToArray(p1, itompTransform * v1); Vect3ToArray(p2, itompTransform * v2);
                 Vect3ToArray(p3, itompTransform * v3);
+                if(drNormals)
+                {
+                    Vect3ToArray(center, itompTransform * ((v1 + v2 + v3) /3));
+                    Vect3ToArray(normal,  itompTransform * obj->GetOrientation() *  (obj->normals_[t.id] * 0.5) +  itompTransform * (v1 + v2 + v3) /3);
+                }
             }
             else
             {
                 Vect3ToArray(p1, v1); Vect3ToArray(p2, v2);
                 Vect3ToArray(p3, v3);
+                if(drNormals)
+                {
+                    Vect3ToArray(center, (v1 + v2 + v3) /3);
+                    Vect3ToArray(normal,  (obj->normals_[t.id] * 0.5 +(v1 + v2 + v3) /3));
+                }
             }
             dsDrawLineD(p1, p2);
             dsDrawLineD(p2, p3);
             dsDrawLineD(p3, p1);
+            if(drNormals)
+            {
+                dsSetColor(1,0,0);
+                dsDrawLineD(center, normal);
+                dsSetColor(0,0,0);
+            }
         }
     }
     void DrawModel(const planner::Model* model, bool useItomp = true)
