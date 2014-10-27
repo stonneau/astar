@@ -16,7 +16,7 @@ class IKSolver
 {
 
 public:
-     IKSolver(const float espilon = 0.001f, const float treshold = 0.001f, const float stepSize = 0.01f, const float stepsizeOptim=0.1f);
+     IKSolver(const float espilon = 0.001f, const float treshold = 0.001f, const float stepSize = 0.01f, const float stepsizeOptim=0.01f);
 	~IKSolver();
 
 public:

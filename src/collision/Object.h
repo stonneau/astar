@@ -62,8 +62,10 @@ public:
     ///  \param epsilon threshold for contact
     ///  \param normal reference to a vector that will contain
     ///     the closest normal vector of the obstacle is the contact exists.
+    ///  \param proj reference to a vector that will contain
+    ///     the closest point on the object surface.
     ///  \param return : true if a collision exists, false otherwise
-    bool InContact(Object* object, double epsilon, Eigen::Vector3d& normal); // can not be const because of pqp but it is.
+    bool InContact(Object* object, double epsilon, Eigen::Vector3d& normal, Eigen::Vector3d &proj); // can not be const because of pqp but it is.
 
     ///  \brief returns whether the current Object is in contact with another.
     ///  \param object the object on which to test the collision

@@ -190,13 +190,56 @@ bool Object::InContact(Object* object, double epsilon)
 
 #include <iostream>
 
-bool Object::InContact(Object* object, double epsilon, Eigen::Vector3d& normal)
+bool Object::InContact(Object* object, double epsilon, Eigen::Vector3d& normal, Eigen::Vector3d& proj)
 {
-    PQP_ToleranceResult result;
-    PQP_Tolerance(&result, pqpOrientation_, pqpPosition_, model_,
+    PQP_DistanceResult result;
+    PQP_Distance(&result,pqpOrientation_,pqpPosition_,model_,
+                 object->pqpOrientation_, object->pqpPosition_, object->model_,  2*epsilon, 2*epsilon,2);
+    double val = result.Distance();
+    if(val > epsilon) return false;
+    if(object->normals_.empty())
+    {
+        std::cout << "no normals";
+        return true;
+    }
+    // finding closest triangle.
+    // make sure as many normals as tris;
+    assert(object->model_->num_tris == object->normals_.size());
+    double minDistance = std::numeric_limits<double>::max();
+    double currentDistance;
+    Eigen::Vector3d currentProjection;
+    Eigen::Vector3d p1, p2, p3;
+    int i=0;
+    for(T_Vector3::const_iterator cit = object->normals_.begin(); cit != object->normals_.end(); ++cit, ++i)
+    {
+        DoubleVectorToEigen(p1, object->model_->tris[i].p1);
+        DoubleVectorToEigen(p2, object->model_->tris[i].p2);
+        DoubleVectorToEigen(p3, object->model_->tris[i].p3);
+        currentProjection = ProjPoint2Triangle(p1,p2,p3, this->position_);
+        currentDistance = (currentProjection - this->position_).norm();
+        if(currentDistance < minDistance)
+        {
+            normal = *cit;
+            proj = currentProjection;
+            minDistance = currentDistance;
+        }
+    }
+    return true;
+}
+
+/*bool Object::InContact(Object* object, double epsilon, Eigen::Vector3d& normal, Eigen::Vector3d& proj)
+{
+    Eigen::Vector3d projection;
+    //PQP_ToleranceResult result;
+    //PQP_Tolerance(&result, pqpOrientation_, pqpPosition_, model_,
+    //             object->pqpOrientation_, object->pqpPosition_, object->model_,
+    //             epsilon, 2);
+    //bool res = result.CloserThanTolerance();
+    PQP_DistanceResult result;
+    PQP_Distance(&result, pqpOrientation_, pqpPosition_, model_,
                  object->pqpOrientation_, object->pqpPosition_, object->model_,
-                 epsilon, 2);
-    bool res = result.CloserThanTolerance();
+                 epsilon, epsilon, 2);
+    bool res = result.Distance() <= epsilon;
     if(res)
     {
         if (object->normals_.empty())
@@ -208,18 +251,23 @@ bool Object::InContact(Object* object, double epsilon, Eigen::Vector3d& normal)
         double distance = std::numeric_limits<double>::max();
         double tmp = distance;
         Eigen::Vector3d p1, p2, p3, source;
-        DoubleVectorToEigen(source, result.P1());
+        DoubleVectorToEigen(source, result.P2());
         for(T_Vector3::const_iterator cit = object->normals_.begin(); cit != object->normals_.end(); ++cit, ++i)
         {
-            DoubleVectorToEigen(p1, object->model_->tris[i].p1);
-            DoubleVectorToEigen(p2, object->model_->tris[i].p2);
-            DoubleVectorToEigen(p3, object->model_->tris[i].p3);
-            tmp = (ProjPoint2Triangle(p1,p2,p3, source) - source).norm();
-            if(tmp < distance) normal = *cit;
+            DoubleVectorToEigen(p1, this->model_->tris[i].p1);
+            DoubleVectorToEigen(p2, this->model_->tris[i].p2);
+            DoubleVectorToEigen(p3, this->model_->tris[i].p3);
+            projection = ProjPoint2Triangle(p1,p2,p3, source);
+            tmp = (projection - source).norm();
+            if(tmp < distance)
+            {
+                normal = *cit;
+                proj = projection;
+            }
         }
     }
     return res;
-}
+}*/
 
 bool Object::InContact(Object* object, double epsilon, Eigen::Vector3d& normal, const std::vector<Eigen::Vector3d>& positions)
 {

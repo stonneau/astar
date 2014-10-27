@@ -713,7 +713,7 @@ Eigen::Vector3d planner::GetEffectorCenter(Node* node)
         ++it)
     {
         bary += *it;
-        return *it;
+        //return *it;
     }
     return bary / res.size();
 }
