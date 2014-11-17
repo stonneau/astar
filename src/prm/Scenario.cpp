@@ -78,6 +78,7 @@ Scenario::Scenario(const std::string& filepath)
 			else if(line.find("VISIBILITY") == 0)
 			{
 				visibility = true;
+                std::cout << "VISIBILITY" << std::endl;
 			}
 		}
 		if((generating && loading) || !(generating ||loading))
@@ -101,11 +102,11 @@ Scenario::Scenario(const std::string& filepath)
 		{
             if(contactObjects_.empty())
             {
-                prm = planner::LoadPRM(prmfile, contactObjects_, objects_, model_);
+                prm = planner::LoadPRM(prmfile, objects_, model_);
             }
             else
             {
-                prm = planner::LoadPRM(prmfile, objects_, model_);
+                prm = planner::LoadPRM(prmfile, contactObjects_, objects_, model_);
             }
 		}
 	}

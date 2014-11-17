@@ -15,6 +15,7 @@
 #include "prmpath/ik/IKSolver.h"
 #include "prmpath/ik/VectorAlignmentConstraint.h"
 #include "prmpath/ik/ForceManipulabilityConstraint.h"
+#include "prmpath/ik/ObstacleAvoidanceConstraint.h"
 #include "Timer.h"
 
 #include <string>
@@ -254,6 +255,29 @@ namespace
             DrawNode(*cit);
         }
     }
+
+    void PerformIkStep(planner::CompleteScenario& scenario, planner::State* state)
+    {
+        ik::IKSolver solver;
+        std::vector<Eigen::Vector3d>::iterator posit = state->contactLimbPositions.begin();
+        std::vector<Eigen::Vector3d>::iterator normit = state->contactLimbPositionsNormals.begin();
+        planner::Collider collider(scenario.scenario->objects_);
+        for(std::vector<int>::const_iterator cit = state->contactLimbs.begin();
+            cit != state->contactLimbs.end(); ++cit, ++posit, ++normit)
+        {
+            planner::Node* limb =  planner::GetChild(scenario.robot,scenario.limbs[*cit]->id);
+            ik::VectorAlignmentConstraint constraint(*normit);
+            ik::ObstacleAvoidanceConstraint obsconstraint(collider);
+            std::vector<ik::PartialDerivativeConstraint*> constraints;
+            //constraints.push_back(&constraint);
+            constraints.push_back(&obsconstraint);
+            //solver.AddConstraint(ik::ForceManip);
+            {
+                solver.StepClamping(limb, *posit, *posit, constraints, true);
+            }
+        }
+    }
+
 }
 static void simLoop (int pause)
 {
@@ -280,13 +304,27 @@ static void simLoop (int pause)
     }
     //Eigen::Vector3d target = planner::GetChild(cScenario->robot, "torso_x_joint")->toWorldRotation* Eigen::Vector3d(0.3,0,0);
     DrawPoint(itompTransform*target);
+
+    PQP_REAL p1 [3];
+    PQP_REAL p2 [3];
+    Vect3ToArray(p1, itompTransform * Eigen::Vector3d(0,0,0));
+    dsSetColor(1,0,0);
+    Vect3ToArray(p2, itompTransform * Eigen::Vector3d(1,0,0));
+    dsDrawLineD(p1, p2);
+    dsSetColor(0,1,0);
+    Vect3ToArray(p2, itompTransform * Eigen::Vector3d(0,1,0));
+    dsDrawLineD(p1, p2);
+    dsSetColor(0,0,1);
+    Vect3ToArray(p2, itompTransform * Eigen::Vector3d(0,0,1));
+    dsDrawLineD(p1, p2);
 }
 void start()
 {
     constraints.push_back(new ik::VectorAlignmentConstraint(Eigen::Vector3d(0,1,0)));
     //constraints.push_back(new ik::ForceManipulabilityConstraint);
     //ikSolver.AddConstraint(ik::ForceManip);
-    cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/tunnel.scen");
+    cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/truck.scen");
+    //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/race.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/climbing.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/zoey.scen");
     //cScenario = planner::CompleteScenarioFromFile("../tests/profile.scen");
@@ -443,7 +481,8 @@ void command(int cmd)   /**  key control function; */
         }
         case '4' :
         {
-            ikSolver.StepClamping(planner::GetChild(cScenario->robot, "upper_right_arm_z_joint"),target,directionManip, constraints ,optimize);
+            //ikSolver.StepClamping(planner::GetChild(cScenario->robot, "upper_right_arm_z_joint"),target,directionManip, constraints ,optimize);
+            PerformIkStep(*cScenario, states[current]);
             break;
         }
         case 'q' :
@@ -451,6 +490,9 @@ void command(int cmd)   /**  key control function; */
         break;
         case 'y' :
             drawObject = !drawObject;
+        break;
+        case '9' :
+            drawNormals = !drawNormals;
         break;
         case 's' :
             planner::SavePrm(*(cScenario->scenario->prm), outpath);//, (AngleAxisd(M_PI, Vector3d::UnitZ()) * AngleAxisd(0.5*M_PI, Vector3d::UnitX())).matrix());
@@ -463,6 +505,8 @@ void command(int cmd)   /**  key control function; */
             current ++; if(states.size() <= current) current = states.size()-1;
             //cScenario->robot->SetConfiguration(cScenario->path[current]);
             cScenario->robot = states[current]->value;
+            std::cout << "state stable" << states[current]->stable << std::endl;
+            std::cout << "Z" << states[current]->value->currentRotation << std::endl;
             //currentSample = 0;
             //samples = planner::GetPosturesInContact(*cScenario->robot, cScenario->limbs[0], cScenario->limbSamples[0], cScenario->scenario->objects_ );
             break;
@@ -472,6 +516,8 @@ void command(int cmd)   /**  key control function; */
             current--; if(current <0) current = 0;
             //cScenario->robot->SetConfiguration(states[current]);
             cScenario->robot = states[current]->value;
+            std::cout << "Z" << states[current]->value->currentRotation << std::endl;
+
             //currentSample = 0;
             //samples = planner::GetPosturesInContact(*cScenario->robot, cScenario->limbs[0], cScenario->limbSamples[0], cScenario->scenario->objects_ );
 

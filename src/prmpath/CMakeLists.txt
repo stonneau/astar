@@ -41,6 +41,7 @@ set(SOURCES
     ik/PartialDerivativeConstraint.h ik/PartialDerivativeConstraint.cpp
     ik/VectorAlignmentConstraint.h ik/VectorAlignmentConstraint.cpp
     ik/ForceManipulabilityConstraint.h ik/ForceManipulabilityConstraint.cpp
+    ik/ObstacleAvoidanceConstraint.h ik/ObstacleAvoidanceConstraint.cpp
         ${SRC_TOOLS_DIR}/MatrixDefs.h ${SRC_TOOLS_DIR}/MatrixDefs.cpp
         ${SRC_TOOLS_DIR}/MatrixDefsInternal.h
 )
@@ -49,6 +50,7 @@ add_library(prmpath ${SOURCES})
 TARGET_LINK_LIBRARIES(prmpath prmcollision)
 TARGET_LINK_LIBRARIES(prmpath prm)
 TARGET_LINK_LIBRARIES(prmpath PQP)
+TARGET_LINK_LIBRARIES(prmpath equilibrium)
 
 SET_TARGET_PROPERTIES(prmpath PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 SET_TARGET_PROPERTIES(prmpath PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")

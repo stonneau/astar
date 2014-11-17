@@ -1,4 +1,4 @@
-#include "Test.h"
+#include "DynamicStability.h"
 #include "libcdd/setoper.h"
 #include "libcdd/cdd.h"
 

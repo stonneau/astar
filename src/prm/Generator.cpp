@@ -74,13 +74,14 @@ Model* Generator::operator()()
         /*configuration.englobed = new Object(*model_.englobed);
         configuration.englobing = new Object(*model_.englobing);*/
         // pick one object randomly
-        std::pair<Object*, const Tri*> sampled;
+        SampleTriangle sampled;
         double r = ((double) rand() / (RAND_MAX));
         if(r > 0.3)
             sampled = RandomPointIntriangle();
         else
             sampled = WeightedTriangles();
-        const Tri& triangle = *(sampled.second);
+        const Tri& triangle = *(sampled.second.second);
+        const Eigen::Vector3d& triangleNormal = (sampled.second.first);
         //http://stackoverflow.com/questions/4778147/sample-random-point-in-triangle
         Eigen::Vector3d A, B, C;
         DoubleArrayToVector(A, triangle.p1);
@@ -89,58 +90,94 @@ Model* Generator::operator()()
         double r1, r2;
         r1 = ((double) rand() / (RAND_MAX)); r2 = ((double) rand() / (RAND_MAX));
         Eigen::Vector3d P = (1 - sqrt(r1)) * A + (sqrt(r1) * (1 - r2)) * B + (sqrt(r1) * r2) * C;
- //if(P.y() < 2.5)
-if(P.y() > -0.3 && P.y() < 2.5)
+if(P.y() > 0)
+//if(P.y() > -0.3 && P.y() < 2.5)
 		{
 			configuration.SetPosition(P);
 			// random rotation
-            double rx = ((double) rand() / (RAND_MAX)) * M_PI; double ry = ((double) rand() / (RAND_MAX)) * M_PI *2; double rz = ((double) rand() / (RAND_MAX))  * M_PI *2;
-			matrices::Matrix3 tranform = matrices::Rotz3(rz);
+            double rx, rz; double ry = ((double) rand() / (RAND_MAX))  * M_PI *2;
+            matrices::Matrix3 tranform = matrices::Rotz3(ry);
+            matrices::Matrix3 tranformComplete = tranform;
+            //asserting that x is not pointing upward
+            matrices::Vector3 y = matrices::Vector3(0,1,0);
+            matrices::Vector3 x = matrices::Vector3(1,0,0);
+            matrices::Vector3 z = matrices::Vector3(0,0,1);
+            do
+            {
+                rx = ((double) rand() / (RAND_MAX)) * M_PI * 2;
+                rz = ((double) rand() / (RAND_MAX)) * M_PI *2;
+                ry = ((double) rand() / (RAND_MAX))  * M_PI *2;
+                tranformComplete = matrices::Rotz3(rz);
+                tranformComplete*= matrices::Roty3(ry);
+                tranformComplete*= matrices::Rotx3(rx);
+                //tranformComplete= matrices::Roty3(rx);
+                //tranformComplete*= matrices::Rotx3(rx);
+            }
+            while( !(/*y.dot(tranformComplete.block<3,1>(0,0)) < 0 && // torso not facing upward*/
+                     y.dot(tranformComplete.block<3,1>(0,1)) > -0.1 /*&&
+                     x.dot(tranformComplete.block<3,1>(0,1)) < -0.1 */
+                   )); // head not pointing too down
+           // while( y.dot(tranformComplete.block<3,1>(0,0)) < 0.9);
+            //while(false);
 			// find random direction
 			int limit2 = 100;
 			int limitstraight = 2;
-			// first try with straight form
-			configuration.SetOrientation(tranform);
+            // first try with straight form
+            configuration.SetOrientation(tranformComplete);
 			while (limitstraight >0)
 			{
                 Eigen::Vector3d dir((double) rand() / (RAND_MAX) - 0.5, (double) rand() / (RAND_MAX) - 0.5, (double) rand() / (RAND_MAX) - 0.5);
-				if(dir.norm() == 0) break;
+                // check that direction is somewhat colinear to normal
+                if(!sampled.first->normals_.empty())
+                {
+                    while(dir.dot(triangleNormal) <= 0)
+                    {
+                        dir = Eigen::Vector3d((double) rand() / (RAND_MAX) - 0.5, (double) rand() / (RAND_MAX) - 0.5, (double) rand() / (RAND_MAX) - 0.5);
+                        if(dir.norm() != 0)
+                        {
+                            dir.normalize();
+                        }
+                    }
+                }
+                if(dir.norm() == 0) break;
 				dir.normalize();
                 // add random direction and check for collision
                 std::vector<size_t> collisions = configuration.EnglobingCollision(sampled.first);
-                while(collisions.size()>0)
+                int maxStep = 5;
+                while(collisions.size()>0 && maxStep >0)
 				{
 					if(!collider_.IsColliding(configuration.englobed))
 					{
-//if(configuration.GetPosition().y() < 2.)
-if(configuration.GetPosition().y() > -0.3 && configuration.GetPosition().y() < 2.)
+if(configuration.GetPosition().y() > 0)
+//if(configuration.GetPosition().y() > -0.3 && configuration.GetPosition().y() < 2.)
                             return new Model(configuration);
 						break;
 					}
 					configuration.SetPosition(configuration.GetPosition() + (double) rand() / (RAND_MAX) / 2 * dir);
                     collisions = configuration.EnglobingCollision(sampled.first);
+                    maxStep--;
 				}
 				--limitstraight;
 			}
-			tranform*= matrices::Roty3(ry);
-			tranform*= matrices::Rotx3(rx);
-			configuration.SetOrientation(tranform);
+            /*tranform*= matrices::Roty3(ry);
+            tranform*= matrices::Rotx3(rx);*/
+            configuration.SetOrientation(tranformComplete);
 			while (limit2 >0)
 			{
 				Eigen::Vector3d dir((double) rand() / (RAND_MAX) -0.5, (double) rand() / (RAND_MAX) -0.5, (double) rand() / (RAND_MAX) -0.5);
 				// if normal check colinearity
-				if(sampled.first->normals_.size() > sampled.second->id)
+                if(sampled.first->normals_.size() > sampled.second.second->id)
 				{
-					Eigen::Vector3d normal = sampled.first->normals_[sampled.second->id];
+                    Eigen::Vector3d normal = sampled.first->normals_[sampled.second.second->id];
 					normal.normalize();
 					dir.normalize();
 					int i = 1000;
-					while((normal.dot(dir) < 0 && dir.dot(normal) < 0) && i > 0)
+                    /*while((normal.dot(dir) < 0 && dir.dot(normal) < 0) && i > 0)
 					{
 						dir= Eigen::Vector3d((double) rand() / (RAND_MAX) -0.5, (double) rand() / (RAND_MAX) -0.5, (double) rand() / (RAND_MAX) -0.5);
 						dir.normalize();
 						--i;
-					}
+                    }*/
 				}
 				else
 				{
@@ -154,8 +191,8 @@ if(configuration.GetPosition().y() > -0.3 && configuration.GetPosition().y() < 2
 				{
 					if(!collider_.IsColliding(configuration.englobed))
 					{
-//if(configuration.GetPosition().y() < 2.)
-if(configuration.GetPosition().y() > -0.3 && configuration.GetPosition().y() < 2.)
+if(configuration.GetPosition().y() > 0)
+//if(configuration.GetPosition().y() > -0.3 && configuration.GetPosition().y() < 2.)
                             return new Model(configuration);
 						break;
 					}
@@ -170,16 +207,18 @@ if(configuration.GetPosition().y() > -0.3 && configuration.GetPosition().y() < 2
 }
 
 
-std::pair<Object*, const Tri*>  Generator::RandomPointIntriangle()
+Generator::SampleTriangle Generator::RandomPointIntriangle()
 {
     Object* sampled = contactObjects_[rand() % (contactObjects_.size())];
-    return std::make_pair(sampled, &(sampled->GetModel()->tris[rand() % (sampled->GetModel()->num_tris)]));
+    int i =rand() % (sampled->GetModel()->num_tris);
+    Eigen::Vector3d normal = (sampled->normals_.empty()) ? Eigen::Vector3d(0,0,0) : sampled->normals_[i];
+    return std::make_pair(sampled, std::make_pair(normal, &(sampled->GetModel()->tris[i])));
 }
 
-const std::pair<Object*, const Tri*>& Generator::WeightedTriangles()
+const Generator::SampleTriangle &Generator::WeightedTriangles()
 {
     double r = ((double) rand() / (RAND_MAX));
-    std::vector<std::pair<Object*, const Tri*> >::const_iterator trit = triangles_.begin();
+    std::vector<SampleTriangle >::const_iterator trit = triangles_.begin();
     for(std::vector<float>::iterator wit = weights_.begin();
         wit != weights_.end();
         ++wit, ++trit)
@@ -204,7 +243,14 @@ void Generator::InitWeightedTriangles()
             float weight = TriangleArea(*pTri);
             sum += weight;
             weights_.push_back(weight);
-            triangles_.push_back(std::make_pair(*objit, pTri));
+            if((*objit)->normals_.empty())
+            {
+                triangles_.push_back(std::make_pair(*objit, std::make_pair(Eigen::Vector3d(0,1,0),pTri)));
+            }
+            else
+            {
+                triangles_.push_back(std::make_pair(*objit, std::make_pair((*objit)->normals_[i],pTri)));
+            }
         }
         float previousWeight = 0;
         for(std::vector<float>::iterator wit = weights_.begin();

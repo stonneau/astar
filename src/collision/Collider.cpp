@@ -34,3 +34,20 @@ bool Collider::IsColliding()
     }
     return false;
 }
+
+double planner::DistanceToClosestObject(Object* object, Collider* collider)
+{
+    double minDistance = std::numeric_limits<double>::max();
+    double currentDistance;
+    for(Object::T_Object::iterator it = collider->objects_.begin();
+        it != collider->objects_.end();
+        ++it)
+    {
+        currentDistance = object->Distance(*it);
+        if(currentDistance < minDistance)
+        {
+            minDistance = currentDistance;
+        }
+    }
+    return minDistance;
+}

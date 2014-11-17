@@ -11,7 +11,7 @@ void matrices::Matrix3ToMatrix4(const Matrix3& from, Matrix4& to)
 
 void matrices::Matrix4ToMatrix3(const Matrix4& from, Matrix3& to)
 {
-	to = from.block(0,0,3,3);
+    to = from.block(0,0,3,3);
 }
 
 /* Rotates rotated around axis by angle theta, and returns it */
@@ -151,6 +151,29 @@ void matrices::GetRotationMatrix(const Vector3& from, const Vector3& to, Matrix3
 
 		result = I * cosTheta + sinTheta * Iaaa + (1 - cosTheta) * (a*a.transpose());
 	}
+}
+
+Matrix3 matrices::RotationMatrixFromNormal(const Vector3& normal)
+{
+    int imin = 0;
+    for(int i=0; i<3; ++i)
+        if(std::abs(normal[i]) < std::abs(normal[imin]))
+            imin = i;
+
+    Vector3 v2(0,0,0);
+    float dt    = normal[imin];
+
+    v2[imin] = 1;
+    for(int i=0;i<3;i++)
+        v2[i] -= dt*normal[i];
+
+    v2.normalize();
+    Vector3 v3 = -normal.cross(v2);
+    Matrix3 res;
+    res.block(0,0,3,1) = v2;
+    res.block(0,1,3,1) = v3;
+    res.block(0,2,3,1) = normal;
+    return res;
 }
 
 // TODO forward dec

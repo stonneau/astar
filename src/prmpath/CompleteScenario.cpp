@@ -202,7 +202,7 @@ CompleteScenario* planner::CompleteScenarioFromFile(const std::string& filename)
             {
                 Eigen::Matrix4d res = ReadTransform(ExtractQuotes(line), from);
                 cScenario->from = new Model((cScenario->scenario->model_));
-                //cScenario->from->SetOrientation(res.block<3,3>(0,0));
+                cScenario->from->SetOrientation(res.block<3,3>(0,0));
                 cScenario->from->SetPosition(res.block<3,1>(0,3));
                 from = !from;
             }
@@ -210,7 +210,7 @@ CompleteScenario* planner::CompleteScenarioFromFile(const std::string& filename)
             {
                 Eigen::Matrix4d res = ReadTransform(ExtractQuotes(line), to);
                 cScenario->to = new Model((cScenario->scenario->model_));
-                //cScenario->to->SetOrientation(res.block<3,3>(0,0));
+                cScenario->to->SetOrientation(res.block<3,3>(0,0));
                 cScenario->to->SetPosition(res.block<3,1>(0,3));
                 to = !to;
             }

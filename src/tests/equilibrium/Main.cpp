@@ -1,5 +1,5 @@
 
-#include "equilibrium/Test.h"
+#include "equilibrium/DynamicStability.h"
 
 #include <string>
 #include <iostream>

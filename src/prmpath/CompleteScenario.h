@@ -22,11 +22,13 @@ namespace planner
 
 struct State
 {
-    State():value(0){}
+    State():value(0), stable(false){}
     ~State(){if(value)delete value;}
     std::vector<int> contactLimbs;
     std::vector<Eigen::Vector3d> contactLimbPositions;
+    std::vector<Eigen::Vector3d> contactLimbPositionsNormals;
     Robot* value;
+    bool stable;
 };
 
 typedef std::vector<State*> T_State;

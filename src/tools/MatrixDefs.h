@@ -69,6 +69,8 @@ namespace matrices
 	Dérivée de la formule de Rodriguez*/
 	void GetRotationMatrix(const Vector3& from, const Vector3& to, Matrix3& result);
 
+    Matrix3 RotationMatrixFromNormal(const Vector3& normal);
+
 	// TODO forward dec
 	Vector3& Rotate(const Vector3& axis, Vector3& rotated, numeric theta);
 

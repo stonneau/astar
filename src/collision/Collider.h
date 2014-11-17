@@ -32,6 +32,10 @@ public:
 
 private:
     Object::T_Object objects_;
+
+public:
+    friend double DistanceToClosestObject(Object* object, Collider* collider);
 };
+double DistanceToClosestObject(Object* object, Collider* collider);
 }//namespace planner;
 #endif //_CLASS_COLLIDER
