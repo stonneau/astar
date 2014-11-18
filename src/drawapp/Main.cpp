@@ -133,6 +133,24 @@ namespace
         }
     }
 
+    void DrawSpline()
+    {
+        PQP_REAL p1 [3];
+        PQP_REAL p2 [3];
+        if(cScenario->spline)
+        {
+            dsSetColor(0,0,1);
+            for(double t =0.02; t<=1; t = t+0.02)
+            {
+                Eigen::Vector3d from = cScenario->spline->operator ()(t-0.02).first;
+                Eigen::Vector3d to = cScenario->spline->operator ()(t).first;
+                Vect3ToArray(p1, itompTransform * from);
+                Vect3ToArray(p2, itompTransform *to);
+                dsDrawLineD(p1, p2);
+            }
+        }
+    }
+
     void DrawPoint(const Eigen::Vector3d& target)
     {
         dsSetColor(1,0,0);
@@ -281,6 +299,7 @@ namespace
 }
 static void simLoop (int pause)
 {
+    DrawSpline();
     DrawObjects();
     dsSetColorAlpha(0,0, 0.7,0.7);
     DrawNode(cScenario->robot->node);

@@ -3,6 +3,8 @@
 #include "ik/IKSolver.h"
 #include "ik/VectorAlignmentConstraint.h"
 #include "equilibrium/DynamicStability.h"
+#include "collision/Collider.h"
+#include "smoothing/smooth.h"
 
 #include <iostream>
 
@@ -431,7 +433,124 @@ namespace
         {
             developPathRec(*it, *it2, res);
         }
-    return res;
+        return res;
+    }
+
+
+    T_Model::iterator random_element(T_Model::iterator& begin, T_Model::iterator& end)
+    {
+        const unsigned long n = std::distance(begin, end);
+        const unsigned long divisor = (RAND_MAX + 1) / n;
+
+        unsigned long k;
+        do { k = std::rand() / divisor; } while (k >= n);
+
+        T_Model::iterator res = begin;
+        std::advance(res, k);
+        return res;
+    }
+
+
+    std::vector<int> GetConfiguration(T_Model::iterator& c)
+    {
+        std::vector<int> res;
+        // first push position
+        for(int i =0; i<3; ++i)
+        {
+            res.push_back((*c)->GetPosition()(i));
+        }
+        Eigen::Vector3d euler = (*c)->GetOrientation().eulerAngles(2, 1, 0);
+        for(int i =0; i<3; ++i)
+        {
+            res.push_back(euler(i));
+        }
+        return res;
+    }
+
+    bool SetConfiguration(T_Model::iterator& c, const std::vector<int>& config, planner::Collider& collider)
+    {
+        Eigen::Vector3d position;
+        for(int i =0; i<3; ++i)
+        {
+            position(i) = config[i];
+        }
+        (*c)->SetPosition(position);
+        Eigen::Matrix3d daf =  Eigen::AngleAxisd(config[3], Eigen::Vector3d::UnitZ()) *
+                               Eigen::AngleAxisd(config[4], Eigen::Vector3d::UnitY()) *
+                               Eigen::AngleAxisd(config[5], Eigen::Vector3d::UnitX()).matrix();
+        (*c)->SetOrientation(daf);
+        return !(collider.IsColliding((*c)->englobed));
+    }
+
+    T_Model CopyPath(const T_Model& initpath)
+    {
+        T_Model res;
+        for(T_Model::const_iterator it = initpath.begin(); it!=initpath.end(); ++it)
+        {
+            res.push_back(new Model(**it));
+        }
+        return res;
+    }
+
+    void DeletePath(T_Model& initpath)
+    {
+        for(T_Model::iterator it = initpath.begin(); it!=initpath.end(); ++it)
+        {
+            delete(*it);
+        }
+    }
+
+    CT_Model PartialShortcut(const CT_Model& initpath, planner::Collider& collider )
+    {
+        int limit = 0; // time allowed
+        CT_Model finalPath;
+        T_Model res;
+        int nbNodes = initpath.size();
+        if(nbNodes <= 2) return initpath;
+        // copy all nodes
+        for(CT_Model::const_iterator it = initpath.begin(); it!=initpath.end(); ++it)
+        {
+            res.push_back(new Model(*(*it)));
+        }
+
+        T_Model::iterator c1,c2;
+        while(limit > 0)
+        {
+            T_Model tmp = CopyPath(res);
+            // choose two configs randomly
+            c1 = (random_element(++tmp.begin(), --tmp.end()));
+            c2 = (random_element(++tmp.begin(), --tmp.end()));
+            const unsigned long n = std::distance(c1, c2);
+            unsigned int currentIndex = 0;
+            // choose one dof (0 = x, ..., 6 = r_x)
+            int dof = (std::rand() % (int)(6));
+            std::vector<int> pi1, pi2;
+            pi1 = GetConfiguration(c1);
+            pi2 = GetConfiguration(c2);
+            T_Model::iterator it = c1;
+            bool collisionFree = true;
+            while(it != c2)
+            {
+                std::vector<int> pit = GetConfiguration(it);
+                double normalizedIndex =(double)((double(currentIndex)/(double)(n)));
+                pit[dof] =  (1-normalizedIndex) * pi1[dof] + normalizedIndex * pi2[dof];
+                collisionFree = SetConfiguration(c2, pit, collider);
+                if(!collisionFree) break;
+                ++it; ++currentIndex;
+            }
+            if(collisionFree)
+            {
+                DeletePath(res);
+                res = tmp;
+            }
+            limit--;
+        }
+        for(T_Model::iterator it = res.begin(); it!=res.end(); ++it)
+        {
+            finalPath.push_back(new Model(*(*it)));
+        }
+        DeletePath(res);
+        return finalPath;
     }
 
 }
@@ -441,9 +560,12 @@ planner::T_State planner::PostureSequence(planner::CompleteScenario& scenario)
 {
     planner::T_State res;
     State* current = &scenario.initstate;
+    planner::Collider collider(scenario.scenario->objects_);
     //current->stable = Stable(current);
     res.push_back(current);
-    CT_Model path = developPath(scenario.path);
+    scenario.spline = planner::SplineFromPath(collider,scenario.path,2,2);
+    CT_Model path0 = developPath(scenario.path);
+    CT_Model path = PartialShortcut(path0, collider);
     for(CT_Model::iterator it = path.begin(); it!=path.end(); ++it)
     {
         current = Interpolate(scenario, *current, *it);

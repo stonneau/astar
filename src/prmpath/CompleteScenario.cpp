@@ -14,6 +14,7 @@ CompleteScenario::CompleteScenario()
     , robot(0)
     , from(0)
     , to(0)
+    , spline(0)
 {
     // NOTHING
 }

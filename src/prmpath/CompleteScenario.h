@@ -17,6 +17,8 @@
 #include "prmpath/Robot.h"
 #include "prmpath/JointConstraint.h"
 #include "prmpath/sampling/Sample.h"
+#include "smoothing/smooth.h"
+
 namespace planner
 {
 
@@ -49,6 +51,7 @@ struct CompleteScenario
     CT_Model path;
     std::vector<planner::Robot*> completePath;
     State initstate;
+    SplinePath* spline;
     bool relocateEnglobing;
 };
 
