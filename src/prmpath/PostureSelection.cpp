@@ -436,6 +436,20 @@ namespace
         return res;
     }
 
+    CT_Model developPathSpline(const planner::SplinePath& splinePath, const Model& model)
+    {
+        CT_Model res;
+        for(double t =0; t<=1; t = t+0.01)
+        {
+            Model * tmp = new Model(model);
+            Configuration c = splinePath.Evaluate(t);
+            tmp->SetPosition(c.first);
+            tmp->SetOrientation(c.second);
+            res.push_back(tmp);
+        }
+        return res;
+    }
+
 
     T_Model::iterator random_element(T_Model::iterator& begin, T_Model::iterator& end)
     {
@@ -563,9 +577,17 @@ planner::T_State planner::PostureSequence(planner::CompleteScenario& scenario)
     planner::Collider collider(scenario.scenario->objects_);
     //current->stable = Stable(current);
     res.push_back(current);
-    scenario.spline = planner::SplineFromPath(collider,scenario.path,2,2);
-    CT_Model path0 = developPath(scenario.path);
-    CT_Model path = PartialShortcut(path0, collider);
+    CT_Model path;
+    if(scenario.path.size() > 2)
+    {
+        scenario.spline = planner::SplineFromPath(collider,scenario.path,2,2);
+        CT_Model path0 = developPathSpline(*scenario.spline, scenario.scenario->model_);
+        path = PartialShortcut(path0, collider);
+    }
+    else
+    {
+        path = scenario.path;
+    }
     for(CT_Model::iterator it = path.begin(); it!=path.end(); ++it)
     {
         current = Interpolate(scenario, *current, *it);

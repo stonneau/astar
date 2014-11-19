@@ -20,13 +20,25 @@ struct Model;
 
 typedef std::vector<const Model*> CT_Model;
 typedef std::pair<Eigen::Vector3d, Eigen::Matrix3d> Configuration;
+typedef std::pair<Eigen::Vector3d, Eigen::Vector3d> C2_Point;
 
-struct SplinePath
+struct ParamFunction
+{
+    ParamFunction(){}
+    ~ ParamFunction(){}
+    virtual C2_Point operator()(double t) const = 0;
+    virtual C2_Point max() const = 0;
+};
+
+struct SplinePath : public ParamFunction
 {
     SplinePath(const std::vector<Eigen::Vector3d>& controlPoints, const std::vector<Eigen::Vector3d>& controlPointsRot, const std::vector<double>& knots, double scale);
     ~SplinePath();
 
-    Configuration operator()(double t);
+    virtual C2_Point operator()(double t) const;
+    virtual C2_Point max() const;
+    Configuration Evaluate(double t) const;
+
     const std::vector<Eigen::Vector3d> controlPoints_;
     const std::vector<Eigen::Vector3d> controlPointsRot_;
     const std::vector<double> knots_;

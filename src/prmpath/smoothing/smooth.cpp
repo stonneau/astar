@@ -14,8 +14,6 @@ typedef T_Model::iterator IT_Model;
 typedef std::vector<const Model*> CT_Model;
 typedef CT_Model::const_iterator CIT_Model;
 
-typedef std::pair<Eigen::Vector3d, Eigen::Vector3d> C2_Point;
-
 typedef std::pair<double, C2_Point> MilePoint;
 typedef std::vector<MilePoint> T_MilePoint;
 
@@ -123,7 +121,18 @@ Eigen::Vector3d deBoor(int k, int degree, int i, double x, const std::vector<dou
 }
 
 // implementation of de boor algorithm
-Configuration SplinePath::operator ()(double t)
+Configuration SplinePath::Evaluate(double t) const
+{
+    C2_Point c = this->operator ()(t);
+    return std::make_pair(c.first, UnitQ(c.second).toRotationMatrix());
+}
+
+C2_Point SplinePath::max() const
+{
+    return (*this)(1);
+}
+
+C2_Point SplinePath::operator ()(double t) const
 {
     // compute interval
     int interval =-1;
@@ -141,19 +150,16 @@ Configuration SplinePath::operator ()(double t)
             break;
         }
     }
-
     //compute rotation matrix
-    Eigen::Vector3d res = deBoor(3,3,interval,t,knots_,controlPointsRot_);
-    return std::make_pair(deBoor(3,3,interval,t,knots_,controlPoints_), UnitQ(res).toRotationMatrix());
+    return std::make_pair(deBoor(3,3,interval,t,knots_,controlPoints_), deBoor(3,3,interval,t,knots_,controlPointsRot_));
 }
 
 }
 
 using namespace planner;
 
-struct NormalizedPath
+struct NormalizedPath : public ParamFunction
 {
-
     NormalizedPath(const CT_Model& path)
         : milePoints_(CreateMilePoints(path))
         , totaldistance_(milePoints_.back().first)
@@ -164,7 +170,7 @@ struct NormalizedPath
         // NOTHING
     }
 
-    C2_Point operator()(double t) const
+    virtual C2_Point operator()(double t) const
     {
         //assert(0 <= t && t <= 1);
         T_MilePoint::const_iterator cit = milePoints_.begin();
@@ -176,6 +182,11 @@ struct NormalizedPath
                 return Interpolate(*cit, *cit2, t);
             }
         }
+        return milePoints_.back().second;
+    }
+
+    C2_Point max() const
+    {
         return milePoints_.back().second;
     }
 
@@ -252,6 +263,95 @@ namespace
 
 #include <iostream>
 
+namespace
+{
+    planner::SplinePath* createSpline(Collider& collider, ParamFunction* initPath, double maxSpeed, double maxAcceleration, double ta, double tb, int m)
+    {
+        //sample m + 1 points between ta and tb
+        std::vector<double> knots = RandomSample(ta, tb, m+1);
+        // TODO REALIGN MAX DISTANCE TO INCLUDE THIS
+        //ReconfigureTime(knots, maxSpeed);
+
+        //Reconfigure knots so that respect max velocity and acceleration
+
+        Eigen::MatrixXd A = Eigen::MatrixXd::Zero(m+1, m+1);
+        Eigen::MatrixXd r = Eigen::MatrixXd::Zero(m+1,3);
+        Eigen::MatrixXd sol = Eigen::MatrixXd::Zero(m+1,3);
+
+        Eigen::MatrixXd r_rot = Eigen::MatrixXd::Zero(m+1,3);
+        Eigen::MatrixXd sol_rot = Eigen::MatrixXd::Zero(m+1,3);
+
+        Delta d(knots,m);
+
+        for(int k=1; k<m;++k)
+        {
+            double alpha, beta, gamma;
+
+            alpha = (d(k)*d(k))/(d(k-2)+d(k-1)+d(k));
+            beta = (d(k) * (d(k-2)+d(k-1))) / (d(k-2)+d(k-1)+d(k)) +(d(k-1)*(d(k) + d(k+1)))/(d(k-1) + d(k) + d(k+1));
+            gamma =(d(k-1)*d(k-1)) /(d(k-1) + d(k) + d(k+1));
+
+            A(k,k-1) = alpha; // alphak
+            A(k,k) = beta; // betak
+            A(k,k+1) = gamma; // gammak
+
+            // Assigning translation variables
+            C2_Point cr = (*initPath)(knots[k]);
+            r.block<1,3>(k,0) = (cr.first * (d(k-1)+d(k))).transpose();
+            r_rot.block<1,3>(k,0) = (cr.second * (d(k-1)+d(k))).transpose();
+        }
+        A(0,0) = d(0) + 2 *d(1); // beta0
+        A(0,1) = -d(0); // gamma0
+        A(m,m-1) = -d(m-1); // betam
+        A(m,m) = d(m-2)+2*d(m-1); // gammam
+        {
+            C2_Point cr = (*initPath)(knots[0]);
+            r.block<1,3>(0,0) = (cr.first * (d(0)+d(1))).transpose();
+            r_rot.block<1,3>(0,0) = (cr.second * (d(0)+d(1))).transpose();
+        }
+        {
+            C2_Point cr = (*initPath)(knots.back());
+            r.block<1,3>(m,0) = cr.first * (d(m-2)+d(m-1));
+            r_rot.block<1,3>(m,0) = cr.second * (d(m-2)+d(m-1));
+        }
+        std::cout << " A " << std::endl << A << std::endl;
+        std::cout << " r " << std::endl << r << std::endl;
+        sol = A.colPivHouseholderQr().solve(r);
+        sol_rot = A.colPivHouseholderQr().solve(r_rot);
+
+        std::vector<Eigen::Vector3d> controlPoints;
+        std::vector<Eigen::Vector3d> controlPointsRot;
+        std::vector<double> normalizedKnots;
+        C2_Point c0 = (*initPath)(0);
+        controlPoints.push_back(c0.first);
+        controlPointsRot.push_back(c0.second);
+        for(int i =0; i<sol.rows();++i)
+        {
+            controlPoints.push_back(sol.block<1,3>(i,0));
+            controlPointsRot.push_back(sol_rot.block<1,3>(i,0));
+        }
+        C2_Point cEnd = initPath->max();
+        controlPoints.push_back(cEnd.first);
+        controlPointsRot.push_back(cEnd.second);
+        /*multiplicity at start and end*/
+        for(int i =0; i<3;++i)
+        {
+            normalizedKnots.push_back(0);
+        }
+        for(int i =0; i<knots.size();++i)
+        {
+            normalizedKnots.push_back(knots[i]/knots.back());
+        }
+
+        for(int i =0; i<3;++i)
+        {
+            normalizedKnots.push_back(1);
+        }
+        //normalizedKnots.push_back(1);
+        return new SplinePath(controlPoints, controlPointsRot, normalizedKnots,knots.back());
+    }
+}
+
 planner::SplinePath* planner::SplineFromPath(Collider& collider, CT_Model& path, double maxSpeed, double maxAcceleration)
 {
     int m = path.size();
@@ -259,88 +359,7 @@ planner::SplinePath* planner::SplineFromPath(Collider& collider, CT_Model& path,
 
     //sample m + 1 points along the linear trajectory
     double ta = 0;  double tb = initPath.totaldistance_;
-
-    //sample m + 1 points between ta and tb
-    std::vector<double> knots = RandomSample(ta, tb, m+1);
-    // TODO REALIGN MAX DISTANCE TO INCLUDE THIS
-    //ReconfigureTime(knots, maxSpeed);
-
-    //Reconfigure knots so that respect max velocity and acceleration
-
-    Eigen::MatrixXd A = Eigen::MatrixXd::Zero(m+1, m+1);
-    Eigen::MatrixXd r = Eigen::MatrixXd::Zero(m+1,3);
-    Eigen::MatrixXd sol = Eigen::MatrixXd::Zero(m+1,3);
-
-    Eigen::MatrixXd r_rot = Eigen::MatrixXd::Zero(m+1,3);
-    Eigen::MatrixXd sol_rot = Eigen::MatrixXd::Zero(m+1,3);
-
-    Delta d(knots,m);
-
-    for(int k=1; k<m;++k)
-    {
-        double alpha, beta, gamma;
-
-        alpha = (d(k)*d(k))/(d(k-2)+d(k-1)+d(k));
-        beta = (d(k) * (d(k-2)+d(k-1))) / (d(k-2)+d(k-1)+d(k)) +(d(k-1)*(d(k) + d(k+1)))/(d(k-1) + d(k) + d(k+1));
-        gamma =(d(k-1)*d(k-1)) /(d(k-1) + d(k) + d(k+1));
-
-        A(k,k-1) = alpha; // alphak
-        A(k,k) = beta; // betak
-        A(k,k+1) = gamma; // gammak
-
-        // Assigning translation variables
-        C2_Point cr = initPath(knots[k]);
-        r.block<1,3>(k,0) = (cr.first * (d(k-1)+d(k))).transpose();
-        r_rot.block<1,3>(k,0) = (cr.second * (d(k-1)+d(k))).transpose();
-    }
-    A(0,0) = d(0) + 2 *d(1); // beta0
-    A(0,1) = -d(0); // gamma0
-    A(m,m-1) = -d(m-1); // betam
-    A(m,m) = d(m-2)+2*d(m-1); // gammam
-    {
-        C2_Point cr = initPath(knots[0]);
-        r.block<1,3>(0,0) = (cr.first * (d(0)+d(1))).transpose();
-        r_rot.block<1,3>(0,0) = (cr.second * (d(0)+d(1))).transpose();
-    }
-    {
-        C2_Point cr = initPath(knots.back());
-        r.block<1,3>(m,0) = cr.first * (d(m-2)+d(m-1));
-        r_rot.block<1,3>(m,0) = cr.second * (d(m-2)+d(m-1));
-    }
-    std::cout << " A " << std::endl << A << std::endl;
-    std::cout << " r " << std::endl << r << std::endl;
-    sol = A.colPivHouseholderQr().solve(r);
-    sol_rot = A.colPivHouseholderQr().solve(r_rot);
-
-    std::vector<Eigen::Vector3d> controlPoints;
-    std::vector<Eigen::Vector3d> controlPointsRot;
-    std::vector<double> normalizedKnots;
-    C2_Point c0 = initPath(0);
-    controlPoints.push_back(c0.first);
-    controlPointsRot.push_back(c0.second);
-    for(int i =0; i<sol.rows();++i)
-    {
-        controlPoints.push_back(sol.block<1,3>(i,0));
-        controlPointsRot.push_back(sol_rot.block<1,3>(i,0));
-    }
-    controlPoints.push_back(initPath.milePoints_.back().second.first);
-    controlPointsRot.push_back(initPath.milePoints_.back().second.second);
-    /*multiplicity at start and end*/
-    for(int i =0; i<3;++i)
-    {
-        normalizedKnots.push_back(0);
-    }
-    for(int i =0; i<knots.size();++i)
-    {
-        normalizedKnots.push_back(knots[i]/knots.back());
-    }
-
-    for(int i =0; i<3;++i)
-    {
-        normalizedKnots.push_back(1);
-    }
-    //normalizedKnots.push_back(1);
-    return new SplinePath(controlPoints, controlPointsRot, normalizedKnots,knots.back());
+    return createSpline(collider, &initPath, maxSpeed, maxAcceleration, ta, tb, m);
 }
 
 planner::SplinePath planner::SplineShortCut(Collider& collider, CT_Model& path, int nbSteps)
