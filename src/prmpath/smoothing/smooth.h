@@ -23,11 +23,12 @@ typedef std::pair<Eigen::Vector3d, Eigen::Matrix3d> Configuration;
 
 struct SplinePath
 {
-    SplinePath(const std::vector<Eigen::Vector3d>& controlPoints, const std::vector<double>& knots, double scale);
+    SplinePath(const std::vector<Eigen::Vector3d>& controlPoints, const std::vector<Eigen::Vector3d>& controlPointsRot, const std::vector<double>& knots, double scale);
     ~SplinePath();
 
     Configuration operator()(double t);
     const std::vector<Eigen::Vector3d> controlPoints_;
+    const std::vector<Eigen::Vector3d> controlPointsRot_;
     const std::vector<double> knots_;
     const double scale_;
 };

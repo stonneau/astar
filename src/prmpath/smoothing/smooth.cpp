@@ -1,6 +1,7 @@
 #include "smooth.h"
-#include "spline/b_spline.h"
 #include "prm/Model.h"
+
+#include "tools/ExpMap.h"
 
 #include <vector>
 #include <utility>
@@ -13,15 +14,28 @@ typedef T_Model::iterator IT_Model;
 typedef std::vector<const Model*> CT_Model;
 typedef CT_Model::const_iterator CIT_Model;
 
-typedef std::pair<double, Configuration> MilePoint;
+typedef std::pair<Eigen::Vector3d, Eigen::Vector3d> C2_Point;
+
+typedef std::pair<double, C2_Point> MilePoint;
 typedef std::vector<MilePoint> T_MilePoint;
 
-typedef spline::b_spline<double, double, 3, true, Eigen::Vector3d> b_spline_t;
 
 
-Configuration MakeConfiguration(const Model* model)
+C2_Point MakeConfiguration(const Model* model)
 {
-    return std::make_pair(model->GetPosition(), model->GetOrientation());
+    matrices::ExpMap emap(model->GetOrientation());
+    return std::make_pair(model->GetPosition(), emap.log());
+}
+
+Eigen::Quaterniond UnitQ(const Eigen::Vector3d& v)
+{
+    Eigen::Vector3d unit = v;
+    double norm = v.norm();
+    if(norm != 0)
+    {
+        unit.normalize();
+    }
+    return Eigen::Quaterniond(Eigen::AngleAxisd(norm,unit));
 }
 
 T_MilePoint CreateMilePoints(const CT_Model& path)
@@ -48,14 +62,14 @@ T_MilePoint CreateMilePoints(const CT_Model& path)
     return res;
 }
 
-Configuration Interpolate(const MilePoint& a, const MilePoint& b, double t)
+C2_Point Interpolate(const MilePoint& a, const MilePoint& b, double t)
 {
     double t0 = a.first;
     double t1 = b.first;
     double tp = (t - t0) / (t1 - t0);
 
-    const Eigen::Quaterniond qa(a.second.second);
-    const Eigen::Quaterniond qb(b.second.second);
+    const Eigen::Quaterniond qa = UnitQ(a.second.second);
+    const Eigen::Quaterniond qb = UnitQ(b.second.second);
 
     const Eigen::Vector3d& va = a.second.first;
     const Eigen::Vector3d& vb = b.second.first;
@@ -63,7 +77,8 @@ Configuration Interpolate(const MilePoint& a, const MilePoint& b, double t)
     Eigen::Vector3d offset = va + tp * (vb - va);
     Eigen::Quaterniond qres  = qa.slerp(tp, qb);
 
-    return std::make_pair(offset, qres.matrix());
+    matrices::ExpMap emap(qres);
+    return std::make_pair(offset, emap.log());
 }
 
 void InsertSorted(std::vector<double>& knots, double newValue)
@@ -79,8 +94,9 @@ void InsertSorted(std::vector<double>& knots, double newValue)
     knots.push_back(newValue);
 }
 
-SplinePath::SplinePath(const std::vector<Eigen::Vector3d>& controlPoints, const std::vector<double>& knots, double scale)
+SplinePath::SplinePath(const std::vector<Eigen::Vector3d>& controlPoints, const std::vector<Eigen::Vector3d>& controlPointsRot, const std::vector<double>& knots, double scale)
     : controlPoints_(controlPoints)
+    , controlPointsRot_(controlPointsRot)
     , knots_(knots)
     , scale_(scale)
 {
@@ -125,7 +141,10 @@ Configuration SplinePath::operator ()(double t)
             break;
         }
     }
-    return std::make_pair(deBoor(3,3,interval,t,knots_,controlPoints_), Eigen::Matrix3d::Identity());
+
+    //compute rotation matrix
+    Eigen::Vector3d res = deBoor(3,3,interval,t,knots_,controlPointsRot_);
+    return std::make_pair(deBoor(3,3,interval,t,knots_,controlPoints_), UnitQ(res).toRotationMatrix());
 }
 
 }
@@ -145,7 +164,7 @@ struct NormalizedPath
         // NOTHING
     }
 
-    Configuration operator()(double t) const
+    C2_Point operator()(double t) const
     {
         //assert(0 <= t && t <= 1);
         T_MilePoint::const_iterator cit = milePoints_.begin();
@@ -252,6 +271,8 @@ planner::SplinePath* planner::SplineFromPath(Collider& collider, CT_Model& path,
     Eigen::MatrixXd r = Eigen::MatrixXd::Zero(m+1,3);
     Eigen::MatrixXd sol = Eigen::MatrixXd::Zero(m+1,3);
 
+    Eigen::MatrixXd r_rot = Eigen::MatrixXd::Zero(m+1,3);
+    Eigen::MatrixXd sol_rot = Eigen::MatrixXd::Zero(m+1,3);
 
     Delta d(knots,m);
 
@@ -266,42 +287,44 @@ planner::SplinePath* planner::SplineFromPath(Collider& collider, CT_Model& path,
         A(k,k-1) = alpha; // alphak
         A(k,k) = beta; // betak
         A(k,k+1) = gamma; // gammak
-        Eigen::Vector3d vr = initPath(knots[k]).first * (d(k-1)+d(k));
-        for(int i=0; i<3; ++i)
-        {
-            r(k,i) = vr(i);
-        }
+
+        // Assigning translation variables
+        C2_Point cr = initPath(knots[k]);
+        r.block<1,3>(k,0) = (cr.first * (d(k-1)+d(k))).transpose();
+        r_rot.block<1,3>(k,0) = (cr.second * (d(k-1)+d(k))).transpose();
     }
     A(0,0) = d(0) + 2 *d(1); // beta0
     A(0,1) = -d(0); // gamma0
     A(m,m-1) = -d(m-1); // betam
     A(m,m) = d(m-2)+2*d(m-1); // gammam
     {
-        Eigen::Vector3d vr0 = initPath(knots[0]).first * (d(0)+d(1));
-        for(int i=0; i<3; ++i)
-        {
-            r(0,i) = vr0(i);
-        }
+        C2_Point cr = initPath(knots[0]);
+        r.block<1,3>(0,0) = (cr.first * (d(0)+d(1))).transpose();
+        r_rot.block<1,3>(0,0) = (cr.second * (d(0)+d(1))).transpose();
     }
     {
-        Eigen::Vector3d vrm = initPath(knots.back()).first * (d(m-2)+d(m-1));
-        for(int i=0; i<3; ++i)
-        {
-            r(m,i) = vrm(i);
-        }
+        C2_Point cr = initPath(knots.back());
+        r.block<1,3>(m,0) = cr.first * (d(m-2)+d(m-1));
+        r_rot.block<1,3>(m,0) = cr.second * (d(m-2)+d(m-1));
     }
     std::cout << " A " << std::endl << A << std::endl;
     std::cout << " r " << std::endl << r << std::endl;
     sol = A.colPivHouseholderQr().solve(r);
+    sol_rot = A.colPivHouseholderQr().solve(r_rot);
 
     std::vector<Eigen::Vector3d> controlPoints;
+    std::vector<Eigen::Vector3d> controlPointsRot;
     std::vector<double> normalizedKnots;
-    controlPoints.push_back(initPath(0).first);
+    C2_Point c0 = initPath(0);
+    controlPoints.push_back(c0.first);
+    controlPointsRot.push_back(c0.second);
     for(int i =0; i<sol.rows();++i)
     {
         controlPoints.push_back(sol.block<1,3>(i,0));
+        controlPointsRot.push_back(sol_rot.block<1,3>(i,0));
     }
     controlPoints.push_back(initPath.milePoints_.back().second.first);
+    controlPointsRot.push_back(initPath.milePoints_.back().second.second);
     /*multiplicity at start and end*/
     for(int i =0; i<3;++i)
     {
@@ -317,7 +340,7 @@ planner::SplinePath* planner::SplineFromPath(Collider& collider, CT_Model& path,
         normalizedKnots.push_back(1);
     }
     //normalizedKnots.push_back(1);
-    return new SplinePath(controlPoints, normalizedKnots,knots.back());
+    return new SplinePath(controlPoints, controlPointsRot, normalizedKnots,knots.back());
 }
 
 planner::SplinePath planner::SplineShortCut(Collider& collider, CT_Model& path, int nbSteps)
@@ -345,8 +368,8 @@ planner::SplinePath planner::SplineShortCut(Collider& collider, CT_Model& path, 
 
         // compute derivatives at extremity
         Eigen::Vector3d uap, ubp;
-        Configuration uaplus, uaminus;
-        Configuration ubplus, ubminus;
+        C2_Point uaplus, uaminus;
+        C2_Point ubplus, ubminus;
         const double epsilon = 0.0001;
         uaplus = initPath(ta+epsilon); uaminus = initPath(ta-epsilon);
         ubplus = initPath(tb+epsilon); ubminus = initPath(ta-epsilon);

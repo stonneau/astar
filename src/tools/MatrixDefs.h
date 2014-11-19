@@ -26,13 +26,13 @@ namespace matrices
     typedef Eigen::Vector2f Vector2;
     typedef Eigen::VectorXf VectorX;
 	typedef Eigen::Matrix4f Matrix4;
-	typedef Eigen::Matrix3f Matrix3;
+    typedef Eigen::Matrix3f Matrix3;
 #else
 	typedef Eigen::Vector3d Vector3;
     typedef Eigen::Vector2d Vector2;
     typedef Eigen::VectorXd VectorX;
 	typedef Eigen::Matrix4d Matrix4;
-	typedef Eigen::Matrix3d Matrix3;
+    typedef Eigen::Matrix3d Matrix3;
 #endif
 
 	void Matrix3ToMatrix4(const Matrix3& from, Matrix4& to);

@@ -48,6 +48,7 @@ set(SOURCES
         ${SRC_DIR}/../include/spline/bezier_curve.h
         ${SRC_DIR}/../include/spline/exact_cubic.h
         ${SRC_TOOLS_DIR}/MatrixDefs.h ${SRC_TOOLS_DIR}/MatrixDefs.cpp
+        ${SRC_TOOLS_DIR}/ExpMap.h ${SRC_TOOLS_DIR}/ExpMap.cpp
         ${SRC_TOOLS_DIR}/MatrixDefsInternal.h
 )
 
