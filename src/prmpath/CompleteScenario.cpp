@@ -25,6 +25,7 @@ CompleteScenario::~CompleteScenario()
     delete robot;
     delete from;
     delete to;
+    delete spline;
     for(std::vector<planner::Robot*>::iterator it = completePath.begin();
         it != completePath.end(); ++it)
     {

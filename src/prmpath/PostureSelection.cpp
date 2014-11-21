@@ -580,7 +580,8 @@ planner::T_State planner::PostureSequence(planner::CompleteScenario& scenario)
     CT_Model path;
     if(scenario.path.size() > 2)
     {
-        scenario.spline = planner::SplineFromPath(collider,scenario.path,2,2);
+        //scenario.spline = new planner::SplinePath(planner::SplineFromPath(collider,scenario.path,2,2));
+        scenario.spline = new planner::SplinePath(planner::SplineShortCut(collider,scenario.path,2,2,10));
         CT_Model path0 = developPathSpline(*scenario.spline, scenario.scenario->model_);
         path = PartialShortcut(path0, collider);
     }
