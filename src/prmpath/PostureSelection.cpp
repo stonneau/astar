@@ -195,13 +195,19 @@ Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::
     //Eigen::Vector3d effectorCentroid = planner::GetEffectorCenter(limb);
     double bestManip = std::numeric_limits<double>::min();
     double tmp_manip, tempweightedmanip;
-    Eigen::Vector3d dir = direction;
     std::size_t found = limb->tag.find("arm");
-    if (found!=std::string::npos)
+    Eigen::Vector3d dir = direction;
+    /*if (found==std::string::npos)
     {
-        dir = Eigen::Vector3d(-0.1,0,0.9);
+        dir = dir;
         dir.normalize();
     }
+    else
+    {
+        dir = Eigen::Vector3d(0,1.,0.);
+        dir.normalize();
+    }*/
+    dir = robot.currentRotation * direction; //Eigen::Vector3d(0,1,0.);
     for(T_Samples::const_iterator sit = samples.begin(); sit != samples.end(); ++sit)
     {
         tmp_manip = planner::sampling::Manipulability(*sit, dir);
@@ -214,15 +220,15 @@ Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::
                 if(effector->InContact(*oit,epsilon, normal, projection) && !planner::IsSelfColliding(&robot, limb) && !LimbColliding(limb, obstacles))
                 //if(planner::MinDistance(effectorCentroid, *oit, projection, normal) < epsilon && !planner::IsSelfColliding(&robot, limb) && !LimbColliding(limb, obstacles))
                 {
-                    tempweightedmanip = tmp_manip * dir.dot(normal);
-                    if(tempweightedmanip > bestManip)
+                    tempweightedmanip = tmp_manip * dir.dot(robot.currentRotation * normal);
+                    if(tempweightedmanip > bestManip)// && (planner::SafeTargetDistance(limb,projection,0.9)))
                     {
                         bestManip = tempweightedmanip;
-                        res = *sit;
+                        res =tempweightedmanip > 0 ? *sit : 0;
                         //position = effector->GetPosition();
                         normalVector = normal;
                         position = projection;
-                        break;
+                       // break;
                     }
                 }
             }
@@ -238,7 +244,7 @@ Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::
         ik::IKSolver solver;
         //solver.AddConstraint(ik::ForceManip);
         {
-            int limit = 10;
+            int limit = 0;
             //int limit2 = 100;
             while(limit > 0)
             {
@@ -252,6 +258,7 @@ Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::
     {
         planner::sampling::LoadSample(*save, limb);
     }
+
     return res;
 }
 
@@ -290,7 +297,7 @@ sampling::T_Samples planner::GetContactCandidates(Robot& robot, Node* limb, cons
 
 
 T_Samples planner::GetPosturesOnTarget(Robot& robot, Node* limb, const sampling::T_Samples &samples
-                                         , Object::T_Object& obstacles, Eigen::Vector3d worldposition)
+                                         , Object::T_Object& obstacles, const Eigen::Vector3d& worldposition)
 {
     T_Samples res;
     Object* effector = GetEffector(limb);
@@ -322,7 +329,7 @@ namespace
         return res;
     }
 
-    planner::State* Interpolate(planner::CompleteScenario& scenario, const State& previous, const Model* next)
+    /*planner::State* Interpolate(planner::CompleteScenario& scenario, const State& previous, const Model* next)
     {
         planner::State* res = new State;
         Robot * robot = new planner::Robot(*(previous.value));
@@ -372,6 +379,67 @@ namespace
             }
         }
         return res;
+    }*/
+
+    planner::State* Interpolate(planner::CompleteScenario& scenario, const State& previous, const Model* next)
+    {
+        std::cout << " Satate " <<  std::endl;
+        // Create new state and move it to path location
+        State* state = new State();
+        state->value = new Robot(*previous.value);
+        Robot* robot = state->value;
+        state->value->SetPosition(next->GetPosition(), false);
+        state->value->SetRotation(next->GetOrientation(), true);
+
+        // retrieve indexes of limbs to iterate over them
+        std::vector<Node*> limbs;
+        for(std::vector<Node*>::iterator it = scenario.limbs.begin()
+            ; it!=scenario.limbs.end(); ++it)
+        {
+            limbs.push_back(planner::GetChild(robot,(*it)->id));
+        }
+
+        int lIndex = 0;
+        for(std::vector<Node*>::iterator lit = limbs.begin(); lit != limbs.end(); ++lit, ++lIndex)
+        {
+            bool maintainPreviousTarget = false;
+            Eigen::Vector3d target, normal;
+            if(previous.InContact(lIndex, target, normal) && SafeTargetDistance(*lit,target,0.9)) // limb was in contact, try to maintain it
+            {
+                T_Samples samples = GetPosturesOnTarget(*robot, *lit, scenario.limbSamples[lIndex], scenario.scenario->objects_, target);
+                // TODO TRY TO USE IK IN FACT
+                if(!samples.empty())
+                {
+                    state->contactLimbs.push_back(lIndex);
+                    state->contactLimbPositions.push_back(target);
+                    state->contactLimbPositionsNormals.push_back(normal);
+                    planner::sampling::LoadSample(*(samples.front()),*lit);
+                    maintainPreviousTarget = true; // MOVE OUT OF BLOCK WITH IK USE
+                    state->contactLimbs.push_back(lIndex);
+                    state->contactLimbPositions.push_back(target);
+                    state->contactLimbPositionsNormals.push_back(normal);
+                    std::cout << " limb mainained in contact " << lIndex <<  std::endl;
+                }
+            }
+            if(!maintainPreviousTarget) // could not reach previous target, get a new one (reasons are distance of collision)
+            {
+                Eigen::Vector3d direction = next->GetPosition() - previous.value->node->position;
+                direction = direction.norm() == 0 ? Eigen::Vector3d(0,1,0) : direction;
+                direction.normalize();
+// TODO INCLUDE SAFE TARGET DISTANCE
+                Sample* sample = GetPosturesInContact(*robot, *lit, scenario.limbSamples[lIndex],
+                                                        scenario.scenario->objects_, direction, target, normal);
+                if(sample)
+                {
+                    state->contactLimbs.push_back(lIndex);
+                    state->contactLimbPositions.push_back(target);
+                    state->contactLimbPositionsNormals.push_back(normal);
+                    //planner::sampling::LoadSample(*sample,limbs[*cit]);
+                    std::cout << " limb in contact " << lIndex <<  std::endl;
+                }
+            }
+        }
+        return state;
     }
 
     void developPathRec(const Model* a, const Model* b, CT_Model& res)
@@ -439,7 +507,7 @@ namespace
     CT_Model developPathSpline(const planner::SplinePath& splinePath, const Model& model)
     {
         CT_Model res;
-        for(double t =0; t<=1; t = t+0.01)
+        for(double t =0; t<=1; t = t+0.05)
         {
             Model * tmp = new Model(model);
             Configuration c = splinePath.Evaluate(t);
@@ -581,7 +649,7 @@ planner::T_State planner::PostureSequence(planner::CompleteScenario& scenario)
     if(scenario.path.size() > 2)
     {
         //scenario.spline = new planner::SplinePath(planner::SplineFromPath(collider,scenario.path,2,2));
-        scenario.spline = new planner::SplinePath(planner::SplineShortCut(collider,scenario.path,2,2,10));
+        scenario.spline = new planner::SplinePath(planner::SplineShortCut(collider,scenario.path,2,2,0));
         CT_Model path0 = developPathSpline(*scenario.spline, scenario.scenario->model_);
         path = PartialShortcut(path0, collider);
     }

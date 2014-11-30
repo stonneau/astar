@@ -31,6 +31,21 @@ struct State
     std::vector<Eigen::Vector3d> contactLimbPositionsNormals;
     Robot* value;
     bool stable;
+
+    bool InContact(int limb, Eigen::Vector3d& target, Eigen::Vector3d& normal) const
+    {
+        int id = 0;
+        for(; id < contactLimbs.size(); ++id)
+        {
+            if(contactLimbs[id] == limb)
+            {
+                target = contactLimbPositions[id];
+                normal = contactLimbPositionsNormals[id];
+                return true;
+            }
+        }
+        return false;
+    }
 };
 
 typedef std::vector<State*> T_State;

@@ -203,6 +203,7 @@ CompleteScenario* planner::CompleteScenarioFromFile(const std::string& filename)
             if(line.find("PATH_FROM matrix=") != string::npos && scenario)
             {
                 Eigen::Matrix4d res = ReadTransform(ExtractQuotes(line), from);
+                std::cout << " FROM \n" << res << std::endl;
                 cScenario->from = new Model((cScenario->scenario->model_));
                 cScenario->from->SetOrientation(res.block<3,3>(0,0));
                 cScenario->from->SetPosition(res.block<3,1>(0,3));
@@ -211,6 +212,7 @@ CompleteScenario* planner::CompleteScenarioFromFile(const std::string& filename)
             if(line.find("PATH_TO matrix=") != string::npos && scenario)
             {
                 Eigen::Matrix4d res = ReadTransform(ExtractQuotes(line), to);
+                std::cout << " TO \n" << res << std::endl;
                 cScenario->to = new Model((cScenario->scenario->model_));
                 cScenario->to->SetOrientation(res.block<3,3>(0,0));
                 cScenario->to->SetPosition(res.block<3,1>(0,3));

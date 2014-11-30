@@ -10,6 +10,7 @@
 #define _STRUCT_MODEL
 
 #include "collision/Object.h"
+#include "collision/Collider.h"
 
 namespace planner
 {
@@ -75,6 +76,22 @@ struct Model
             }
         }
         return res;
+    }
+
+    bool ReachabilityCondition(Collider& collider) // updates collision indexes
+    {
+        collisionIndexes.clear();
+        size_t id = 0;
+        bool englobingCollision = false;
+        for(Object::T_Object::iterator it = englobing.begin();
+            it != englobing.end() && !englobingCollision; ++it, ++id)
+        {
+            if(collider.IsColliding(*it))
+            {
+                englobingCollision = true;
+            }
+        }
+        return englobingCollision && !collider.IsColliding(englobed);
     }
 
     const Eigen::Matrix3d& GetOrientation() const

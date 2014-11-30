@@ -32,6 +32,8 @@ using namespace std;
 using namespace Eigen;
 namespace
 {
+
+    double dirIK = 1;
     static float xyz[3] = {8,-1.3,2.5};
     static float hpr[3] = {180.0,-10.0,0.0};
     bool pathOn = true;
@@ -40,6 +42,7 @@ namespace
     bool drawPOstures = true;
     bool drawScene = false;
     bool drawNormals = false;
+    bool solid = true;
     std::string outpath("../tests/testSerialization.txt");
     std::string outfilename ("../tests/entrance.path");
     Eigen::Matrix3d itompTransform;
@@ -75,7 +78,7 @@ namespace
     }
 
     planner::Object::CT_Object path;
-    void DrawObject(const planner::Object* obj, bool useItomp = true)
+    void DrawObject(const planner::Object* obj, bool useItomp = true, bool solid = false)
     {
         // TODO DRAW OFFSET
         PQP_REAL p1 [3];
@@ -86,43 +89,98 @@ namespace
         bool drNormals = drawNormals &! obj->normals_.empty();
         for(int i =0; i< obj->GetModel()->num_tris; ++i)
         {
-            const Tri& t = obj->GetModel()->tris[i];
-            Vector3d v1, v2, v3;
-            arrayToVect3(t.p1, v1); arrayToVect3(t.p2, v2); arrayToVect3(t.p3, v3);
-            v1 = obj->GetOrientation() * v1; v1 = v1 + obj->GetPosition();
-            v2 = obj->GetOrientation() * v2; v2 = v2 + obj->GetPosition();
-            v3 = obj->GetOrientation() * v3; v3 = v3 + obj->GetPosition();
-            if(useItomp)
+            if(!solid)
             {
-                Vect3ToArray(p1, itompTransform * v1); Vect3ToArray(p2, itompTransform * v2);
-                Vect3ToArray(p3, itompTransform * v3);
+                const Tri& t = obj->GetModel()->tris[i];
+                Vector3d v1, v2, v3;
+                arrayToVect3(t.p1, v1); arrayToVect3(t.p2, v2); arrayToVect3(t.p3, v3);
+                v1 = obj->GetOrientation() * v1; v1 = v1 + obj->GetPosition();
+                v2 = obj->GetOrientation() * v2; v2 = v2 + obj->GetPosition();
+                v3 = obj->GetOrientation() * v3; v3 = v3 + obj->GetPosition();
+                if(useItomp)
+                {
+                    Vect3ToArray(p1, itompTransform * v1); Vect3ToArray(p2, itompTransform * v2);
+                    Vect3ToArray(p3, itompTransform * v3);
+                    if(drNormals)
+                    {
+                        Vect3ToArray(center, itompTransform * ((v1 + v2 + v3) /3));
+                        Vect3ToArray(normal,  itompTransform * obj->GetOrientation() *  (obj->normals_[t.id] * 0.5) +  itompTransform * (v1 + v2 + v3) /3);
+                    }
+                }
+                else
+                {
+                    Vect3ToArray(p1, v1); Vect3ToArray(p2, v2);
+                    Vect3ToArray(p3, v3);
+                    if(drNormals)
+                    {
+                        Vect3ToArray(center, (v1 + v2 + v3) /3);
+                        Vect3ToArray(normal,  (obj->normals_[t.id] * 0.5 +(v1 + v2 + v3) /3));
+                    }
+                }
+                dsDrawLineD(p1, p2);
+                dsDrawLineD(p2, p3);
+                dsDrawLineD(p3, p1);
                 if(drNormals)
                 {
-                    Vect3ToArray(center, itompTransform * ((v1 + v2 + v3) /3));
-                    Vect3ToArray(normal,  itompTransform * obj->GetOrientation() *  (obj->normals_[t.id] * 0.5) +  itompTransform * (v1 + v2 + v3) /3);
+                    dsSetColor(1,0,0);
+                    dsDrawLineD(center, normal);
+                    dsSetColor(0,0,0);
                 }
             }
             else
             {
-                Vect3ToArray(p1, v1); Vect3ToArray(p2, v2);
-                Vect3ToArray(p3, v3);
+                const Tri& t = obj->GetModel()->tris[i];
+                Vector3d v1, v2, v3, c; // c is triangle center
+                arrayToVect3(t.p1, v1); arrayToVect3(t.p2, v2); arrayToVect3(t.p3, v3);
+                v1 = obj->GetOrientation() * v1; v1 = v1 + obj->GetPosition();
+                v2 = obj->GetOrientation() * v2; v2 = v2 + obj->GetPosition();
+                v3 = obj->GetOrientation() * v3; v3 = v3 + obj->GetPosition();
+                if(useItomp)
+                {
+                    c =  itompTransform * ((v1 + v2 + v3) /3);
+                    Vect3ToArray(center, itompTransform * ((v1 + v2 + v3) /3));
+                    if(drNormals)
+                    {
+                        Vect3ToArray(normal,  itompTransform * obj->GetOrientation() *  (obj->normals_[t.id] * 0.5) +  itompTransform * (v1 + v2 + v3) /3);
+                    }
+                    v1 = itompTransform * v1; v2 =itompTransform * v2;
+                    v3 = itompTransform * v3;
+                }
+                else
+                {
+                    c =  (v1 + v2 + v3) /3;
+                    Vect3ToArray(center, (v1 + v2 + v3) /3);
+                    if(drNormals)
+                    {
+                        Vect3ToArray(normal,  (obj->normals_[t.id] * 0.5 +(v1 + v2 + v3) /3));
+                    }
+                }
+
+                //compute center done
+                v1 = v1 - c; v2 = v2 - c; v3 = v3 - c;
+                double R[12];
+                for(int i =0; i< 3; ++i)
+                {
+                    for(int j =0; j< 4; ++j)
+                    {
+                        R[ 4*i + j ] = i == j ? 1. : 0.;
+                    }
+                }
+                Vect3ToArray(p1, v1); Vect3ToArray(p2, v2); Vect3ToArray(p3, v3);
+                dsDrawTriangleD(center,R,p1, p2, p3, solid);
+                /*dsDrawLineD(p1, p2);
+                dsDrawLineD(p2, p3);
+                dsDrawLineD(p3, p1);*/
                 if(drNormals)
                 {
-                    Vect3ToArray(center, (v1 + v2 + v3) /3);
-                    Vect3ToArray(normal,  (obj->normals_[t.id] * 0.5 +(v1 + v2 + v3) /3));
+                    dsSetColor(1,0,0);
+                    dsDrawLineD(center, normal);
+                    dsSetColor(0,0,0);
                 }
-            }
-            dsDrawLineD(p1, p2);
-            dsDrawLineD(p2, p3);
-            dsDrawLineD(p3, p1);
-            if(drNormals)
-            {
-                dsSetColor(1,0,0);
-                dsDrawLineD(center, normal);
-                dsSetColor(0,0,0);
             }
         }
     }
+
     void DrawModel(const planner::Model* model, bool useItomp = true)
     {
         DrawObject(model->englobed, useItomp);
@@ -185,19 +243,19 @@ namespace
     {
         if(drawScene)
         {
-            dsSetColorAlpha(0,0, 0,1);
+            dsSetColorAlpha(0,0, 0,0.7);
             for(planner::Object::T_Object::iterator it = cScenario->scenario->objects_.begin();
                 it != cScenario->scenario->objects_.end();
                 ++it)
             {
-                DrawObject(*it);
+                DrawObject(*it, true, solid);
             }
 
             for(planner::Object::T_Object::iterator it = cScenario->scenario->contactObjects_.begin();
                 it != cScenario->scenario->contactObjects_.end();
                 ++it)
             {
-                DrawObject(*it);
+                DrawObject(*it, true, solid);
             }
         }
         if(pathOn)
@@ -265,7 +323,7 @@ namespace
     void DrawNode(const planner::Node* node)
     {
         if(node->current)
-            DrawObject(node->current, true);
+            DrawObject(node->current, true, true);
         if (drawacis) DrawAcis(node);
         for(std::vector<planner::Node*>::const_iterator cit = node->children.begin();
             cit != node->children.end(); ++cit)
@@ -274,7 +332,7 @@ namespace
         }
     }
 
-    void PerformIkStep(planner::CompleteScenario& scenario, planner::State* state)
+    void PerformIkStep(planner::CompleteScenario& scenario, planner::State* state, bool obs = false)
     {
         ik::IKSolver solver;
         std::vector<Eigen::Vector3d>::iterator posit = state->contactLimbPositions.begin();
@@ -287,11 +345,39 @@ namespace
             ik::VectorAlignmentConstraint constraint(*normit);
             ik::ObstacleAvoidanceConstraint obsconstraint(collider);
             std::vector<ik::PartialDerivativeConstraint*> constraints;
-            //constraints.push_back(&constraint);
-            constraints.push_back(&obsconstraint);
+            if(!obs)
+                constraints.push_back(&constraint);
+            //constraints.push_back(&obsconstraint);
             //solver.AddConstraint(ik::ForceManip);
             {
                 solver.StepClamping(limb, *posit, *posit, constraints, true);
+            }
+        }
+    }
+
+    void PerformIkStep(planner::CompleteScenario& scenario, planner::Node* limb, bool obs = false)
+    {
+        planner::State* state = states[current];
+        ik::IKSolver solver;
+        std::vector<Eigen::Vector3d>::iterator posit = state->contactLimbPositions.begin();
+        std::vector<Eigen::Vector3d>::iterator normit = state->contactLimbPositionsNormals.begin();
+        planner::Collider collider(scenario.scenario->objects_);
+        for(std::vector<int>::const_iterator cit = state->contactLimbs.begin();
+            cit != state->contactLimbs.end(); ++cit, ++posit, ++normit)
+        {
+            planner::Node* l2 =  planner::GetChild(scenario.robot,scenario.limbs[*cit]->id);
+            if(l2->id == limb->id)
+            {
+                ik::VectorAlignmentConstraint constraint(*normit);
+                ik::ObstacleAvoidanceConstraint obsconstraint(collider);
+                std::vector<ik::PartialDerivativeConstraint*> constraints;
+                if(!obs)
+                    constraints.push_back(&constraint);
+                //constraints.push_back(&obsconstraint);
+                //solver.AddConstraint(ik::ForceManip);
+                {
+                    solver.StepClamping(limb, *posit, *posit, constraints, true);
+                }
             }
         }
     }
@@ -301,12 +387,20 @@ static void simLoop (int pause)
 {
     DrawSpline();
     DrawObjects();
-    dsSetColorAlpha(0,0, 0.7,0.7);
+    dsSetColorAlpha(0,0, 0.7,1);
     DrawNode(cScenario->robot->node);
+    std::vector<Eigen::Vector3d>::iterator nit = states[current]->contactLimbPositionsNormals.begin();
     for(std::vector<Eigen::Vector3d>::iterator it = states[current]->contactLimbPositions.begin();
-        it != states[current]->contactLimbPositions.end(); ++it)
+        it != states[current]->contactLimbPositions.end(); ++it, ++nit)
     {
-        DrawPoint(itompTransform * (*it));
+        Eigen::Vector3d orig = itompTransform * (*it);
+        DrawPoint(orig);
+        PQP_REAL p1 [3];
+        PQP_REAL p2 [3];
+        Vect3ToArray(p1,orig);
+        dsSetColor(0,1,0);
+        Vect3ToArray(p2, orig + itompTransform * (*nit));
+        dsDrawLineD(p1, p2); dsSetColor(0,0,1);
     }
     if(drawPOstures)
     {
@@ -343,6 +437,8 @@ void start()
     //constraints.push_back(new ik::ForceManipulabilityConstraint);
     //ikSolver.AddConstraint(ik::ForceManip);
     cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/truck.scen");
+    //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/truck_front.scen");
+    //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/truck_test.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/race.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/climbing.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/zoey.scen");
@@ -401,7 +497,7 @@ void start()
 
     Eigen::Matrix3d inverse = itompTransform;
     inverse.inverse();
-    exporter::ITOMPExporter itompexporter(inverse, Eigen::Vector3d(12,-8,-0.5));
+    exporter::ITOMPExporter itompexporter(inverse, Eigen::Vector3d(12,-0,-0.5));
     itompexporter.PushStructure(cScenario->robot);
     for(planner::T_State::iterator it = states.begin()+1; it != states.end(); ++it)
     {
@@ -470,7 +566,7 @@ bool SavePath()
 
     Eigen::Matrix3d inverse = itompTransform;
     inverse.inverse();
-    exporter::ITOMPExporter itompexporter(inverse, Eigen::Vector3d(0,0,0.472064));
+    exporter::ITOMPExporter itompexporter(inverse, Eigen::Vector3d(0,0,0.));
     itompexporter.PushStructure(cScenario->robot);
     for(planner::T_State::iterator it = states.begin()+1; it != states.end(); ++it)
     {
@@ -504,6 +600,12 @@ void command(int cmd)   /**  key control function; */
             PerformIkStep(*cScenario, states[current]);
             break;
         }
+        case '7' :
+        {
+            //ikSolver.StepClamping(planner::GetChild(cScenario->robot, "upper_right_arm_z_joint"),target,directionManip, constraints ,optimize);
+            PerformIkStep(*cScenario, states[current], true);
+            break;
+        }
         case 'q' :
             drawacis = !drawacis;
         break;
@@ -512,6 +614,12 @@ void command(int cmd)   /**  key control function; */
         break;
         case '9' :
             drawNormals = !drawNormals;
+        break;            
+        case '8' :
+            dirIK *= -1;
+        break;
+        case '6' :
+            solid = !solid;
         break;
         case 's' :
             planner::SavePrm(*(cScenario->scenario->prm), outpath);//, (AngleAxisd(M_PI, Vector3d::UnitZ()) * AngleAxisd(0.5*M_PI, Vector3d::UnitX())).matrix());
@@ -573,57 +681,105 @@ void command(int cmd)   /**  key control function; */
             break;
         }
         case 'a' :
-        planner::GetChild(cScenario->robot, "upper_right_arm_z_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_right_arm_z_joint")->value-0.1);
+        planner::GetChild(cScenario->robot, "upper_right_arm_z_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_right_arm_z_joint")->value-0.1* dirIK);
         break;
         case 'z' :
-        planner::GetChild(cScenario->robot, "upper_right_arm_y_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_right_arm_y_joint")->value-0.1);
+        planner::GetChild(cScenario->robot, "upper_right_arm_y_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_right_arm_y_joint")->value-0.1* dirIK);
         break;
         case 'e' :
-        planner::GetChild(cScenario->robot, "upper_right_arm_x_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_right_arm_x_joint")->value-0.1);
+        planner::GetChild(cScenario->robot, "upper_right_arm_x_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_right_arm_x_joint")->value-0.1* dirIK);
         break;
         case 'r' :
-        planner::GetChild(cScenario->robot, "lower_right_arm_joint")->SetRotation(planner::GetChild(cScenario->robot,"lower_right_arm_joint")->value-0.1);
+        planner::GetChild(cScenario->robot, "lower_right_arm_joint")->SetRotation(planner::GetChild(cScenario->robot,"lower_right_arm_joint")->value-0.1* dirIK);
+        break;
+        case 'A' :
+        planner::GetChild(cScenario->robot, "right_hand_z_joint")->SetRotation(planner::GetChild(cScenario->robot,"right_hand_z_joint")->value-0.1* dirIK);
+        break;
+        case 'Z' :
+        planner::GetChild(cScenario->robot, "right_hand_y_joint")->SetRotation(planner::GetChild(cScenario->robot,"right_hand_y_joint")->value-0.1* dirIK);
+        break;
+        case 'E' :
+        planner::GetChild(cScenario->robot, "right_hand_x_joint")->SetRotation(planner::GetChild(cScenario->robot,"right_hand_x_joint")->value-0.1* dirIK);
+        break;
+        case 'R' :
+            PerformIkStep(*cScenario, planner::GetChild(cScenario->robot, "upper_right_arm_z_joint"));
         break;
 
         case 'u' :
-        planner::GetChild(cScenario->robot, "upper_right_arm_z_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_right_arm_z_joint")->value-0.1);
+        planner::GetChild(cScenario->robot, "upper_right_arm_z_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_right_arm_z_joint")->value-0.1* dirIK);
         break;
         case 'i' :
-        planner::GetChild(cScenario->robot, "upper_left_arm_y_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_left_arm_y_joint")->value-0.1);
+        planner::GetChild(cScenario->robot, "upper_left_arm_y_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_left_arm_y_joint")->value-0.1* dirIK);
         break;
         case 'o' :
-        planner::GetChild(cScenario->robot, "upper_left_arm_x_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_left_arm_x_joint")->value-0.1);
+        planner::GetChild(cScenario->robot, "upper_left_arm_x_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_left_arm_x_joint")->value-0.1* dirIK);
         break;
         case 'p' :
-        planner::GetChild(cScenario->robot, "lower_left_arm_joint")->SetRotation(planner::GetChild(cScenario->robot,"lower_left_arm_joint")->value-0.1);
+        planner::GetChild(cScenario->robot, "lower_left_arm_joint")->SetRotation(planner::GetChild(cScenario->robot,"lower_left_arm_joint")->value-0.1* dirIK);
+        break;
+        case 'U' :
+        planner::GetChild(cScenario->robot, "left_hand_z_joint")->SetRotation(planner::GetChild(cScenario->robot,"left_hand_z_joint")->value-0.1* dirIK);
+        break;
+        case 'I' :
+        planner::GetChild(cScenario->robot, "left_hand_y_joint")->SetRotation(planner::GetChild(cScenario->robot,"left_hand_y_joint")->value-0.1* dirIK);
+        break;
+        case 'O' :
+        planner::GetChild(cScenario->robot, "left_hand_x_joint")->SetRotation(planner::GetChild(cScenario->robot,"left_hand_x_joint")->value-0.1* dirIK);
+        break;
+        case 'P' :
+            PerformIkStep(*cScenario, planner::GetChild(cScenario->robot, "upper_left_arm_z_joint"));
         break;
 
 
         case 'w' :
-        planner::GetChild(cScenario->robot, "upper_right_arm_z_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_right_arm_z_joint")->value-0.1);
+        planner::GetChild(cScenario->robot, "upper_left_leg_z_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_left_leg_z_joint")->value-0.1* dirIK);
         break;
         case 'x' :
-        planner::GetChild(cScenario->robot, "upper_left_leg_y_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_left_leg_y_joint")->value-0.1);
+        planner::GetChild(cScenario->robot, "upper_left_leg_y_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_left_leg_y_joint")->value-0.1* dirIK);
         break;
         case 'c' :
-        planner::GetChild(cScenario->robot, "upper_left_leg_x_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_left_leg_x_joint")->value-0.1);
+        planner::GetChild(cScenario->robot, "upper_left_leg_x_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_left_leg_x_joint")->value-0.1* dirIK);
         break;
         case 'v' :
-        planner::GetChild(cScenario->robot, "lower_left_leg_joint")->SetRotation(planner::GetChild(cScenario->robot,"lower_left_leg_joint")->value-0.1);
+        planner::GetChild(cScenario->robot, "lower_left_leg_joint")->SetRotation(planner::GetChild(cScenario->robot,"lower_left_leg_joint")->value-0.1* dirIK);
+        break;
+        case 'W' :
+        planner::GetChild(cScenario->robot, "left_foot_z_joint")->SetRotation(planner::GetChild(cScenario->robot,"left_foot_z_joint")->value-0.1* dirIK);
+        break;
+        case 'X' :
+        planner::GetChild(cScenario->robot, "left_foot_y_joint")->SetRotation(planner::GetChild(cScenario->robot,"left_foot_y_joint")->value-0.1* dirIK);
+        break;
+        case 'C' :
+        planner::GetChild(cScenario->robot, "left_foot_x_joint")->SetRotation(planner::GetChild(cScenario->robot,"left_foot_x_joint")->value-0.1* dirIK);
+        break;
+        case 'V' :
+            PerformIkStep(*cScenario, planner::GetChild(cScenario->robot, "upper_left_leg_z_joint"));
         break;
 
 
         case 'h' :
-        planner::GetChild(cScenario->robot, "upper_right_arm_z_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_right_arm_z_joint")->value-0.1);
+        planner::GetChild(cScenario->robot, "upper_right_arm_z_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_right_arm_z_joint")->value-0.1* dirIK);
         break;
         case 'j' :
-        planner::GetChild(cScenario->robot, "upper_right_leg_y_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_right_leg_y_joint")->value-0.1);
+        planner::GetChild(cScenario->robot, "upper_right_leg_y_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_right_leg_y_joint")->value-0.1* dirIK);
         break;
         case 'k' :
-        planner::GetChild(cScenario->robot, "upper_right_leg_x_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_right_leg_x_joint")->value-0.1);
+        planner::GetChild(cScenario->robot, "upper_right_leg_x_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_right_leg_x_joint")->value-0.1* dirIK);
         break;
         case 'l' :
-        planner::GetChild(cScenario->robot, "lower_right_leg_joint")->SetRotation(planner::GetChild(cScenario->robot,"lower_right_leg_joint")->value-0.1);
+        planner::GetChild(cScenario->robot, "lower_right_leg_joint")->SetRotation(planner::GetChild(cScenario->robot,"lower_right_leg_joint")->value-0.1* dirIK);
+        break;
+        case 'H' :
+        planner::GetChild(cScenario->robot, "right_foot_z_joint")->SetRotation(planner::GetChild(cScenario->robot,"right_foot_z_joint")->value-0.1* dirIK);
+        break;
+        case 'J' :
+        planner::GetChild(cScenario->robot, "right_foot_y_joint")->SetRotation(planner::GetChild(cScenario->robot,"right_foot_y_joint")->value-0.1* dirIK);
+        break;
+        case 'K' :
+        planner::GetChild(cScenario->robot, "right_foot_x_joint")->SetRotation(planner::GetChild(cScenario->robot,"right_foot_x_joint")->value-0.1* dirIK);
+        break;
+        case 'L' :
+            PerformIkStep(*cScenario, planner::GetChild(cScenario->robot, "upper_right_leg_z_joint"));
         break;
     }
 }

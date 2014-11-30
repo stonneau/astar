@@ -102,7 +102,7 @@ double ObstacleAvoidanceConstraint::Evaluate(planner::Node* limb, Eigen::VectorX
     SetPose(limb, minDofs);
     valMin = MinDistance(limb, collider_);
     SetPose(limb, maxDofs);
-    valMin = MinDistance(limb, collider_);
+    valPlus = MinDistance(limb, collider_);
     double res = double (valPlus - valMin) / (epsilon * 2) ;
     SetPose(limb, save);
     return res;

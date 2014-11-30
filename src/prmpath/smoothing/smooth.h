@@ -38,7 +38,9 @@ struct SplinePath : public ParamFunction
 
     virtual C2_Point operator()(double t) const;
     virtual C2_Point max() const;
+    virtual C2_Point min() const;
     virtual double tmax() const {return knots_.back();}
+    virtual double tmin() const {return knots_.front();}
     virtual C2_Point derivative(const double t) const;
     Configuration Evaluate(double t) const;
 

@@ -90,7 +90,7 @@ Model* Generator::operator()()
         double r1, r2;
         r1 = ((double) rand() / (RAND_MAX)); r2 = ((double) rand() / (RAND_MAX));
         Eigen::Vector3d P = (1 - sqrt(r1)) * A + (sqrt(r1) * (1 - r2)) * B + (sqrt(r1) * r2) * C;
-if(P.y() > 0)
+if(P.y() > 0  && configuration.GetPosition().y() < 8)
 //if(P.y() > -0.3 && P.y() < 2.5)
 		{
 			configuration.SetPosition(P);
@@ -113,8 +113,8 @@ if(P.y() > 0)
                 //tranformComplete= matrices::Roty3(rx);
                 //tranformComplete*= matrices::Rotx3(rx);
             }
-            while( !(/*y.dot(tranformComplete.block<3,1>(0,0)) < 0 && // torso not facing upward*/
-                     y.dot(tranformComplete.block<3,1>(0,1)) > -0.1 /*&&
+            while( !(y.dot(tranformComplete.block<3,1>(0,0)) < 0 && // torso not facing upward
+                     y.dot(tranformComplete.block<3,1>(0,1)) > 0.3 /*&&
                      x.dot(tranformComplete.block<3,1>(0,1)) < -0.1 */
                    )); // head not pointing too down
            // while( y.dot(tranformComplete.block<3,1>(0,0)) < 0.9);
@@ -126,18 +126,18 @@ if(P.y() > 0)
             configuration.SetOrientation(tranformComplete);
 			while (limitstraight >0)
 			{
-                Eigen::Vector3d dir((double) rand() / (RAND_MAX) - 0.5, (double) rand() / (RAND_MAX) - 0.5, (double) rand() / (RAND_MAX) - 0.5);
+                Eigen::Vector3d dir((double) rand() / (double)(RAND_MAX) - 0.5, (double) rand() / (double)(RAND_MAX) - 0.5, (double) rand() / (double)(RAND_MAX) - 0.5);
                 // check that direction is somewhat colinear to normal
                 if(!sampled.first->normals_.empty())
                 {
-                    while(dir.dot(triangleNormal) <= 0)
+                    /*while(dir.dot(triangleNormal) <= 0)
                     {
                         dir = Eigen::Vector3d((double) rand() / (RAND_MAX) - 0.5, (double) rand() / (RAND_MAX) - 0.5, (double) rand() / (RAND_MAX) - 0.5);
                         if(dir.norm() != 0)
                         {
                             dir.normalize();
                         }
-                    }
+                    }*/
                 }
                 if(dir.norm() == 0) break;
 				dir.normalize();
@@ -148,12 +148,12 @@ if(P.y() > 0)
 				{
 					if(!collider_.IsColliding(configuration.englobed))
 					{
-if(configuration.GetPosition().y() > 0)
+if(configuration.GetPosition().y() > 0 && configuration.GetPosition().y() < 8)
 //if(configuration.GetPosition().y() > -0.3 && configuration.GetPosition().y() < 2.)
                             return new Model(configuration);
 						break;
 					}
-					configuration.SetPosition(configuration.GetPosition() + (double) rand() / (RAND_MAX) / 2 * dir);
+                    configuration.SetPosition(configuration.GetPosition() + (double) rand() / (RAND_MAX) / 4 * dir);
                     collisions = configuration.EnglobingCollision(sampled.first);
                     maxStep--;
 				}
@@ -164,7 +164,7 @@ if(configuration.GetPosition().y() > 0)
             configuration.SetOrientation(tranformComplete);
 			while (limit2 >0)
 			{
-				Eigen::Vector3d dir((double) rand() / (RAND_MAX) -0.5, (double) rand() / (RAND_MAX) -0.5, (double) rand() / (RAND_MAX) -0.5);
+                Eigen::Vector3d dir((double) rand() / (double) (RAND_MAX) -0.5, (double) rand() / (double) (RAND_MAX) -0.5, (double) rand() / (double) (RAND_MAX) -0.5);
 				// if normal check colinearity
                 if(sampled.first->normals_.size() > sampled.second.second->id)
 				{
@@ -191,12 +191,12 @@ if(configuration.GetPosition().y() > 0)
 				{
 					if(!collider_.IsColliding(configuration.englobed))
 					{
-if(configuration.GetPosition().y() > 0)
+if(configuration.GetPosition().y() > 0  && configuration.GetPosition().y() < 8)
 //if(configuration.GetPosition().y() > -0.3 && configuration.GetPosition().y() < 2.)
                             return new Model(configuration);
 						break;
 					}
-					configuration.SetPosition(configuration.GetPosition() + (double) rand() / (RAND_MAX) / 2 * dir);
+                    configuration.SetPosition(configuration.GetPosition() + (double) rand() / (double)(RAND_MAX) / 2. * dir);
                     collisions = configuration.EnglobingCollision(sampled.first);
 				}
 				--limit2;

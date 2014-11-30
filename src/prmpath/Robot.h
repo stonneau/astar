@@ -125,5 +125,7 @@ Node* GetChild(Robot *robot, const int id);
 void  Zero(Robot *robot);
 Node* LoadRobot(const std::string& urdfpath);
 bool IsSelfColliding(Robot* robot, Node* limb);
+bool SafeTargetDistance(const Node* limb, double distance, float margin = 0.8);
+bool SafeTargetDistance(const Node* limb, const Eigen::Vector3d& target, float margin = 0.8);
 } //namespace planner
 #endif //_STRUCT_ROBOT

@@ -680,6 +680,35 @@ bool planner::IsSelfColliding(planner::Robot* robot, planner::Node* limb)
     return false;
 }
 
+double LimbLengthRec(const Node* limb)
+{
+    double minDistance =  (limb->children.empty()) ?  0 : std::numeric_limits<double>::max();
+    double tmp;
+    for(std::vector<Node*>::const_iterator cit = limb->children.begin();
+        cit != limb->children.end(); ++cit)
+    {
+        tmp = LimbLengthRec(*cit);
+        if(tmp < minDistance) minDistance = tmp;
+    }
+    return minDistance + (limb->position - limb->parent->position).norm();
+}
+
+
+bool planner::SafeTargetDistance(const planner::Node* limb, double distance, float margin)
+{
+    // compute distance from limb to effector with a safety margin
+    double totalLength = limb->children.empty() ? 0 :  LimbLengthRec(limb->children.front());
+    return distance < totalLength * margin;
+}
+
+bool planner::SafeTargetDistance(const planner::Node* limb, const Eigen::Vector3d& target, float margin)
+{
+    // compute distance from limb to effector with a safety margin
+    double totalLength = limb->children.empty() ? 0 :  LimbLengthRec(limb->children.front());
+
+    //std::cout << "safedistance " << limb->tag << "distance " << (target - limb->position).norm() << "totallengh" << totalLength << std::endl;
+    return (target - limb->position).norm() < totalLength * margin;
+}
 
 void GetEffectorsRec(Node* limb, std::vector<Eigen::Vector3d>& res)
 {
