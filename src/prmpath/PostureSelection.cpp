@@ -304,7 +304,7 @@ T_Samples planner::GetPosturesOnTarget(Robot& robot, Node* limb, const sampling:
     for(T_Samples::const_iterator sit = samples.begin(); sit != samples.end(); ++sit)
     {
         LoadSample(*(*sit),limb);
-        if((effector->GetPosition() - worldposition).norm()<epsilon && !effector->IsColliding(obstacles))
+        if((effector->GetPosition() - worldposition).norm()<2*epsilon && !effector->IsColliding(obstacles))
         {
             //std::cout << "si si ca arrive " << std::endl;
             res.push_back(*sit);
@@ -383,7 +383,7 @@ namespace
 
     planner::State* Interpolate(planner::CompleteScenario& scenario, const State& previous, const Model* next)
     {
-        std::cout << " Satate " <<  std::endl;
+        //std::cout << " Satate " <<  std::endl;
         // Create new state and move it to path location
         State* state = new State();
         state->value = new Robot(*previous.value);
@@ -414,12 +414,14 @@ namespace
                     state->contactLimbPositions.push_back(target);
                     state->contactLimbPositionsNormals.push_back(normal);
                     planner::sampling::LoadSample(*(samples.front()),*lit);
-                    maintainPreviousTarget = true; // MOVE OUT OF BLOCK WITH IK USE
-                    state->contactLimbs.push_back(lIndex);
-                    state->contactLimbPositions.push_back(target);
-                    state->contactLimbPositionsNormals.push_back(normal);
-                    std::cout << " limb mainained in contact " << lIndex <<  std::endl;
+//std::cout << " limb mainained in contact " << lIndex <<  std::endl;
                 }
+
+                /*state->contactLimbs.push_back(lIndex);
+                state->contactLimbPositions.push_back(target);
+                state->contactLimbPositionsNormals.push_back(normal);*/
+
+                maintainPreviousTarget = true; // MOVE OUT OF BLOCK WITH IK USE
             }
             if(!maintainPreviousTarget) // could not reach previous target, get a new one (reasons are distance of collision)
             {
@@ -435,7 +437,7 @@ namespace
                     state->contactLimbPositions.push_back(target);
                     state->contactLimbPositionsNormals.push_back(normal);
                     //planner::sampling::LoadSample(*sample,limbs[*cit]);
-                    std::cout << " limb in contact " << lIndex <<  std::endl;
+//std::cout << " limb in contact " << lIndex <<  std::endl;
                 }
             }
         }

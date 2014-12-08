@@ -1,6 +1,6 @@
 MODEL = ../rocketboxmale/cenglobedt.obj ../rocketboxmale/cenglobing.obj
-OBJECT = ../tests/collision/truck_simple.obj
+OBJECT = ../tests/collision/truck_09.obj
 qs = ../tests/fullscenarios/zombi_room.prm
-PRMFILE = ../tests/truck.prm
-SZE = 1000 2 20
-VSIBILITY
+PRMFILE = ../tests/testSerialization.txt
+SIZ = 900 2 20
+VISBILITY
