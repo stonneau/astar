@@ -416,10 +416,12 @@ namespace
                     planner::sampling::LoadSample(*(samples.front()),*lit);
 //std::cout << " limb mainained in contact " << lIndex <<  std::endl;
                 }
-
+                else
+                {
                 /*state->contactLimbs.push_back(lIndex);
                 state->contactLimbPositions.push_back(target);
                 state->contactLimbPositionsNormals.push_back(normal);*/
+                }
 
                 maintainPreviousTarget = true; // MOVE OUT OF BLOCK WITH IK USE
             }
@@ -652,7 +654,8 @@ planner::T_State planner::PostureSequence(planner::CompleteScenario& scenario)
     {
         //scenario.spline = new planner::SplinePath(planner::SplineFromPath(collider,scenario.path,2,2));
         scenario.spline = new planner::SplinePath(planner::SplineShortCut(collider,scenario.path,2,2,0));
-        CT_Model path0 = developPathSpline(*scenario.spline, scenario.scenario->model_);
+        //CT_Model path0 = developPathSpline(*scenario.spline, scenario.scenario->model_);
+        CT_Model path0 = developPath(scenario.path);
         path = PartialShortcut(path0, collider);
     }
     else
