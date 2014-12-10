@@ -60,6 +60,7 @@ namespace
     bool optimize = true;
     std::vector<ik::PartialDerivativeConstraint*> constraints;
 }
+/*Draw*/
 namespace
 {
     void arrayToVect3(const double * tab, Vector3d& vect)
@@ -383,6 +384,29 @@ namespace
     }
 
 }
+
+
+/*technical*/
+namespace
+{
+    void DeleteCurrentState()
+    {
+        if(states.size()< 1) return;
+        delete(states[current]);
+        states.erase(states.begin()+current);
+        current--; if(current <0) current = 0;
+        cScenario->robot = states[current]->value;
+    }
+
+    void CloneCurrentState()
+    {
+        if(states.empty()) return;
+        planner::State* s = new planner::State(states[current]);
+        states.insert(states.begin()+current, s);
+        current++;
+    }
+}
+
 static void simLoop (int pause)
 {
     DrawSpline();
@@ -443,6 +467,7 @@ void start()
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/climbing.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/zoey.scen");
     //cScenario = planner::CompleteScenarioFromFile("../tests/profile.scen");
+    //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/chair.scen");
     std::cout << "done" << std::endl;
     dsSetViewpoint (xyz,hpr);
     itompTransform =Eigen::Matrix3d::Identity();
@@ -780,6 +805,12 @@ void command(int cmd)   /**  key control function; */
         break;
         case 'L' :
             PerformIkStep(*cScenario, planner::GetChild(cScenario->robot, "upper_right_leg_z_joint"));
+        break;
+        case 'B' :
+            DeleteCurrentState();
+        break;
+        case 'G' :
+            CloneCurrentState();
         break;
     }
 }

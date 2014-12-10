@@ -90,7 +90,7 @@ Model* Generator::operator()()
         double r1, r2;
         r1 = ((double) rand() / (RAND_MAX)); r2 = ((double) rand() / (RAND_MAX));
         Eigen::Vector3d P = (1 - sqrt(r1)) * A + (sqrt(r1) * (1 - r2)) * B + (sqrt(r1) * r2) * C;
-if(P.y() > 0  && configuration.GetPosition().y() < 8 && std::abs(configuration.GetPosition().z()) < 2)
+//if(P.y() > 0  && configuration.GetPosition().y() < 8 ) //&& std::abs(configuration.GetPosition().z()) < 2)
 //if(P.y() > -0.3 && P.y() < 2.5)
 		{
 			configuration.SetPosition(P);
@@ -148,7 +148,7 @@ if(P.y() > 0  && configuration.GetPosition().y() < 8 && std::abs(configuration.G
 				{
 					if(!collider_.IsColliding(configuration.englobed))
 					{
-if(configuration.GetPosition().y() > 0 && configuration.GetPosition().y() < 8  && std::abs(configuration.GetPosition().z()) < 2)
+//if(configuration.GetPosition().y() > 0 && configuration.GetPosition().y() < 8 ) // && std::abs(configuration.GetPosition().z()) < 2)
 //if(configuration.GetPosition().y() > -0.3 && configuration.GetPosition().y() < 2.)
                             return new Model(configuration);
 						break;
@@ -191,7 +191,7 @@ if(configuration.GetPosition().y() > 0 && configuration.GetPosition().y() < 8  &
 				{
 					if(!collider_.IsColliding(configuration.englobed))
 					{
-if(configuration.GetPosition().y() > 0  && configuration.GetPosition().y() < 8 && std::abs(configuration.GetPosition().z()) < 2)
+//if(configuration.GetPosition().y() > 0  && configuration.GetPosition().y() < 8  ) //&& std::abs(configuration.GetPosition().z()) < 2)
 //if(configuration.GetPosition().y() > -0.3 && configuration.GetPosition().y() < 2.)
                             return new Model(configuration);
 						break;

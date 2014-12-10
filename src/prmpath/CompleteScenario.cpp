@@ -9,6 +9,16 @@ using namespace planner;
 
 using namespace std;
 
+State::State(const State *parent)
+    :value(new planner::Robot(*parent->value))
+    , stable(parent->stable)
+    , contactLimbs(parent->contactLimbs)
+    , contactLimbPositions(parent->contactLimbPositions)
+    , contactLimbPositionsNormals(parent->contactLimbPositionsNormals)
+{
+    // NOTHING
+}
+
 CompleteScenario::CompleteScenario()
     : scenario(0)
     , robot(0)

@@ -418,9 +418,9 @@ namespace
                 }
                 else
                 {
-                /*state->contactLimbs.push_back(lIndex);
+                state->contactLimbs.push_back(lIndex);
                 state->contactLimbPositions.push_back(target);
-                state->contactLimbPositionsNormals.push_back(normal);*/
+                state->contactLimbPositionsNormals.push_back(normal);
                 }
 
                 maintainPreviousTarget = true; // MOVE OUT OF BLOCK WITH IK USE

@@ -25,6 +25,7 @@ namespace planner
 struct State
 {
     State():value(0), stable(false){}
+    State(const State* parent);
     ~State(){if(value)delete value;}
     std::vector<int> contactLimbs;
     std::vector<Eigen::Vector3d> contactLimbPositions;
