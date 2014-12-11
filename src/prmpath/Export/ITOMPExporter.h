@@ -24,12 +24,25 @@ namespace exporter
 class  ITOMPExporter : public Exporter
 {
 public:
-     ITOMPExporter(const Eigen::Matrix3d &rotation, const Eigen::Vector3d &offset);
+     ITOMPExporter(const Eigen::Matrix3d &rotation, const Eigen::Vector3d &offset, const std::vector<planner::Node*>& limbs);
     ~ITOMPExporter();
 
 public:
     virtual void PushStructure(planner::Robot*/*skeleton*/);
     virtual void PushFrame(planner::Robot * /*robot*/, bool tpose = false);
+    virtual bool Save(const std::string& /*filename*/);
+
+    void PushFrame(planner::Robot * /*robot*/, const std::vector<int>& contactLimbs
+                   , const std::vector<Eigen::Vector3d>& contactLimbPositions
+                   , const std::vector<Eigen::Vector3d>& contactLimbPositionsNormals
+                   , bool tpose = false);
+
+public:
+     std::vector<int> contactLimbs;
+     std::vector<Eigen::Vector3d> contactLimbPositions;
+     std::vector<Eigen::Vector3d> contactLimbPositionsNormals;
+     const int nbEffectors_;
+     const std::vector<planner::Node*>& limbs_;
 
 private:
     ITOMPExporter(const ITOMPExporter&);

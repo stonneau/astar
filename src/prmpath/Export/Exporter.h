@@ -30,7 +30,7 @@ public:
 
 public:
     virtual void PushFrame(planner::Robot* robot, bool tpose = false);
-    bool Save(const std::string& /*filename*/);
+    virtual bool Save(const std::string& /*filename*/);
     virtual void PushStructure(planner::Robot*/*skeleton*/)=0;
 
 private:
@@ -40,6 +40,7 @@ private:
 protected:
     FileHandler f_;
     std::vector< std::string > frames_;
+    std::vector< std::string > contactFrames_;
 
 protected:
     const bool useRadians_;

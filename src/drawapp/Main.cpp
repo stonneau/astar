@@ -522,7 +522,7 @@ void start()
 
     Eigen::Matrix3d inverse = itompTransform;
     inverse.inverse();
-    exporter::ITOMPExporter itompexporter(inverse, Eigen::Vector3d(12,-0,-0.5));
+    exporter::ITOMPExporter itompexporter(inverse, Eigen::Vector3d(12,-0,-0.5), cScenario->limbs);
     itompexporter.PushStructure(cScenario->robot);
     for(planner::T_State::iterator it = states.begin()+1; it != states.end(); ++it)
     {
@@ -591,12 +591,12 @@ bool SavePath()
 
     Eigen::Matrix3d inverse = itompTransform;
     inverse.inverse();
-    exporter::ITOMPExporter itompexporter(inverse, Eigen::Vector3d(0,0,0.));
+    exporter::ITOMPExporter itompexporter(inverse, Eigen::Vector3d(0,0,0.), cScenario->limbs);
     itompexporter.PushStructure(cScenario->robot);
     for(planner::T_State::iterator it = states.begin()+1; it != states.end(); ++it)
     {
         (*it)->value->node->Update();
-        itompexporter.PushFrame((*it)->value, false);
+        itompexporter.PushFrame((*it)->value, (*it)->contactLimbs, (*it)->contactLimbPositions, (*it)->contactLimbPositionsNormals,  false);
     }
     savebvh ="../tests/itomp.path";
     itompexporter.Save(savebvh);

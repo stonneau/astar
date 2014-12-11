@@ -79,8 +79,10 @@ namespace
 }
 
 
-ITOMPExporter::ITOMPExporter(const Eigen::Matrix3d& rotation, const Eigen::Vector3d &offset)
+ITOMPExporter::ITOMPExporter(const Eigen::Matrix3d& rotation, const Eigen::Vector3d &offset, const std::vector<planner::Node*>& limbs)
     : Exporter(rotation,offset,true)
+    , limbs_(limbs)
+    , nbEffectors_(limbs.size())
 {
     // NOTHING
 }
@@ -93,16 +95,67 @@ ITOMPExporter::~ITOMPExporter()
 
 void ITOMPExporter::PushFrame(planner::Robot* robot, bool tpose)
 {
-    std::stringstream frame;
+    std::vector<int> cL;
+    std::vector<Eigen::Vector3d> clp, clpn;
+    PushFrame(robot, cL, clp, clpn, tpose);
+}
+
+void ITOMPExporter::PushFrame(planner::Robot* robot, const std::vector<int>& contactLimbs
+               , const std::vector<Eigen::Vector3d>& contactLimbPositions
+               , const std::vector<Eigen::Vector3d>& contactLimbPositionsNormals
+               , bool tpose)
+{
+    /*Push joint values*/
+    std::stringstream jframe;
      // Write translations...
     Eigen::Vector3d res = rotation_ * robot->node->position + offset_;
     Eigen::Matrix3d rot =AngleAxisd(-0.5*M_PI, Vector3d::UnitY()).matrix();
-    frame << res[0] << "\t" << res[1] << "\t" << res[2]<< "\t";
-    WriteDofNoFantomJoint(robot->node->children.front(), frame, rotation_, tpose);
+    jframe << res[0] << "\t" << res[1] << "\t" << res[2]<< "\t";
+    WriteDofNoFantomJoint(robot->node->children.front(), jframe, rotation_, tpose);
     //WriteDofRecNoFantomJoint(robot->node->children.front(), frame, tpose);
     //WriteDofNoFantomJoint(robot->node->children.front(), frame, rot, tpose);
     //WriteDofRecNoFantomJoint(robot->node->children.front(), frame, tpose);
-    frames_.push_back(frame.str());
+    frames_.push_back(jframe.str());
+
+
+    /*Push contact values*/
+    std::stringstream cframe;
+    std::vector<planner::Node*>::const_iterator cit = limbs_.begin();
+    for(int i = 0; i < nbEffectors_; ++i, ++cit)
+    {
+        bool found = false;
+        int id=0;
+        for(; id < contactLimbs.size() && !found; ++id)
+        {
+            if(contactLimbs[id]==i)
+            {
+                found = true;
+                break;
+            }
+        }
+        if(found) // is in contact
+        {
+            cframe << 1 << "\t"; // say there s a contact
+            // push position
+            Eigen::Vector3d res = rotation_ * contactLimbPositions[id] + offset_;
+            cframe << res[0] << "\t" << res[1] << "\t" << res[2]<< "\t";
+            // push rotation
+            // get Node name
+            const int& id = (*cit)->id;
+            // find effectors
+            std::vector<planner::Node*> effectors = planner::GetEffectors(planner::GetChild(robot,id),true);
+            Eigen::Quaterniond qa(rotation_ * (effectors.front()->toWorldRotation));
+            cframe << qa.x() << "\t" << qa.y() << "\t" << qa.z() << "\t" << qa.w() << "\t";
+        }
+        else
+        {
+            for(int j =0; j< 8; ++j)
+            {
+                cframe << 0 << "\t";
+            }
+        }
+    }
+    contactFrames_.push_back(cframe.str());
 }
 
 void ITOMPExporter::PushStructure(planner::Robot* robot)
@@ -114,4 +167,20 @@ void ITOMPExporter::PushStructure(planner::Robot* robot)
     f_ << "base_prismatic_joint_z" << f_.nl();
 
     WriteJointNameRec(f_, robot->node->children.front());
+}
+
+bool ITOMPExporter::Save(const std::string& filename)
+{
+    // saving frames
+    f_ << f_.nl() << "MOTION\nFrames:\t" << (double)(frames_.size()) << "\nFrame Time: 1\n";
+    for(std::vector<string>::const_iterator it = frames_.begin(); it!=frames_.end(); ++it)
+    {
+        f_ << (*it) << f_.nl();
+    }
+    f_ << f_.nl() << "CONTACT EFFECTORS " << nbEffectors_ << "\n";
+    for(std::vector<string>::const_iterator it = contactFrames_.begin(); it!=contactFrames_.end(); ++it)
+    {
+        f_ << (*it) << f_.nl();
+    }
+    return f_.Save(filename);
 }
