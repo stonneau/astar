@@ -10,5 +10,5 @@ LIMB joint_name="upper_right_arm_z_joint"
 LIMB joint_name="upper_left_arm_z_joint"
 LIMB joint_name="upper_right_leg_z_joint"
 LIMB joint_name="upper_left_leg_z_joint"
-NBSAMPLES N="100000"
+NBSAMPLES N="10000"
 INITCONTACTS 
