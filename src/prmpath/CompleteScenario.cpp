@@ -280,6 +280,14 @@ CompleteScenario* planner::CompleteScenarioFromFile(const std::string& filename)
     std::cout << "cherche" << filename << std::endl;
     if(scenario && skeleton && contraints && to && from && limb && samples )
     {
+        // order correctly roms relativelty to limbs
+        std::vector<std::string> limbnames;
+        for(std::vector<planner::Node*>::const_iterator cit = cScenario->limbs.begin();
+            cit != cScenario->limbs.end(); ++cit)
+        {
+            limbnames.push_back((*cit)->tag);
+        }
+        cScenario->scenario->model_.SortEnglobingByName(limbnames);
         // Generate path
         cScenario->path = cScenario->scenario->prm->GetPath(*(cScenario->from), *(cScenario->to), 10, true, true);
         if(cScenario->path.empty())

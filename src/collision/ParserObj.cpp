@@ -178,6 +178,15 @@ namespace planner
 	};
 }
 
+namespace
+{
+std::string ExtractObjName(const std::string& line)
+{
+    std::vector<string> res  = splitSpace(line);
+    if(res.size()>1) return res.back();
+}
+}
+
 using namespace planner;
 
 Object::T_Object planner::ParseObj(const std::string& filename, const bool asOneObject)
@@ -193,7 +202,9 @@ void planner::ParseObj(const std::string& filename, std::vector<Object*>& object
 	string line;
 	ifstream myfile (filename);
 	std::vector<std::string> lines;
+    std::vector<std::string> names;
     bool firstInit = false;
+    std::string current_name = "foo";
 	if (myfile.is_open())
 	{
 		while ( myfile.good() )
@@ -206,12 +217,14 @@ void planner::ParseObj(const std::string& filename, std::vector<Object*>& object
                 if(pImpl.modelOn_)
                 {
                     // TODO ADD MATRIX !
+                    names.push_back(current_name); current_name = ExtractObjName(line);
                     pImpl.currentModel_->EndModel();
                     pImpl.objectnormals.push_back(pImpl.currentNormals_);
                     pImpl.currentNormals_.clear();
                 }
                 else
                 {
+                    current_name = ExtractObjName(line);
                     pImpl.modelOn_ = true;
                     firstInit = true;
                 }
@@ -244,6 +257,7 @@ void planner::ParseObj(const std::string& filename, std::vector<Object*>& object
             pImpl.objectnormals.push_back(pImpl.currentNormals_);
             pImpl.currentNormals_.clear();
             pImpl.modelOn_ = false;
+            names.push_back(current_name); current_name = "";
         }
         // now create Objects
         int i =0;
@@ -251,7 +265,7 @@ void planner::ParseObj(const std::string& filename, std::vector<Object*>& object
             it != pImpl.models_.end();
             ++it, ++i)
         {
-            objects.push_back(new Object(*it, pImpl.objectnormals[i]));
+            objects.push_back(new Object(*it, pImpl.objectnormals[i], names[i]));
         }
 	}
     else

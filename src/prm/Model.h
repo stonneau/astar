@@ -12,6 +12,8 @@
 #include "collision/Object.h"
 #include "collision/Collider.h"
 
+#include <iostream>
+
 namespace planner
 {
 
@@ -101,6 +103,33 @@ struct Model
     const Eigen::Vector3d& GetPosition() const
     {
         return englobed->GetPosition();
+    }
+
+    void SortEnglobingByName(const std::vector<std::string>& names)
+    {
+        Object::T_Object res;
+        for(std::vector<std::string>::const_iterator cit = names.begin(); cit != names.end(); ++cit)
+        {
+            if((*cit) == "") break;
+            for(Object::T_Object::const_iterator oit = englobing.begin();
+                oit != englobing.end(); ++oit)
+            {
+                std::size_t found = (*oit)->name_.find(*cit);
+                if (found!=std::string::npos)
+                {
+                    Object* obj = *oit;
+                    res.push_back(obj);
+                }
+            }
+        }
+        if(res.size() == englobing.size())
+        {
+            englobing = res;
+        }
+        else
+        {
+            std::cout << "names of limbs and ROM NOT matching. Can not sort correctly";
+        }
     }
 
     Object* englobed;

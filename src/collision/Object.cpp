@@ -125,20 +125,22 @@ namespace
 
 using namespace planner;
 
-Object::Object(PQP_Model* model)
+Object::Object(PQP_Model* model, std::string name)
     : model_(model)
     , position_(Eigen::Vector3d::Zero())
     , orientation_(Eigen::Matrix3d::Identity())
+    , name_(name)
 {
     EigenToDoubleMatrix(orientation_, pqpOrientation_);
     EigenToDoubleVector(position_, pqpPosition_);
 }
 
-Object::Object(PQP_Model* model, const T_Vector3& normals)
+Object::Object(PQP_Model* model, const T_Vector3& normals, std::string name)
     : normals_(normals)
     , model_(model)
     , position_(Eigen::Vector3d::Zero())
     , orientation_(Eigen::Matrix3d::Identity())
+    , name_(name)
 {
     assert(normals_.empty() || normals_.size() == model->num_tris);
     EigenToDoubleMatrix(orientation_, pqpOrientation_);
@@ -149,6 +151,7 @@ Object::Object(const Object& parent)
     : position_(Eigen::Vector3d::Zero())
     , orientation_(Eigen::Matrix3d::Identity())
     , normals_(parent.normals_)
+    , name_(parent.name_)
 {
     model_ = new PQP_Model;
     model_->BeginModel();

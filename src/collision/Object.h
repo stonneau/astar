@@ -32,12 +32,12 @@ public:
 public:
     ///  \brief Constructor
     ///  \param model a PQP_Model upon which Object will be built.
-     Object(PQP_Model *model);
+    Object(PQP_Model *model, std::string name = "no_name");
 
     ///  \brief Constructor
     ///  \param model a PQP_Model upon which Object will be built.
     ///  \param normals The normals associated to each triangle
-     Object(PQP_Model *model, const T_Vector3& normals);
+     Object(PQP_Model *model, const T_Vector3& normals, std::string name = "no_name");
 
 
      ///  \brief Constructor
@@ -107,6 +107,7 @@ public:
 
 public:
 	T_Vector3 normals_;
+    const std::string name_;
 
 private:
     PQP_Model* model_;
