@@ -41,8 +41,11 @@ public:
      std::vector<int> contactLimbs;
      std::vector<Eigen::Vector3d> contactLimbPositions;
      std::vector<Eigen::Vector3d> contactLimbPositionsNormals;
-     const int nbEffectors_;
      const std::vector<planner::Node*>& limbs_;
+     const int nbEffectors_;
+
+private:
+     std::vector<int> itompEffectorOrder_;
 
 private:
     ITOMPExporter(const ITOMPExporter&);

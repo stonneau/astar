@@ -78,6 +78,21 @@ namespace
     }
 }
 
+namespace
+{
+void findstring(const std::string key, const std::vector<planner::Node*>& limbs, std::vector<int>& indexes)
+{
+    int i =0;
+    for(std::vector<planner::Node*>::const_iterator nit = limbs.begin();
+        nit != limbs.end(); ++nit, ++i)
+    {
+        if((*nit)->tag.find(key) != string::npos)
+        {
+            indexes.push_back(i);
+        }
+    }
+}
+}
 
 ITOMPExporter::ITOMPExporter(const Eigen::Matrix3d& rotation, const Eigen::Vector3d &offset, const std::vector<planner::Node*>& limbs)
     : Exporter(rotation,offset,true)
@@ -85,6 +100,17 @@ ITOMPExporter::ITOMPExporter(const Eigen::Matrix3d& rotation, const Eigen::Vecto
     , nbEffectors_(limbs.size())
 {
     // NOTHING
+    // this must be done better
+    // Currently the order I use is 'left foot' 'right foot' 'left hand' 'right hand'.
+    /*find left foot*/
+    findstring("upper_left_leg_z_joint", limbs, itompEffectorOrder_);
+    findstring("upper_right_leg_z_joint", limbs, itompEffectorOrder_);
+    findstring("upper_left_arm_z_joint", limbs, itompEffectorOrder_);
+    findstring("upper_right_arm_z_joint", limbs, itompEffectorOrder_);
+    if(limbs.size() == itompEffectorOrder_.size())
+    {
+        std::cout << "Error: could not find all itomp effectors in robot model" << std::endl;
+    }
 }
 
 ITOMPExporter::~ITOMPExporter()
@@ -121,8 +147,11 @@ void ITOMPExporter::PushFrame(planner::Robot* robot, const std::vector<int>& con
     /*Push contact values*/
     std::stringstream cframe;
     std::vector<planner::Node*>::const_iterator cit = limbs_.begin();
-    for(int i = 0; i < nbEffectors_; ++i, ++cit)
+//for(int i = 0; i < nbEffectors_; ++i, ++cit)
+    for(std::vector<int>::const_iterator contactorderit = itompEffectorOrder_.begin();
+        contactorderit != itompEffectorOrder_.end(); ++contactorderit)
     {
+        const int& i = *contactorderit;
         bool found = false;
         int id=0;
         for(; id < contactLimbs.size() && !found; ++id)
