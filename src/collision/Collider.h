@@ -25,6 +25,7 @@ public:
 
      /// brief collision testing between an Object and the Objects of the Collider
      bool IsColliding(Object* object);
+     bool IsCollidingGround(Object *model, double tolerance);
 
      /// brief collision testing between all the Objects of the Collider
      bool IsColliding();

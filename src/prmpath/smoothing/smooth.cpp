@@ -565,7 +565,7 @@ planner::SplinePath planner::SplineShortCut(Collider& collider, CT_Model& path, 
         }
         bool success = false;
         planner::SplinePath subSpline = createSpline(collider,  *(path.front()), paramFunction, &currentSpline, maxSpeed, maxAcceleration, ta, tb, m, 3, success, false, true);
-        if(success) currentSpline = MergeSpline(currentSpline,subSpline, ta, tb, currentStep == nbSteps -1);
+        if(success) currentSpline = MergeSpline(currentSpline,subSpline, ta, tb, currentStep == nbSteps);
         currentStep++;
         if(currentStep == nbSteps)
         {

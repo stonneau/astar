@@ -30,6 +30,7 @@ Scenario::Scenario(const std::string& filepath)
 		bool loading = false;
 		bool modelFound = false;
 		bool visibility = false;
+        bool point = false;
 		std::string prmfile("");
 		int size = -1; int neighbours = -1; float neighbourDistance =-1.;
         while (myfile.good())
@@ -109,13 +110,17 @@ Scenario::Scenario(const std::string& filepath)
                 prm = planner::LoadPRM(prmfile, contactObjects_, objects_, model_);
             }
 		}
+        if(!point)
+        {
+            point_ = ParseObj("../rocketboxmale/point.obj").front();
+        }
 	}
 	else
 	{
 		std::string error("ERROR: can not find scenario file ");
 		error += filepath;
 		throw ScenarioException(error);
-	}
+    }
 }
 
 Scenario::~Scenario()
@@ -125,5 +130,6 @@ Scenario::~Scenario()
     {
         delete *it;
     }
+    delete point_;
 	delete prm;
 }

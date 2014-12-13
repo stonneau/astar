@@ -13,10 +13,12 @@ void ExpMap::setRotation(const Quat &q)
 
     numeric cosp = m_q.w();
     m_sinp = m_v.norm();
-    m_v /= m_sinp;
-
-    m_theta = atan2(double(m_sinp),double(cosp));
-    m_v *= m_theta;
+    if(m_sinp != 0)
+    {
+        m_v /= m_sinp;
+        m_theta = atan2(double(m_sinp),double(cosp));
+        m_v *= m_theta;
+    }
  }
 
 const Quat& ExpMap::getRotation() const
@@ -196,7 +198,7 @@ void ExpMap::angleUpdated()
 Vector3 ExpMap::log() const
 {
     // v = log(q) = 2 * cos-1 (q_w) / |qv| * qv
-    return (2 * std::acos(m_q.w())) / (m_q.vec().norm()) * m_q.vec();
+    return m_v.norm() == 0 ? m_v : (2 * std::acos(m_q.w())) / (m_q.vec().norm()) * m_q.vec();
     /*numeric theta = v.norm(); if(v.norm() != 0) v.normalize();
     return AngleAx(theta,v);*/
 }

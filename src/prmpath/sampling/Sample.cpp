@@ -1,6 +1,7 @@
 #include "Sample.h"
 #include "prmpath/Jacobian.h"
 #include "prmpath/Robot.h"
+#include "tools/MatrixDefsInternal.h"
 
 #include <vector>
 #include <iostream>
@@ -37,10 +38,14 @@ Eigen::Vector3d AssignValues(Node* root, const std::vector<double>& values)
     return root->toLocalRotation * son->position;
 }
 
-Eigen::Matrix3d GetJacobianProduct(Node* root)
+Eigen::Matrix3d GetJacobianProduct(Jacobian& j)
 {
-    Jacobian j(root);
     return j.GetJacobianProduct().block<3,3>(0,0);
+}
+
+Eigen::Matrix3d GetJacobianProductInverse(Jacobian& j)
+{
+    return j.GetJacobianProductInverse().block<3,3>(0,0);
 }
 
 void ValuesFromNodeRec(Node* node, std::vector<double>& values)
@@ -65,7 +70,9 @@ std::vector<double> ValuesFromNode(Node* node)
 Sample::Sample(Node* root)
     : values(ValuesFromNode(root))
     , effectorPosition(AssignValues(root, values))
-    , jacobianProduct(GetJacobianProduct(root))
+    , jacobian(root)
+    , jacobianProduct(GetJacobianProduct(jacobian))
+    , jacobianProductInverse(GetJacobianProductInverse(jacobian))
 {
     // NOTHING
 }
@@ -73,7 +80,9 @@ Sample::Sample(Node* root)
 Sample::Sample(Node* root, const std::vector<double>& values)
     : values(values)
     , effectorPosition(AssignValues(root, values))
-    , jacobianProduct(GetJacobianProduct(root))
+    , jacobian(root)
+    , jacobianProduct(GetJacobianProduct(jacobian))
+    , jacobianProductInverse(GetJacobianProductInverse(jacobian))
 {
     // NOTHING
 }
@@ -164,6 +173,13 @@ double planner::sampling::Manipulability(const Sample* sample, const Eigen::Vect
 {
 // GROS HACK DE MERDE
     double r = (direction.transpose()*sample->jacobianProduct*direction);
+    return 1/sqrt(r);
+}
+
+double planner::sampling::VelocityManipulability(const Sample* sample, const Eigen::Vector3d& direction)
+{
+// GROS HACK DE MERDE
+    double r = (direction.transpose()*sample->jacobianProductInverse*direction);
     return 1/sqrt(r);
 }
 

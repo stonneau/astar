@@ -14,6 +14,7 @@
 #include <Eigen/Dense>
 
 #include "prmpath/Robot.h"
+#include "prmpath/Jacobian.h"
 
 namespace planner
 {
@@ -29,7 +30,9 @@ struct Sample
 
     const std::vector<double> values;
     const Eigen::Vector3d effectorPosition;
+    Jacobian jacobian;
     const Eigen::Matrix3d jacobianProduct;
+    const Eigen::Matrix3d jacobianProductInverse;
 };
 
 typedef std::vector<Sample*> T_Samples;
@@ -37,6 +40,7 @@ void LoadSample(const Sample& sample, Node* root);
 
 T_Samples GenerateSamples(const planner::Robot& robot, const Node *root, int nbSamples);
 double Manipulability(const Sample* sample, const Eigen::Vector3d& direction);
+double VelocityManipulability(const Sample* sample, const Eigen::Vector3d& direction);
 
 } // namespace sampling
 } // namespace planner

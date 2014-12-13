@@ -59,6 +59,7 @@ struct Scenario
 
 	Object::T_Object objects_;
     Object::T_Object contactObjects_;
+    Object* point_;
 	Model model_;
 	SimplePRM* prm;
 };

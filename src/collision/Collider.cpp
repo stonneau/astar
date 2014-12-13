@@ -19,6 +19,12 @@ bool Collider::IsColliding(Object *model)
     return model->IsColliding(objects_);
 }
 
+bool Collider::IsCollidingGround(Object *model, double tolerance)
+{
+    Eigen::Vector3d normal(0,1,0);
+    return model->IsColliding(objects_, normal, tolerance);
+}
+
 bool Collider::IsColliding()
 {
     for(Object::T_Object::iterator it = objects_.begin();

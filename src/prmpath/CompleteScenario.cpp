@@ -307,7 +307,7 @@ CompleteScenario* planner::CompleteScenarioFromFile(const std::string& filename)
                 // assign contacts
                 planner::sampling::Sample* candidate
                         = planner::GetPosturesInContact(*cScenario->robot, cScenario->limbs[*cit],
-                                                        cScenario->limbSamples[*cit], cScenario->scenario->objects_, direction);
+                                                        cScenario->limbSamples[*cit], cScenario->scenario->objects_, direction, *cScenario);
                 /*if(candidate)
                 {
                     planner::sampling::LoadSample(*candidate, cScenario->limbs[*cit]);

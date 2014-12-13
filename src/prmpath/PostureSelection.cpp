@@ -183,10 +183,42 @@ namespace
     }
 
     const double epsilon = 0.01;
+
+
+
+    bool NextIsInRange(int lIndex, const Eigen::Vector3d& target, const Object* point, const Model* nextnext)
+    {
+        if(nextnext)
+        {
+            Model next(*nextnext);
+            Object* objrom = next.englobing[lIndex];
+            if(objrom)
+            {
+                Object tmp(*point);
+                tmp.SetPosition(target);
+                return tmp.InContact(objrom, 0.1);
+            }
+        }
+        return true;
+    }
+
+    bool NextIsInRange(const Eigen::Vector3d& target, const Object* objrom,  const Object* point)
+    {
+        if(objrom)
+        {
+            Object obj(*objrom);
+            Object tmp(*point);
+            tmp.SetPosition(target);
+            return tmp.InContact(&obj, 0.01);
+        }
+        return true;
+    }
 }
 
 Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::T_Samples& samples
-                                         , Object::T_Object& obstacles, const Eigen::Vector3d& direction, Eigen::Vector3d& position, Eigen::Vector3d& normalVector)
+                                         , Object::T_Object& obstacles, const Eigen::Vector3d& direction
+                                         , Eigen::Vector3d& position, Eigen::Vector3d& normalVector
+                                         , planner::CompleteScenario& scenario, const Object* rom)
 {
     Sample* save = new Sample(limb);
     Sample* res = 0;
@@ -215,20 +247,24 @@ Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::
         {
             Eigen::Vector3d normal, projection;
             LoadSample(*(*sit),limb);
-            for(Object::T_Object::iterator oit = obstacles.begin(); oit != obstacles.end(); ++oit)
+            if(!(planner::IsSelfColliding(&robot, limb) || LimbColliding(limb, obstacles)))
             {
-                if(effector->InContact(*oit,epsilon, normal, projection) && !planner::IsSelfColliding(&robot, limb) && !LimbColliding(limb, obstacles))
-                //if(planner::MinDistance(effectorCentroid, *oit, projection, normal) < epsilon && !planner::IsSelfColliding(&robot, limb) && !LimbColliding(limb, obstacles))
+                for(Object::T_Object::iterator oit = obstacles.begin(); oit != obstacles.end(); ++oit)
                 {
-                    tempweightedmanip = tmp_manip * dir.dot(robot.currentRotation * normal);
-                    if(tempweightedmanip > bestManip)// && (planner::SafeTargetDistance(limb,projection,0.9)))
+//if(effector->InContact(*oit,epsilon, normal, projection) && !planner::IsSelfColliding(&robot, limb) && !LimbColliding(limb, obstacles))
+                    if(effector->InContact(*oit,epsilon, normal, projection)) // && NextIsInRange(projection, rom, scenario.scenario->point_))
+                    //if(planner::MinDistance(effectorCentroid, *oit, projection, normal) < epsilon && !planner::IsSelfColliding(&robot, limb) && !LimbColliding(limb, obstacles))
                     {
-                        bestManip = tempweightedmanip;
-                        res =tempweightedmanip > 0 ? *sit : 0;
-                        //position = effector->GetPosition();
-                        normalVector = normal;
-                        position = projection;
-                       // break;
+                        tempweightedmanip = tmp_manip * dir.dot(robot.currentRotation * normal);
+                        if(tempweightedmanip > bestManip)// && (planner::SafeTargetDistance(limb,projection,0.9)))
+                        {
+                            bestManip = tempweightedmanip;
+                            res =tempweightedmanip > 0 ? *sit : 0;
+                            //position = effector->GetPosition();
+                            normalVector = normal;
+                            position = projection;
+                           // break;
+                        }
                     }
                 }
             }
@@ -246,9 +282,9 @@ Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::
         {
             int limit = 0;
             //int limit2 = 100;
-            while(limit > 0)
+            while(limit > 0 && !solver.StepClamping(limb, position, position, constraints, true))
             {
-                solver.StepClamping(limb, position, position, constraints, true);
+                //solver.StepClamping(limb, position, position, constraints, true);
                 //solver.StepClamping(limb, position, position, constraints, true);
                 limit--;
             }
@@ -263,10 +299,10 @@ Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::
 }
 
 Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::T_Samples& samples
-                                         , Object::T_Object& obstacles, const Eigen::Vector3d& direction)
+                                         , Object::T_Object& obstacles, const Eigen::Vector3d& direction, CompleteScenario &scenario)
 {
     Eigen::Vector3d dummmy, dummmy2;
-    return GetPosturesInContact(robot, limb, samples, obstacles, direction, dummmy, dummmy2);
+    return GetPosturesInContact(robot, limb, samples, obstacles, direction, dummmy, dummmy2, scenario, 0);
 }
 
 sampling::T_Samples planner::GetContactCandidates(Robot& robot, Node* limb, const sampling::T_Samples& samples
@@ -381,7 +417,15 @@ namespace
         return res;
     }*/
 
-    planner::State* Interpolate(planner::CompleteScenario& scenario, const State& previous, const Model* next)
+    void Vector3toArray(const Eigen::Vector3d& vect, double* arr)
+    {
+        for(int i=0; i<3; ++i)
+        {
+            arr[i] = vect[i];
+        }
+    }
+
+    planner::State* Interpolate(planner::CompleteScenario& scenario, const State& previous, const Model* next, const Model* nextnext)
     {
         //std::cout << " Satate " <<  std::endl;
         // Create new state and move it to path location
@@ -404,6 +448,9 @@ namespace
         {
             bool maintainPreviousTarget = false;
             Eigen::Vector3d target, normal;
+            Eigen::Vector3d direction = next->GetPosition() - previous.value->node->position;
+            direction = direction.norm() == 0 ? Eigen::Vector3d(0,1,0) : direction;
+            direction.normalize();
             if(previous.InContact(lIndex, target, normal) && SafeTargetDistance(*lit,target,0.9)) // limb was in contact, try to maintain it
             {
                 T_Samples samples = GetPosturesOnTarget(*robot, *lit, scenario.limbSamples[lIndex], scenario.scenario->objects_, target);
@@ -418,21 +465,33 @@ namespace
                 }
                 else
                 {
-                state->contactLimbs.push_back(lIndex);
-                state->contactLimbPositions.push_back(target);
-                state->contactLimbPositionsNormals.push_back(normal);
+                    state->contactLimbs.push_back(lIndex);
+                    state->contactLimbPositions.push_back(target);
+                    state->contactLimbPositionsNormals.push_back(normal);
+                    int limit = 0;
+                    //int limit2 = 100;
+                    ik::IKSolver solver;
+                    ik::VectorAlignmentConstraint constraint(normal);
+                    std::vector<ik::PartialDerivativeConstraint*> constraints;
+                    constraints.push_back(&constraint);
+                    while(limit > 0 && !solver.StepClamping(*lit, target, direction, constraints, true))
+                    {
+                        limit--;
+                    }
                 }
 
                 maintainPreviousTarget = true; // MOVE OUT OF BLOCK WITH IK USE
             }
             if(!maintainPreviousTarget) // could not reach previous target, get a new one (reasons are distance of collision)
             {
-                Eigen::Vector3d direction = next->GetPosition() - previous.value->node->position;
-                direction = direction.norm() == 0 ? Eigen::Vector3d(0,1,0) : direction;
-                direction.normalize();
 // TODO INCLUDE SAFE TARGET DISTANCE
+                Object* point(0);
+                if(nextnext)
+                {
+                    point = nextnext->englobing[lIndex];
+                }
                 Sample* sample = GetPosturesInContact(*robot, *lit, scenario.limbSamples[lIndex],
-                                                        scenario.scenario->objects_, direction, target, normal);
+                                                      scenario.scenario->objects_, direction, target, normal, scenario, point);
                 if(sample)
                 {
                     state->contactLimbs.push_back(lIndex);
@@ -511,7 +570,7 @@ namespace
     CT_Model developPathSpline(const planner::SplinePath& splinePath, const Model& model)
     {
         CT_Model res;
-        for(double t =0; t<=1; t = t+0.05)
+        for(double t =0; t<=1; t = t+0.025)
         {
             Model * tmp = new Model(model);
             Configuration c = splinePath.Evaluate(t);
@@ -662,9 +721,17 @@ planner::T_State planner::PostureSequence(planner::CompleteScenario& scenario)
     {
         path = scenario.path;
     }
-    for(CT_Model::iterator it = path.begin(); it!=path.end(); ++it)
+    CT_Model::iterator it2 = path.begin(); ++it2;
+    for(CT_Model::iterator it = path.begin(); it!=path.end(); ++it, ++it2)
     {
-        current = Interpolate(scenario, *current, *it);
+        if(it2 == path.end())
+        {
+            current = Interpolate(scenario, *current, *it, 0);
+        }
+        else
+        {
+            current = Interpolate(scenario, *current, *it, *it2);
+        }
         current->stable = false;// Stable(current);
         res.push_back(current);
     }

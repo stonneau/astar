@@ -343,6 +343,30 @@ bool Object::IsColliding(T_Object& objects)
     return false;
 }
 
+bool Object::IsColliding(T_Object& objects, const Eigen::Vector3d &normal, double tolerance)
+{
+    PQP_CollideResult cres;
+    for(T_Object::iterator it = objects.begin();
+        it != objects.end(); ++it)
+    {
+        PQP_Collide(&cres, pqpOrientation_, pqpPosition_, model_,
+                    (*it)->pqpOrientation_, (*it)->pqpPosition_, (*it)->model_, PQP_ALL_CONTACTS);
+        if (cres.Colliding())
+        {
+            for(int i =0; i < cres.NumPairs(); ++i)
+            {
+                //find triangle
+                const Eigen::Vector3d& obstaclenorm = this->normals_[cres.Id2(i)];
+                if(normal.dot(obstaclenorm) >= tolerance)
+                {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
 bool Object::IsColliding(const T_Object::iterator& from,  const T_Object::iterator& to)
 {
     T_Object::iterator it = from;

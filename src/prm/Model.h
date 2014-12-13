@@ -96,6 +96,23 @@ struct Model
         return englobingCollision && !collider.IsColliding(englobed);
     }
 
+    bool ReachabilityConditionGround(Collider& collider, double tolerance) // constrains collision with vertival
+    {
+        collisionIndexes.clear();
+        size_t id = 0;
+        bool englobingCollision = false;
+        bool oneleg = false;
+        for(Object::T_Object::iterator it = englobing.begin();
+            it != englobing.end() && !englobingCollision; ++it, ++id)
+        {
+            if((*it)->name_.find("leg") != std::string::npos && collider.IsCollidingGround(*it, tolerance))
+            {
+                englobingCollision = true;
+            }
+        }
+        return englobingCollision && !collider.IsColliding(englobed);
+    }
+
     const Eigen::Matrix3d& GetOrientation() const
     {
         return englobed->GetOrientation();
