@@ -80,6 +80,40 @@ struct Model
         return res;
     }
 
+    std::vector<size_t> EnglobingCollisionGround(Object* obj, double tolerance = 0.7) // updates collision indexes
+    {
+        Eigen::Vector3d normal(0,0.8,0);
+        std::vector<size_t> res;
+        collisionIndexes.clear();
+        size_t id = 0;
+        for(Object::T_Object::iterator it = englobing.begin();
+            it != englobing.end(); ++it, ++id)
+        {
+            if((*it)->name_.find("leg") != std::string::npos && (*it)->IsColliding(obj,normal, tolerance))
+            {
+                res.push_back(id);
+            }
+        }
+        return res;
+    }
+
+    std::vector<size_t> EnglobingCollisionClimb(Object* obj, double tolerance = 0.7) // updates collision indexes
+    {
+        Eigen::Vector3d normal(0,0.8,0);
+        std::vector<size_t> res;
+        collisionIndexes.clear();
+        size_t id = 0;
+        for(Object::T_Object::iterator it = englobing.begin();
+            it != englobing.end(); ++it, ++id)
+        {
+            if((*it)->IsColliding(obj,normal, tolerance))
+            {
+                res.push_back(id);
+            }
+        }
+        return res;
+    }
+
     bool ReachabilityCondition(Collider& collider) // updates collision indexes
     {
         collisionIndexes.clear();

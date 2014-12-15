@@ -168,8 +168,14 @@ namespace
     }
 }
 
-
 double planner::sampling::Manipulability(const Sample* sample, const Eigen::Vector3d& direction)
+{
+// GROS HACK DE MERDE
+    return sqrt(sample->jacobianProduct.determinant());
+}
+
+
+double planner::sampling::ForceManipulability(const Sample* sample, const Eigen::Vector3d& direction)
 {
 // GROS HACK DE MERDE
     double r = (direction.transpose()*sample->jacobianProduct*direction);

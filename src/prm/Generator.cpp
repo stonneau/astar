@@ -104,9 +104,11 @@ if(P.y() > 0  && configuration.GetPosition().y() < 8 && std::abs(configuration.G
             matrices::Vector3 z = matrices::Vector3(0,0,1);
             do
             {
+//rx = ((double) rand() / (RAND_MAX)) * M_PI * 2;
                 rx = ((double) rand() / (RAND_MAX)) * M_PI * 2;
                 rz = ((double) rand() / (RAND_MAX)) * M_PI *2;
-                ry = ((double) rand() / (RAND_MAX))  * M_PI *2;
+// ry = ((double) rand() / (RAND_MAX))  * M_PI *2;
+                ry = ((double) rand() / (RAND_MAX))  * M_PI / 8; // climb
                 tranformComplete = matrices::Rotz3(rz);
                 tranformComplete*= matrices::Roty3(ry);
                 tranformComplete*= matrices::Rotx3(rx);
@@ -142,9 +144,11 @@ if(P.y() > 0  && configuration.GetPosition().y() < 8 && std::abs(configuration.G
                 if(dir.norm() == 0) break;
 				dir.normalize();
                 // add random direction and check for collision
-                std::vector<size_t> collisions = configuration.EnglobingCollision(sampled.first);
+                std::vector<size_t> collisions = configuration.EnglobingCollisionClimb(sampled.first, 0.3);
+//collisions = configuration.EnglobingCollisionGround(sampled.first);
                 int maxStep = 5;
-                while(collisions.size()>0 && maxStep >0)
+//while(collisions.size()>0 && maxStep >0)
+                while((collisions.size()>3 || (configuration.GetPosition().y() >3.7 && collisions.size()>0)) && maxStep >0)
 				{
 					if(!collider_.IsColliding(configuration.englobed))
 					{
@@ -154,7 +158,8 @@ if(configuration.GetPosition().y() > 0 && configuration.GetPosition().y() < 8 &&
 						break;
 					}
                     configuration.SetPosition(configuration.GetPosition() + (double) rand() / (RAND_MAX) / 4 * dir);
-                    collisions = configuration.EnglobingCollision(sampled.first);
+                    collisions = configuration.EnglobingCollisionClimb(sampled.first, 0.3);
+//collisions = configuration.EnglobingCollisionGround(sampled.first);
                     maxStep--;
 				}
 				--limitstraight;
@@ -187,7 +192,8 @@ if(configuration.GetPosition().y() > 0 && configuration.GetPosition().y() < 8 &&
 				// add random direction and check for collision
 
                 std::vector<size_t> collisions = configuration.EnglobingCollision(sampled.first);
-                while(collisions.size()>0)
+//while(collisions.size()>0)
+                while(collisions.size()>3 || (configuration.GetPosition().y() > 3.7 && collisions.size()>0))
 				{
 					if(!collider_.IsColliding(configuration.englobed))
 					{
@@ -197,7 +203,7 @@ if(configuration.GetPosition().y() > 0  && configuration.GetPosition().y() < 8  
 						break;
 					}
                     configuration.SetPosition(configuration.GetPosition() + (double) rand() / (double)(RAND_MAX) / 2. * dir);
-                    collisions = configuration.EnglobingCollision(sampled.first);
+                    collisions = configuration.EnglobingCollisionGround(sampled.first);
 				}
 				--limit2;
 			}

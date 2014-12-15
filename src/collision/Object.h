@@ -92,6 +92,13 @@ public:
     ///  \param return : true if a collision exists, false otherwise
     bool IsColliding(T_Object& objects, const Eigen::Vector3d& normal, double tolerance); // can not be const because of pqp but it is...
 
+
+    ///  \brief returns whether the current Object collide with a list of Object.
+    /// additional conditions is that the normals should be more or less aligned.
+    ///  \param objects the objects on which to test the collision
+    ///  \param return : true if a collision exists, false otherwise
+    bool IsColliding(Object* object, const Eigen::Vector3d& normal, double tolerance); // can not be const because of pqp but it is...
+
     ///  \brief returns whether the current Object collide with a list of Object described
     ///  by beginning and endind iterators
     ///  \param from iterator to the first element of a set of Objects

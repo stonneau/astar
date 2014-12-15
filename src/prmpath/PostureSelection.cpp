@@ -227,22 +227,21 @@ Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::
     //Eigen::Vector3d effectorCentroid = planner::GetEffectorCenter(limb);
     double bestManip = std::numeric_limits<double>::min();
     double tmp_manip, tempweightedmanip;
-    std::size_t found = limb->tag.find("arm");
+    std::size_t found = limb->tag.find("leg");
     Eigen::Vector3d dir = direction;
+    //if(direction.y() < 0 ) dir = -direction;
+    Eigen::Vector3d dirn = dir;
     /*if (found==std::string::npos)
-    {
-        dir = dir;
-        dir.normalize();
-    }
-    else
-    {
-        dir = Eigen::Vector3d(0,1.,0.);
-        dir.normalize();
-    }*/
-    dir = robot.currentRotation * direction; //Eigen::Vector3d(0,1,0.);
+    {*/
+        dirn = Eigen::Vector3d(0,1.,0.);
+        dirn.normalize();
+    /*}*/
+    dir = robot.currentRotation * dir; //Eigen::Vector3d(0,1,0.);
+    dirn = robot.currentRotation * dirn; //Eigen::Vector3d(0,1,0.);
     for(T_Samples::const_iterator sit = samples.begin(); sit != samples.end(); ++sit)
     {
-        tmp_manip = planner::sampling::Manipulability(*sit, dir);
+//tmp_manip = direction.y() < 0 ?  planner::sampling::VelocityManipulability(*sit, dir) :  planner::sampling::ForceManipulability(*sit, dir);
+        tmp_manip = planner::sampling::ForceManipulability(*sit, dir);
         if(tmp_manip > bestManip)
         {
             Eigen::Vector3d normal, projection;
@@ -255,7 +254,7 @@ Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::
                     if(effector->InContact(*oit,epsilon, normal, projection)) // && NextIsInRange(projection, rom, scenario.scenario->point_))
                     //if(planner::MinDistance(effectorCentroid, *oit, projection, normal) < epsilon && !planner::IsSelfColliding(&robot, limb) && !LimbColliding(limb, obstacles))
                     {
-                        tempweightedmanip = tmp_manip * dir.dot(robot.currentRotation * normal);
+                        tempweightedmanip = tmp_manip * dirn.dot(robot.currentRotation * normal);
                         if(tempweightedmanip > bestManip)// && (planner::SafeTargetDistance(limb,projection,0.9)))
                         {
                             bestManip = tempweightedmanip;
@@ -451,7 +450,11 @@ namespace
             Eigen::Vector3d direction = next->GetPosition() - previous.value->node->position;
             direction = direction.norm() == 0 ? Eigen::Vector3d(0,1,0) : direction;
             direction.normalize();
-            if(previous.InContact(lIndex, target, normal) && SafeTargetDistance(*lit,target,0.9)) // limb was in contact, try to maintain it
+            if((*lit)->tag.find("leg") != std::string::npos)
+            {
+                //direction = Eigen::Vector3d(0,1,0);
+            }
+            if(previous.InContact(lIndex, target, normal) && SafeTargetDistance(*lit,target,0.85)) // limb was in contact, try to maintain it
             {
                 T_Samples samples = GetPosturesOnTarget(*robot, *lit, scenario.limbSamples[lIndex], scenario.scenario->objects_, target);
                 // TODO TRY TO USE IK IN FACT

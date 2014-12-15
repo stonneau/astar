@@ -40,6 +40,7 @@ void LoadSample(const Sample& sample, Node* root);
 
 T_Samples GenerateSamples(const planner::Robot& robot, const Node *root, int nbSamples);
 double Manipulability(const Sample* sample, const Eigen::Vector3d& direction);
+double ForceManipulability(const Sample* sample, const Eigen::Vector3d& direction);
 double VelocityManipulability(const Sample* sample, const Eigen::Vector3d& direction);
 
 } // namespace sampling
