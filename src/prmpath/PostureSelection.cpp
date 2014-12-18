@@ -185,33 +185,24 @@ namespace
     const double epsilon = 0.01;
 
 
-
-    bool NextIsInRange(int lIndex, const Eigen::Vector3d& target, const Object* point, const Model* nextnext)
+    double LimbLengthRec(const Node* limb)
     {
-        if(nextnext)
+        double minDistance =  (limb->children.empty()) ?  0 : std::numeric_limits<double>::max();
+        double tmp;
+        for(std::vector<Node*>::const_iterator cit = limb->children.begin();
+            cit != limb->children.end(); ++cit)
         {
-            Model next(*nextnext);
-            Object* objrom = next.englobing[lIndex];
-            if(objrom)
-            {
-                Object tmp(*point);
-                tmp.SetPosition(target);
-                return tmp.InContact(objrom, 0.1);
-            }
+            tmp = LimbLengthRec(*cit);
+            if(tmp < minDistance) minDistance = tmp;
         }
-        return true;
+        return minDistance + (limb->position - limb->parent->position).norm();
     }
 
-    bool NextIsInRange(const Eigen::Vector3d& target, const Object* objrom,  const Object* point)
+
+    bool NextIsInRange(const planner::Node* limb, const Eigen::Vector3d& target, const Object* objrom,  const Object* point)
     {
-        if(objrom)
-        {
-            Object obj(*objrom);
-            Object tmp(*point);
-            tmp.SetPosition(target);
-            return tmp.InContact(&obj, 0.01);
-        }
-        return true;
+        double totalLength = limb->children.empty() ? 0 :  LimbLengthRec(limb->children.front());
+        return (objrom->GetPosition() - target).norm() < totalLength * 0.9;
     }
 }
 
@@ -251,7 +242,7 @@ Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::
                 for(Object::T_Object::iterator oit = obstacles.begin(); oit != obstacles.end(); ++oit)
                 {
 //if(effector->InContact(*oit,epsilon, normal, projection) && !planner::IsSelfColliding(&robot, limb) && !LimbColliding(limb, obstacles))
-                    if(effector->InContact(*oit,epsilon, normal, projection)) // && NextIsInRange(projection, rom, scenario.scenario->point_))
+                    if(effector->InContact(*oit,epsilon, normal, projection) && planner::SafeTargetDistance(limb,projection,0.9) && NextIsInRange(limb, projection, rom, scenario.scenario->point_))
                     //if(planner::MinDistance(effectorCentroid, *oit, projection, normal) < epsilon && !planner::IsSelfColliding(&robot, limb) && !LimbColliding(limb, obstacles))
                     {
                         tempweightedmanip = tmp_manip * dirn.dot(robot.currentRotation * normal);
@@ -334,6 +325,7 @@ sampling::T_Samples planner::GetContactCandidates(Robot& robot, Node* limb, cons
 T_Samples planner::GetPosturesOnTarget(Robot& robot, Node* limb, const sampling::T_Samples &samples
                                          , Object::T_Object& obstacles, const Eigen::Vector3d& worldposition)
 {
+    Sample* save = new Sample(limb);
     T_Samples res;
     Object* effector = GetEffector(limb);
     for(T_Samples::const_iterator sit = samples.begin(); sit != samples.end(); ++sit)
@@ -345,6 +337,7 @@ T_Samples planner::GetPosturesOnTarget(Robot& robot, Node* limb, const sampling:
             res.push_back(*sit);
         }
     }
+    planner::sampling::LoadSample(*save, limb);
     return res;
 }
 
@@ -456,7 +449,7 @@ namespace
             }
             if(previous.InContact(lIndex, target, normal) && SafeTargetDistance(*lit,target,0.85)) // limb was in contact, try to maintain it
             {
-                T_Samples samples = GetPosturesOnTarget(*robot, *lit, scenario.limbSamples[lIndex], scenario.scenario->objects_, target);
+                /*T_Samples samples = GetPosturesOnTarget(*robot, *lit, scenario.limbSamples[lIndex], scenario.scenario->objects_, target);
                 // TODO TRY TO USE IK IN FACT
                 if(!samples.empty())
                 {
@@ -466,12 +459,12 @@ namespace
                     planner::sampling::LoadSample(*(samples.front()),*lit);
 //std::cout << " limb mainained in contact " << lIndex <<  std::endl;
                 }
-                else
+                else*/
                 {
                     state->contactLimbs.push_back(lIndex);
                     state->contactLimbPositions.push_back(target);
                     state->contactLimbPositionsNormals.push_back(normal);
-                    int limit = 0;
+                    int limit = 20;
                     //int limit2 = 100;
                     ik::IKSolver solver;
                     ik::VectorAlignmentConstraint constraint(normal);

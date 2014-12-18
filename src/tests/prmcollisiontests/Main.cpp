@@ -9,6 +9,14 @@
 #include <iostream>
 #include <cmath>
 
+namespace
+{
+bool quasiEqual(const Eigen::Vector3d& a, const Eigen::Vector3d& b)
+{
+    return (a-b).norm() < 0.0001;
+}
+}
+
 using namespace std;
 
 void ObjParserCanLoadFileTest(bool& error)
@@ -144,6 +152,83 @@ void SerializeSimplePRMTest(bool& error)
     planner::SavePrm(*prm2, outpath2);
 }
 
+#include "collision/Sphere.h"
+
+void SphereTest(bool& error)
+{
+    planner::Sphere a(0,0,0,1);
+    planner::Sphere b(0,0,0,1);
+    planner::Sphere c(0,0,0,0.8);
+    planner::Sphere d(0.3,0.3,0.3,0.8);
+    planner::Sphere e(2,0,0,1);
+    planner::SphereCollisionRes res = planner::Intersect(a,b,true);
+    if(res.collisionType != planner::sphereContained)
+    {
+        error = true;
+        std::cout << "ERROR in SphereTest 1: sphere a and b are contained, got " << res.collisionType << std::endl;
+    }
+
+
+    res = planner::Intersect(b,c,true);
+    if(res.collisionType != planner::sphereContained)
+    {
+        error = true;
+        std::cout << "ERROR in SphereTest 2: sphere c contained by b, got " << res.collisionType << std::endl;
+    }
+
+
+    res = planner::Intersect(c,b,true);
+    if(res.collisionType != planner::sphereContained)
+    {
+        error = true;
+        std::cout << "ERROR in SphereTest 3: sphere c contained by b, got " << res.collisionType << std::endl;
+    }
+
+
+    Eigen::Vector3d posad(0.35,0.35,0.35);
+    res = planner::Intersect(a,d,true);
+    if(res.collisionType != planner::cercle)
+    {
+        error = true;
+        std::cout << "ERROR in SphereTest 4: sphere a and d intersect, got " << res.collisionType << std::endl;
+    }
+    if(!quasiEqual(posad,res.center))
+    {
+        error = true;
+        std::cout << "ERROR in SphereTest 5: sphere a and d intersect point: expected\n" << posad << "got\n"  << res.center << std::endl;
+    }
+    res = planner::Intersect(d,a,true);
+    if(res.collisionType != planner::cercle)
+    {
+        error = true;
+        std::cout << "ERROR in SphereTest 4: sphere a and d intersect, got " << res.collisionType << std::endl;
+    }
+    if(!quasiEqual(posad,res.center))
+    {
+        error = true;
+        std::cout << "ERROR in SphereTest 5: sphere a and d intersect point: expected\n" << posad << "got\n"  << res.center << std::endl;
+    }
+
+
+    Eigen::Vector3d posae(1,0,0);
+    res = planner::Intersect(a,e,true);
+    if(res.collisionType != planner::tangentialExterior)
+    {
+        error = true;
+        std::cout << "ERROR in SphereTest 6: sphere a and d tangent, got " << res.collisionType << std::endl;
+    }
+    if(!quasiEqual(posae,res.center))
+    {
+        error = true;
+        std::cout << "ERROR in SphereTest 7: sphere a and d intersect point: expected\n" << posad << "got\n"  << res.center << std::endl;
+    }
+    if(res.radius != 0)
+    {
+        error = true;
+        std::cout << "ERROR in SphereTest 8: sphere a and d tangent, radius should b 0 " << res.collisionType << std::endl;
+    }
+}
+
 int main(int argc, char *argv[])
 {	std::cout << "performing tests... \n";
     bool error = false;
@@ -152,6 +237,7 @@ int main(int argc, char *argv[])
     CollisionDetectionTest(error);
     LocalPlannerTest(error);
     SerializeSimplePRMTest(error);
+    SphereTest(error);
 	if(error)
 	{
 		std::cout << "There were some errors\n";

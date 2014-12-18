@@ -19,6 +19,8 @@ set(SOURCES
     ParserObj.cpp
     Object.h
     Object.cpp
+    Sphere.h
+    Sphere.cpp
     Collider.h
     Collider.cpp
         ${SRC_TOOLS_DIR}/MatrixDefs.h ${SRC_TOOLS_DIR}/MatrixDefs.cpp
