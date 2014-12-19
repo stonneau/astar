@@ -296,7 +296,7 @@ void Robot::SetPosition(const Eigen::Vector3d& position, bool update)
         tmp = tmp->children.front();
     }
 
-    currentPosition = pos;
+    currentPosition = position;
     node->offset = currentPosition;
     if(update) node->Update();
 }
