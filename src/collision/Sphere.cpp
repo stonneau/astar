@@ -30,3 +30,18 @@ const planner::SphereCollisionRes planner::Intersect(const Sphere& R, const Sphe
     }
 	return res;
 }
+
+
+const std::vector<int> planner::Intersect(const Sphere& R, const std::vector<Sphere> spheres)
+{
+    std::vector<int> res;
+    int i =0;
+    for(std::vector<Sphere>::const_iterator cit = spheres.begin(); cit != spheres.end(); ++cit, ++i)
+    {
+        if(Intersect(R,*cit,false).collisionType>2)
+        {
+            res.push_back(i);
+        }
+    }
+    return res;
+}

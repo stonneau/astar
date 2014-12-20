@@ -164,6 +164,27 @@ namespace
         return res;
     }
 
+    planner::Sphere GetSphere(const std::string& data)
+    {
+        Eigen::Vector3d center;
+        double radius;
+        std::vector<std::string> coords = splitSpace(data);
+        if(coords.size() != 4)
+        {
+            std::cout << "SPHERE needs 4 numbers" << std::endl;
+        }
+        for(int i =0; i<3; ++i)
+        {
+            char value [20];
+            sscanf(coords[i].c_str(),"%s", value);
+            center(i) = strtod (value, NULL);
+        }
+        char value [20];
+        sscanf(coords[3].c_str(),"%s", value);
+        radius = strtod (value, NULL);
+        return planner::Sphere(center,radius);
+    }
+
 }
 
 
@@ -235,7 +256,17 @@ CompleteScenario* planner::CompleteScenarioFromFile(const std::string& filename)
             }
             if(line.find("LIMB") != string::npos && cScenario->robot)
             {
-                Node* res = planner::GetChild(cScenario->robot, ExtractQuotes(line));
+                // decompose between LIMB and SPHERE
+                size_t it = line.find("SPHERE");
+                if(it== string::npos)
+                {
+                    std::cout << "no sphere for limb  "  << std::endl;
+                    break;
+                }
+                std::string limbstring = ExtractQuotes(line);
+                std::string sphereString = ExtractQuotes(line.substr(it));
+                Node* res = planner::GetChild(cScenario->robot, limbstring);
+                cScenario->limbRoms.push_back(GetSphere(sphereString));
                 if(res)
                 {
                     limb = true;

@@ -11,6 +11,8 @@
 
 #include <Eigen/Dense>
 
+#include <vector>
+
 namespace planner
 {
 enum SphereCollisionType
@@ -54,10 +56,11 @@ public:
     ~Sphere(){}
 
 public:
-	const Eigen::Vector3d center_;
-	const double radius_;
+    Eigen::Vector3d center_;
+    double radius_;
 };
 
 const  SphereCollisionRes Intersect(const Sphere& a, const Sphere& b, bool computePoint = false);
+const  std::vector<int> Intersect(const Sphere& a, const std::vector<Sphere>spheres);
 }//namespace planner;
 #endif //_CLASS_COLLIDER

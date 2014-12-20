@@ -182,8 +182,36 @@ namespace
         }
     }
 
+    void DrawPoint(const Eigen::Vector3d& target)
+    {
+        dsSetColor(1,0,0);
+        PQP_REAL p1 [3];
+        PQP_REAL p2 [3];
+        Eigen::Vector3d tmp(target);
+        tmp(2)+=0.1;
+        Vect3ToArray(p1,tmp);
+        tmp(2)-=0.2;
+        Vect3ToArray(p2,tmp);
+        dsDrawLineD(p1, p2);
+
+        tmp(2)+=0.1;
+        tmp(1)+=0.1;
+        Vect3ToArray(p1,tmp);
+        tmp(1)-=0.2;
+        Vect3ToArray(p2,tmp);
+        dsDrawLineD(p1, p2);
+        dsSetColor(0,0,1);
+    }
+
     void DrawModel(const planner::Model* model, bool useItomp = true)
     {
+        Eigen::Matrix3d res = model->GetOrientation();
+        for(std::vector<planner::Sphere>::const_iterator cit =  cScenario->limbRoms.begin();
+            cit !=  cScenario->limbRoms.end(); ++cit)
+        {
+            Eigen::Vector3d spherePos = res * (*cit).center_ + model->GetPosition();
+            DrawPoint(itompTransform * spherePos);
+        }
         DrawObject(model->englobed, useItomp);
         for(planner::Object::T_Object::const_iterator it3 = model->englobing.begin();
             it3 != model->englobing.end(); ++it3)
@@ -208,27 +236,6 @@ namespace
                 dsDrawLineD(p1, p2);
             }
         }
-    }
-
-    void DrawPoint(const Eigen::Vector3d& target)
-    {
-        dsSetColor(1,0,0);
-        PQP_REAL p1 [3];
-        PQP_REAL p2 [3];
-        Eigen::Vector3d tmp(target);
-        tmp(2)+=0.1;
-        Vect3ToArray(p1,tmp);
-        tmp(2)-=0.2;
-        Vect3ToArray(p2,tmp);
-        dsDrawLineD(p1, p2);
-
-        tmp(2)+=0.1;
-        tmp(1)+=0.1;
-        Vect3ToArray(p1,tmp);
-        tmp(1)-=0.2;
-        Vect3ToArray(p2,tmp);
-        dsDrawLineD(p1, p2);
-        dsSetColor(0,0,1);
     }
 
     void LineBetweenObjects(const planner::Model* a, const planner::Model* b)
@@ -324,7 +331,7 @@ namespace
     void DrawNode(const planner::Node* node)
     {
         if(node->current)
-            DrawObject(node->current, true, true);
+            DrawObject(node->current, true, false);
         if (drawacis) DrawAcis(node);
         for(std::vector<planner::Node*>::const_iterator cit = node->children.begin();
             cit != node->children.end(); ++cit)
@@ -413,6 +420,7 @@ static void simLoop (int pause)
     DrawObjects();
     dsSetColorAlpha(0,0, 0.7,1);
     DrawNode(cScenario->robot->node);
+    DrawPoint(itompTransform * cScenario->robot->currentPosition);
     std::vector<Eigen::Vector3d>::iterator nit = states[current]->contactLimbPositionsNormals.begin();
     for(std::vector<Eigen::Vector3d>::iterator it = states[current]->contactLimbPositions.begin();
         it != states[current]->contactLimbPositions.end(); ++it, ++nit)
@@ -426,6 +434,16 @@ static void simLoop (int pause)
         Vect3ToArray(p2, orig + itompTransform * (*nit));
         dsDrawLineD(p1, p2); dsSetColor(0,0,1);
     }
+
+// draw spheres
+   /* for(std::vector<planner::Sphere>::const_iterator cit =  cScenario->limbRoms.begin();
+        cit !=  cScenario->limbRoms.end(); ++cit)
+    {
+        Eigen::Matrix3d res = states[current]->value->node->toWorldRotation;
+        res.inverse();
+        Eigen::Vector3d spherePos = res * (*cit).center_ + states[current]->value->node->position;
+        DrawPoint(itompTransform * spherePos);
+    }*/
     if(drawPOstures)
     {
 		for(std::vector<planner::Node*>::iterator it = postures.begin();
@@ -670,6 +688,7 @@ void command(int cmd)   /**  key control function; */
             //cScenario->robot->SetConfiguration(states[current]);
             cScenario->robot = states[current]->value;
             std::cout << "Z" << states[current]->value->currentRotation << std::endl;
+            std::cout << "X" << states[current]->value->currentPosition << std::endl;
 
             //currentSample = 0;
             //samples = planner::GetPosturesInContact(*cScenario->robot, cScenario->limbs[0], cScenario->limbSamples[0], cScenario->scenario->objects_ );

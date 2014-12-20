@@ -32,21 +32,14 @@ namespace
 			tmp = tmp->children.front();
 		}
 		Eigen::Vector3d res(Eigen::Vector3d::Zero());
-		tmp = tmp->parent;
-		int nbChildren = 0;
-		for(std::vector<planner::Node*>::iterator it = tmp->children.begin();
-			it != tmp->children.end(); ++it)
-		{
-			++nbChildren;
-			res += (*it)->position;
-		}
-		return res / nbChildren;
+        tmp = tmp->parent;
+        return tmp->position;
 	}
 
 	void WriteSamplePosition(planner::sampling::Sample* sample, planner::Node* limb, std::stringstream& outstream)
 	{
 		planner::sampling::LoadSample(*sample, limb);
-        Eigen::Vector3d pos = limb->parent->toLocalRotation * Effectorcentroid(limb); // TODO - limb->position;
+        Eigen::Vector3d pos = Effectorcentroid(limb); // TODO - limb->position;
 		outstream << pos(0) << "," << pos(1) << "," << pos(2) <<'\n';
 	}
 

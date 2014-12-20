@@ -201,15 +201,28 @@ namespace
 
     bool NextIsInRange(const planner::Node* limb, const Eigen::Vector3d& target, const Object* objrom,  const Object* point)
     {
-        double totalLength = limb->children.empty() ? 0 :  LimbLengthRec(limb->children.front());
-        return (objrom->GetPosition() - target).norm() < totalLength * 0.9;
+        if(point && objrom)
+        {
+            double totalLength = limb->children.empty() ? 0 :  LimbLengthRec(limb->children.front());
+            return (objrom->GetPosition() - target).norm() < totalLength * 0.9;
+        }
+        return true;
+    }
+
+    double CostMaintainContact(const planner::Sphere* nextRom, const Eigen::Vector3d& target)
+    {
+        if(nextRom)
+        {
+            return (nextRom->center_ - target).norm();
+        }
+        return 0;
     }
 }
 
 Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::T_Samples& samples
                                          , Object::T_Object& obstacles, const Eigen::Vector3d& direction
                                          , Eigen::Vector3d& position, Eigen::Vector3d& normalVector
-                                         , planner::CompleteScenario& scenario, const Object* rom)
+                                         , planner::CompleteScenario& scenario, const planner::Sphere* rom)
 {
     Sample* save = new Sample(limb);
     Sample* res = 0;
@@ -242,14 +255,15 @@ Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::
                 for(Object::T_Object::iterator oit = obstacles.begin(); oit != obstacles.end(); ++oit)
                 {
 //if(effector->InContact(*oit,epsilon, normal, projection) && !planner::IsSelfColliding(&robot, limb) && !LimbColliding(limb, obstacles))
-                    if(effector->InContact(*oit,epsilon, normal, projection) && planner::SafeTargetDistance(limb,projection,0.9) && NextIsInRange(limb, projection, rom, scenario.scenario->point_))
+                    if(effector->InContact(*oit,epsilon, normal, projection) && planner::SafeTargetDistance(limb,projection,0.9) )//&& NextIsInRange(limb, projection, rom, scenario.scenario->point_))
                     //if(planner::MinDistance(effectorCentroid, *oit, projection, normal) < epsilon && !planner::IsSelfColliding(&robot, limb) && !LimbColliding(limb, obstacles))
                     {
                         tempweightedmanip = tmp_manip * dirn.dot(robot.currentRotation * normal);
+                        tempweightedmanip -= CostMaintainContact(rom, projection);
                         if(tempweightedmanip > bestManip)// && (planner::SafeTargetDistance(limb,projection,0.9)))
                         {
                             bestManip = tempweightedmanip;
-                            res =tempweightedmanip > 0 ? *sit : 0;
+                            res = * sit; //tempweightedmanip > -10 ? *sit : 0;
                             //position = effector->GetPosition();
                             normalVector = normal;
                             position = projection;
@@ -481,13 +495,13 @@ namespace
             if(!maintainPreviousTarget) // could not reach previous target, get a new one (reasons are distance of collision)
             {
 // TODO INCLUDE SAFE TARGET DISTANCE
-                Object* point(0);
+                planner::Sphere* sphere(0);
                 if(nextnext)
                 {
-                    point = nextnext->englobing[lIndex];
+                    sphere = new Sphere(nextnext->GetOrientation() * scenario.limbRoms[lIndex].center_ + nextnext->GetPosition(), scenario.limbRoms[lIndex].radius_);
                 }
                 Sample* sample = GetPosturesInContact(*robot, *lit, scenario.limbSamples[lIndex],
-                                                      scenario.scenario->objects_, direction, target, normal, scenario, point);
+                                                      scenario.scenario->objects_, direction, target, normal, scenario, sphere);
                 if(sample)
                 {
                     state->contactLimbs.push_back(lIndex);

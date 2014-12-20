@@ -18,6 +18,7 @@
 #include "prmpath/JointConstraint.h"
 #include "prmpath/sampling/Sample.h"
 #include "smoothing/smooth.h"
+#include "collision/Sphere.h"
 
 namespace planner
 {
@@ -61,6 +62,7 @@ struct CompleteScenario
     Scenario* scenario; //prm + objs
     Robot* robot;
     std::vector<planner::Node*> limbs;
+    std::vector<planner::Sphere> limbRoms;
     std::vector<sampling::T_Samples> limbSamples;
     Model* from;
     Model* to;
