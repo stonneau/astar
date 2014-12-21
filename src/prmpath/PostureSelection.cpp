@@ -270,7 +270,7 @@ Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::
                         if(tempweightedmanip > bestManip)// && (planner::SafeTargetDistance(limb,projection,0.9)))
                         {
                             bestManip = tempweightedmanip;
-                            res = tempweightedmanip > 0.01 ? *sit : 0;
+                            res = tempweightedmanip > 0.0 ? *sit : 0;
                             //position = effector->GetPosition();
                             normalVector = normal;
                             position = projection;
@@ -542,7 +542,7 @@ namespace
                     state->contactLimbs.push_back(lIndex);
                     state->contactLimbPositions.push_back(target);
                     state->contactLimbPositionsNormals.push_back(normal);
-                    int limit = 0;// 20;
+                    int limit = 0;
                     //int limit2 = 100;
                     ik::IKSolver solver;
                     ik::VectorAlignmentConstraint constraint(normal);
@@ -552,13 +552,13 @@ namespace
                     {
                         limit--;
                     }
+                    maintainPreviousTarget = true; // MOVE OUT OF BLOCK WITH IK USE
                 }
                 else
                 {
                     nbContactsChange.push_back(lIndex);
                 }
 
-                maintainPreviousTarget = true; // MOVE OUT OF BLOCK WITH IK USE
             }
             if(!maintainPreviousTarget) // could not reach previous target, get a new one (reasons are distance of collision)
             {
@@ -823,11 +823,11 @@ planner::T_State planner::PostureSequence(planner::CompleteScenario& scenario)
                 for(std::vector<int>::const_iterator cit = nbContactsChange.begin();
                     cit != nbContactsChange.end()-1; ++cit)
                 {
-                    old = GenerateIntermediateState(scenario, *old, *itbefore, *it, *cit);
+                    old = GenerateIntermediateState(scenario, *old, *itbefore, *it2, *cit);
                     old->stable = false;
                     res.push_back(old);
                 }
-                current = Interpolate(scenario, *current, *it, *it2,nbContactsChange);
+                current = Interpolate(scenario, *old, *it, *it2,nbContactsChange);
             }
         }
         current->stable = false;// Stable(current);
