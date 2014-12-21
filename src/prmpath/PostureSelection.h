@@ -23,7 +23,7 @@ sampling::Sample* GetPosturesInContact(Robot& robot, Node* limb, const sampling:
 
 sampling::Sample* GetPosturesInContact(Robot& robot, Node* limb, const sampling::T_Samples &samples
                                          , Object::T_Object& obstacles, const Eigen::Vector3d& direction, Eigen::Vector3d& position, Eigen::Vector3d &normalVector
-                                       , CompleteScenario &scenario, const Sphere *rom = 0);
+                                       , CompleteScenario &scenario, const Sphere* current_rom = 0, const planner::Sphere* next_rom = 0);
 
 sampling::T_Samples GetContactCandidates(Robot& robot, Node* limb, const sampling::T_Samples &samples
                                          , Object::T_Object& obstacles, const Eigen::Vector3d& direction);

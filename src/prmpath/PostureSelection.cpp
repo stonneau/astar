@@ -209,11 +209,17 @@ namespace
         return true;
     }
 
-    double CostMaintainContact(const planner::Sphere* nextRom, const Eigen::Vector3d& target)
+    double CostMaintainContact(const planner::Sphere* currentRom, const planner::Sphere* nextRom, const Eigen::Vector3d& target)
     {
+        // compute distance from intersection.
         if(nextRom)
         {
-            return (nextRom->center_ - target).norm();
+            planner::SphereCollisionRes res = planner::Intersect(*currentRom,*nextRom,true);
+            if(!res.infoComputed)
+            {
+                std::cout << "no intersection between succeeding roms, weird";
+            }
+            return (res.center - target).norm();
         }
         return 0;
     }
@@ -222,7 +228,7 @@ namespace
 Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::T_Samples& samples
                                          , Object::T_Object& obstacles, const Eigen::Vector3d& direction
                                          , Eigen::Vector3d& position, Eigen::Vector3d& normalVector
-                                         , planner::CompleteScenario& scenario, const planner::Sphere* rom)
+                                         , planner::CompleteScenario& scenario, const planner::Sphere* current_rom, const planner::Sphere* next_rom)
 {
     Sample* save = new Sample(limb);
     Sample* res = 0;
@@ -258,12 +264,13 @@ Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::
                     if(effector->InContact(*oit,epsilon, normal, projection) && planner::SafeTargetDistance(limb,projection,0.9) )//&& NextIsInRange(limb, projection, rom, scenario.scenario->point_))
                     //if(planner::MinDistance(effectorCentroid, *oit, projection, normal) < epsilon && !planner::IsSelfColliding(&robot, limb) && !LimbColliding(limb, obstacles))
                     {
-                        tempweightedmanip = tmp_manip * dirn.dot(robot.currentRotation * normal);
-                        tempweightedmanip -= CostMaintainContact(rom, projection);
+                        tempweightedmanip = tmp_manip; // * dirn.dot(robot.currentRotation * normal);
+                        tempweightedmanip += 1 / CostMaintainContact(current_rom, next_rom, projection);
+                        tempweightedmanip *= dirn.dot(robot.currentRotation * normal);
                         if(tempweightedmanip > bestManip)// && (planner::SafeTargetDistance(limb,projection,0.9)))
                         {
                             bestManip = tempweightedmanip;
-                            res = * sit; //tempweightedmanip > -10 ? *sit : 0;
+                            res = tempweightedmanip > 0.01 ? *sit : 0;
                             //position = effector->GetPosition();
                             normalVector = normal;
                             position = projection;
@@ -431,8 +438,64 @@ namespace
         }
     }
 
-    planner::State* Interpolate(planner::CompleteScenario& scenario, const State& previous, const Model* next, const Model* nextnext)
+    planner::State* GenerateIntermediateState(planner::CompleteScenario& scenario, const State& previous, const Model* next, const Model* nextnext, const int nbContactsChange)
     {
+        State* state = new State(&previous);
+        Robot* robot = state->value;
+        state->contactLimbPositions.clear();
+        state->contactLimbPositionsNormals.clear();
+        state->contactLimbs.clear();
+
+        // retrieve indexes of limbs to iterate over them
+        std::vector<Node*> limbs;
+        for(std::vector<Node*>::iterator it = scenario.limbs.begin()
+            ; it!=scenario.limbs.end(); ++it)
+        {
+            limbs.push_back(planner::GetChild(robot,(*it)->id));
+        }
+
+        int lIndex = 0;
+        for(std::vector<Node*>::iterator lit = limbs.begin(); lit != limbs.end(); ++lit, ++lIndex)
+        {
+            Eigen::Vector3d target, normal;
+            Eigen::Vector3d direction = next->GetPosition() - previous.value->node->position;
+            direction = direction.norm() == 0 ? Eigen::Vector3d(0,1,0) : direction;
+            direction.normalize();
+            if(lIndex == nbContactsChange)
+            {
+                planner::Sphere* sphereCurrent(0);
+                planner::Sphere* sphereNext(0);
+                if(nextnext)
+                {
+                    sphereCurrent = new Sphere(next->GetOrientation() * scenario.limbRoms[lIndex].center_ + next->GetPosition(), scenario.limbRoms[lIndex].radius_);
+                    sphereNext = new Sphere(nextnext->GetOrientation() * scenario.limbRoms[lIndex].center_ + nextnext->GetPosition(), scenario.limbRoms[lIndex].radius_);
+                }
+                Sample* sample = GetPosturesInContact(*robot, *lit, scenario.limbSamples[lIndex],
+                                                      scenario.scenario->objects_, direction, target, normal, scenario, sphereCurrent, sphereNext);
+                if(sample)
+                {
+                    state->contactLimbs.push_back(lIndex);
+                    state->contactLimbPositions.push_back(target);
+                    state->contactLimbPositionsNormals.push_back(normal);
+                    //planner::sampling::LoadSample(*sample,limbs[*cit]);
+//std::cout << " limb in contact " << lIndex <<  std::endl;
+                }
+                delete(sphereCurrent);
+                delete(sphereNext);
+            }
+            else if(previous.InContact(lIndex, target, normal))
+            {
+                state->contactLimbs.push_back(lIndex);
+                state->contactLimbPositions.push_back(target);
+                state->contactLimbPositionsNormals.push_back(normal);
+            }
+        }
+        return state;
+    }
+
+    planner::State* Interpolate(planner::CompleteScenario& scenario, const State& previous, const Model* next, const Model* nextnext, std::vector<int>& nbContactsChange)
+    {
+        nbContactsChange.clear();
         //std::cout << " Satate " <<  std::endl;
         // Create new state and move it to path location
         State* state = new State();
@@ -461,7 +524,7 @@ namespace
             {
                 //direction = Eigen::Vector3d(0,1,0);
             }
-            if(previous.InContact(lIndex, target, normal) && SafeTargetDistance(*lit,target,0.85)) // limb was in contact, try to maintain it
+            if(previous.InContact(lIndex, target, normal)) // limb was in contact, try to maintain it
             {
                 /*T_Samples samples = GetPosturesOnTarget(*robot, *lit, scenario.limbSamples[lIndex], scenario.scenario->objects_, target);
                 // TODO TRY TO USE IK IN FACT
@@ -474,11 +537,12 @@ namespace
 //std::cout << " limb mainained in contact " << lIndex <<  std::endl;
                 }
                 else*/
+                if(SafeTargetDistance(*lit,target,0.92))
                 {
                     state->contactLimbs.push_back(lIndex);
                     state->contactLimbPositions.push_back(target);
                     state->contactLimbPositionsNormals.push_back(normal);
-                    int limit = 20;
+                    int limit = 0;// 20;
                     //int limit2 = 100;
                     ik::IKSolver solver;
                     ik::VectorAlignmentConstraint constraint(normal);
@@ -489,19 +553,25 @@ namespace
                         limit--;
                     }
                 }
+                else
+                {
+                    nbContactsChange.push_back(lIndex);
+                }
 
                 maintainPreviousTarget = true; // MOVE OUT OF BLOCK WITH IK USE
             }
             if(!maintainPreviousTarget) // could not reach previous target, get a new one (reasons are distance of collision)
             {
 // TODO INCLUDE SAFE TARGET DISTANCE
-                planner::Sphere* sphere(0);
+                planner::Sphere* sphereCurrent(0);
+                planner::Sphere* sphereNext(0);
                 if(nextnext)
                 {
-                    sphere = new Sphere(nextnext->GetOrientation() * scenario.limbRoms[lIndex].center_ + nextnext->GetPosition(), scenario.limbRoms[lIndex].radius_);
+                    sphereCurrent = new Sphere(next->GetOrientation() * scenario.limbRoms[lIndex].center_ + next->GetPosition(), scenario.limbRoms[lIndex].radius_);
+                    sphereNext = new Sphere(nextnext->GetOrientation() * scenario.limbRoms[lIndex].center_ + nextnext->GetPosition(), scenario.limbRoms[lIndex].radius_);
                 }
                 Sample* sample = GetPosturesInContact(*robot, *lit, scenario.limbSamples[lIndex],
-                                                      scenario.scenario->objects_, direction, target, normal, scenario, sphere);
+                                                      scenario.scenario->objects_, direction, target, normal, scenario, sphereCurrent, sphereNext);
                 if(sample)
                 {
                     state->contactLimbs.push_back(lIndex);
@@ -510,6 +580,8 @@ namespace
                     //planner::sampling::LoadSample(*sample,limbs[*cit]);
 //std::cout << " limb in contact " << lIndex <<  std::endl;
                 }
+                delete(sphereCurrent);
+                delete(sphereNext);
             }
         }
         return state;
@@ -734,13 +806,29 @@ planner::T_State planner::PostureSequence(planner::CompleteScenario& scenario)
     CT_Model::iterator it2 = path.begin(); ++it2;
     for(CT_Model::iterator it = path.begin(); it!=path.end(); ++it, ++it2)
     {
+        std::vector<int> nbContactsChange;
         if(it2 == path.end())
         {
-            current = Interpolate(scenario, *current, *it, 0);
+            current = Interpolate(scenario, *current, *it, 0,nbContactsChange);
         }
         else
         {
-            current = Interpolate(scenario, *current, *it, *it2);
+            State* old = current;
+            current = Interpolate(scenario, *current, *it, *it2,nbContactsChange);
+            //if(nbContactsChange.size()>1)
+            if(it != path.begin() && nbContactsChange.size()>1)
+            {
+                CT_Model::iterator itbefore = it;
+                --itbefore;
+                for(std::vector<int>::const_iterator cit = nbContactsChange.begin();
+                    cit != nbContactsChange.end()-1; ++cit)
+                {
+                    old = GenerateIntermediateState(scenario, *old, *itbefore, *it, *cit);
+                    old->stable = false;
+                    res.push_back(old);
+                }
+                current = Interpolate(scenario, *current, *it, *it2,nbContactsChange);
+            }
         }
         current->stable = false;// Stable(current);
         res.push_back(current);
