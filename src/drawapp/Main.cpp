@@ -16,6 +16,7 @@
 #include "prmpath/ik/VectorAlignmentConstraint.h"
 #include "prmpath/ik/ForceManipulabilityConstraint.h"
 #include "prmpath/ik/ObstacleAvoidanceConstraint.h"
+#include "prmpath/animation/StateInterpolation.h"
 #include "Timer.h"
 
 #include <string>
@@ -518,6 +519,7 @@ void start()
     std::cout << " SAMPLES" << samples.size() << std::endl;
     std::cout << "done creating nodes " << path.size() << std::endl;
     states = planner::PostureSequence(*cScenario);
+    states = planner::Animate(*cScenario, states[2], states[5], 50);
     for(int i = 0; i< states.size(); ++i)
     {
         std::cout << "state : " << i << std::endl;
@@ -677,7 +679,6 @@ void command(int cmd)   /**  key control function; */
             //cScenario->robot->SetConfiguration(cScenario->path[current]);
             cScenario->robot = states[current]->value;
             std::cout << "state stable" << states[current]->stable << std::endl;
-            std::cout << "Z" << states[current]->value->currentRotation << std::endl;
             //currentSample = 0;
             //samples = planner::GetPosturesInContact(*cScenario->robot, cScenario->limbs[0], cScenario->limbSamples[0], cScenario->scenario->objects_ );
             break;
@@ -687,8 +688,6 @@ void command(int cmd)   /**  key control function; */
             current--; if(current <0) current = 0;
             //cScenario->robot->SetConfiguration(states[current]);
             cScenario->robot = states[current]->value;
-            std::cout << "Z" << states[current]->value->currentRotation << std::endl;
-            std::cout << "X" << states[current]->value->currentPosition << std::endl;
 
             //currentSample = 0;
             //samples = planner::GetPosturesInContact(*cScenario->robot, cScenario->limbs[0], cScenario->limbSamples[0], cScenario->scenario->objects_ );

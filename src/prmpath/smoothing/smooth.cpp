@@ -129,7 +129,7 @@ Eigen::Vector3d deBoor(int k, int degree, int i, double x, const std::vector<dou
 }
 
 // implementation of de boor algorithm
-Configuration SplinePath::Evaluate(double t) const
+Configuration ParamFunction::Evaluate(double t) const
 {
     C2_Point c = this->operator ()(t);
     return std::make_pair(c.first, UnitQ(c.second).toRotationMatrix());
@@ -181,45 +181,40 @@ C2_Point SplinePath::operator ()(double t) const
 
 using namespace planner;
 
-struct InterpolatePath : public ParamFunction
+InterpolatePath::InterpolatePath(const CT_Model& path)
+    : milePoints_(CreateMilePoints(path))
+{}
+
+InterpolatePath::InterpolatePath(const C2_Point& from, const C2_Point& to, const double startTime, const double endTime)
+    : milePoints_(CreateMilePoints(from,to, startTime, endTime))
+{}
+
+InterpolatePath::~InterpolatePath()
 {
-    InterpolatePath(const CT_Model& path)
-        : milePoints_(CreateMilePoints(path))
-    {}
+    // NOTHING
+}
 
-    InterpolatePath(const C2_Point& from, const C2_Point& to, const double startTime, const double endTime)
-        : milePoints_(CreateMilePoints(from,to, startTime, endTime))
-    {}
-
-    ~InterpolatePath()
+C2_Point InterpolatePath::operator()(double t) const
+{
+    //assert(0 <= t && t <= 1);
+    T_MilePoint::const_iterator cit = milePoints_.begin();
+    T_MilePoint::const_iterator cit2 = milePoints_.begin(); ++cit2;
+    for(; cit2 != milePoints_.end(); ++cit, ++cit2)
     {
-        // NOTHING
-    }
-
-    virtual C2_Point operator()(double t) const
-    {
-        //assert(0 <= t && t <= 1);
-        T_MilePoint::const_iterator cit = milePoints_.begin();
-        T_MilePoint::const_iterator cit2 = milePoints_.begin(); ++cit2;
-        for(; cit2 != milePoints_.end(); ++cit, ++cit2)
+        if((*cit).first <= t && t < (*cit2).first)
         {
-            if((*cit).first <= t && t < (*cit2).first)
-            {
-                return Interpolate(*cit, *cit2, t);
-            }
+            return Interpolate(*cit, *cit2, t);
         }
-        return milePoints_.back().second;
     }
+    return milePoints_.back().second;
+}
 
-    virtual C2_Point max() const
-    {
-        return milePoints_.back().second;
-    }
+C2_Point InterpolatePath::max() const
+{
+    return milePoints_.back().second;
+}
 
-    virtual double tmax() const {return milePoints_.back().first;}
-
-    const T_MilePoint milePoints_;
-};
+double InterpolatePath::tmax() const {return milePoints_.back().first;}
 
 namespace
 {

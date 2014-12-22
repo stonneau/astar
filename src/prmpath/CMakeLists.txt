@@ -33,6 +33,7 @@ set(SOURCES
     EffectorROM.cpp
     sampling/Sample.h
     sampling/Sample.cpp
+    animation/StateInterpolation.h animation/StateInterpolation.cpp
     Export/ITOMPExporter.h Export/ITOMPExporter.cpp
     Export/Exporter.h Export/Exporter.cpp
     Export/BVHExporter.h Export/BVHExporter.cpp

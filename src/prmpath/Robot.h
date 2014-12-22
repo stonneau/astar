@@ -104,6 +104,7 @@ public:
     void SetConfiguration(const planner::Object* object);
     void SetConstantRotation(const Eigen::Matrix3d& rotation);
     void SetRotation(const Eigen::Matrix3d& rotation, bool update = true);
+    void SetFullRotation(const Eigen::Matrix3d& rotation, bool update = true);
     void SetPosition(const Eigen::Vector3d& position, bool update = true);
     void Translate  (const Eigen::Vector3d& delta, bool update = true);
 

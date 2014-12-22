@@ -267,6 +267,18 @@ void Robot::SetRotation(const Eigen::Matrix3d& rotation, bool update)
     }
     if(update) node->Update();
 }
+void Robot::SetFullRotation(const Eigen::Matrix3d& rotation, bool update)
+{
+    currentRotation = rotation;
+    Eigen::Vector3d ea = currentRotation.eulerAngles(2,1,0);
+    Node* current = node; // first node is translation
+    for(int i =0; i<3; ++i)
+    {
+        current = current->children[0];
+        current->value = ea[i];
+    }
+    if(update) node->Update();
+}
 void Robot::SetConstantRotation(const Eigen::Matrix3d& rotation)
 {
     constantRotation = rotation;
