@@ -3,6 +3,7 @@
 #include "prmpath/ik/ObstacleAvoidanceConstraint.h"
 #include "prmpath/ik/PartialDerivativeConstraint.h"
 #include "prmpath/ik/VectorAlignmentConstraint.h"
+#include "prmpath/ik/MatchTargetConstraint.h"
 
 #include "tools/ExpMap.h"
 
@@ -33,30 +34,57 @@ namespace
         Eigen::Vector3d to_;
     };
 
-    void PerformIkStep(const planner::CompleteScenario& scenario, planner::State* state, bool obs = false)
+    struct DoIk
     {
-        ik::IKSolver solver;
-        std::vector<Eigen::Vector3d>::iterator posit = state->contactLimbPositions.begin();
-        std::vector<Eigen::Vector3d>::iterator normit = state->contactLimbPositionsNormals.begin();
-        planner::Collider collider(scenario.scenario->objects_);
-        for(std::vector<int>::const_iterator cit = state->contactLimbs.begin();
-            cit != state->contactLimbs.end(); ++cit, ++posit, ++normit)
+        DoIk(const planner::CompleteScenario& scenario, const planner::State* state)
+            : scenario(scenario)
         {
-            planner::Node* limb =  planner::GetChild(state->value,scenario.limbs[*cit]->id);
-            ik::VectorAlignmentConstraint constraint(*normit);
-            ik::ObstacleAvoidanceConstraint obsconstraint(collider);
-            std::vector<ik::PartialDerivativeConstraint*> constraints;
-            if(!obs)
-                constraints.push_back(&constraint);
-            //constraints.push_back(&obsconstraint);
-            //solver.AddConstraint(ik::ForceManip);
-            int limite = 100;
-            while(limite > 0 && !solver.StepClamping(limb, *posit, *posit, constraints, true))
+            for(std::vector<int>::const_iterator cit = state->contactLimbs.begin();
+                cit != state->contactLimbs.end(); ++cit)
             {
-                limite--;
+                planner::Node* limb =  planner::GetChild(state->value,scenario.limbs[*cit]->id);
+                std::vector<ik::PartialDerivativeConstraint*> constraints;
+                ik::MatchTargetConstraint* constraint = new ik::MatchTargetConstraint(limb);
+                constraints.push_back(constraint);
+                allconstraints.push_back(constraints);
             }
         }
-    }
+
+        ~DoIk()
+        {
+            for(std::vector< std::vector<ik::PartialDerivativeConstraint*> >::iterator cit = allconstraints.begin();
+                cit != allconstraints.end(); ++cit)
+            {
+                for(std::vector<ik::PartialDerivativeConstraint*>::iterator it2 = cit->begin();
+                    it2 != cit->end(); ++it2)
+                {
+                    delete(*it2);
+                }
+            }
+        }
+
+        void operator ()(planner::State* state)
+        {
+            ik::IKSolver solver;
+            std::vector<Eigen::Vector3d>::iterator posit = state->contactLimbPositions.begin();
+            std::vector<Eigen::Vector3d>::iterator normit = state->contactLimbPositionsNormals.begin();
+            int limbId = 0;
+            for(std::vector<int>::const_iterator cit = state->contactLimbs.begin();
+                cit != state->contactLimbs.end(); ++cit, ++posit, ++normit, ++limbId)
+            {
+                planner::Node* limb =  planner::GetChild(state->value,scenario.limbs[*cit]->id);
+                int limite = 100;
+                while(limite > 0 && !solver.StepClamping(limb, *posit, *posit, allconstraints[limbId], true))
+                {
+                    limite--;
+                }
+            }
+        }
+
+        ik::IKSolver solver;
+        std::vector< std::vector<ik::PartialDerivativeConstraint*> > allconstraints;
+        const planner::CompleteScenario& scenario;
+    };
 
     // index in "to" state vectors
     std::vector<int> GetModifiedContacts(const planner::State& from, const planner::State& to)
@@ -139,6 +167,7 @@ planner::T_State planner::Animate(const planner::CompleteScenario& scenario, con
     InterpolateContacts interpolate(scenario,from,to);
     planner::InterpolatePath path(MakeConfiguration(from),MakeConfiguration(to),0,1);
     planner::T_State res;
+    DoIk doIk(scenario,&to);
     res.push_back(new State(&from));
     State* current = new State(&from);
     current->contactLimbPositions = to.contactLimbPositions;
@@ -152,7 +181,7 @@ planner::T_State planner::Animate(const planner::CompleteScenario& scenario, con
         current->value->SetFullRotation(conf.second, false);
         current->value->SetPosition(conf.first, true);
         interpolate(*current, step);
-        PerformIkStep(scenario,current,false);
+        doIk(current);
         res.push_back(current);
         step += stepsize;
     }

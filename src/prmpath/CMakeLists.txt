@@ -41,6 +41,7 @@ set(SOURCES
     ik/IKSolver.h ik/IKSolver.cpp
     smoothing/smooth.h smoothing/smooth.cpp
     ik/PartialDerivativeConstraint.h ik/PartialDerivativeConstraint.cpp
+    ik/MatchTargetConstraint.h ik/MatchTargetConstraint.cpp
     ik/VectorAlignmentConstraint.h ik/VectorAlignmentConstraint.cpp
     ik/ForceManipulabilityConstraint.h ik/ForceManipulabilityConstraint.cpp
     ik/ObstacleAvoidanceConstraint.h ik/ObstacleAvoidanceConstraint.cpp
