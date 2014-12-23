@@ -17,7 +17,7 @@ public:
 
 private:
     //Jacobian& Jacobian::operator =(const Jacobian&);
-	Jacobian(const Jacobian&);
+    //Jacobian(const Jacobian&);
 
 public:
     void  SetJacobian(const Eigen::MatrixXd& jacobian);

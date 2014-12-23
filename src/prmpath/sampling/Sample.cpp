@@ -77,6 +77,16 @@ Sample::Sample(Node* root)
     // NOTHING
 }
 
+Sample::Sample(const Sample& parent)
+    : values(parent.values)
+    , effectorPosition(parent.effectorPosition)
+    , jacobian(parent.jacobian)
+    , jacobianProduct(parent.jacobianProduct)
+    , jacobianProductInverse(parent.jacobianProductInverse)
+{
+    // NOTHING
+}
+
 Sample::Sample(Node* root, const std::vector<double>& values)
     : values(values)
     , effectorPosition(AssignValues(root, values))
@@ -95,6 +105,13 @@ Sample::~Sample()
 void planner::sampling::LoadSample(const Sample &sample, Node *root)
 {
     AssignValues(root, sample.values);
+}
+
+
+void LoadRobot(const RobotSample& sample, Robot& robot)
+{
+    robot.SetFullRotation(sample.currentRotation_, false);
+    AssignValues(robot.node, sample.sample_.values);
 }
 
 

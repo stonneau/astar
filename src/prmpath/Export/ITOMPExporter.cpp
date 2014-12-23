@@ -107,7 +107,7 @@ ITOMPExporter::ITOMPExporter(const Eigen::Matrix3d& rotation, const Eigen::Vecto
     findstring("upper_right_leg_z_joint", limbs, itompEffectorOrder_);
     findstring("upper_left_arm_z_joint", limbs, itompEffectorOrder_);
     findstring("upper_right_arm_z_joint", limbs, itompEffectorOrder_);
-    if(limbs.size() == itompEffectorOrder_.size())
+    if(limbs.size() != itompEffectorOrder_.size())
     {
         std::cout << "Error: could not find all itomp effectors in robot model" << std::endl;
     }

@@ -61,7 +61,7 @@ Node::Node(const Node& clone)
 }
 Node::~Node()
 {
-    delete current;
+    if(current) delete current;
 }
 void Node::free()
 {
@@ -169,6 +169,10 @@ planner::Node* planner::GetChild(Node* node, const std::string& tag)
 }
 planner::Node* planner::GetChild(Node* node, const int id)
 {
+    if(! node)
+    {
+        bool tg = false;
+    }
     if(node->id == id) return node;
     planner::Node* res;
     for(std::vector<Node*>::iterator cit = node->children.begin();
@@ -243,7 +247,7 @@ Robot::Robot(const Robot& clone)
 
 Robot::~Robot()
 {
-    delete node;
+    node->free();
     for(std::vector<NodeRom*>::iterator it = roms.begin();
         it != roms.end(); ++it)
     {

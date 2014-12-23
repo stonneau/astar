@@ -107,19 +107,16 @@ namespace
                     notfound = false;
                     if((positionFrom - positionTo).norm() > 0.00001)
                     {
-                        std::cout << "limb not matching :" <<*cit << std::endl;
-                        res.push_back(*cit);
+                        res.push_back(lIndex);
                     }
                     break;
                 }
             }
             if(notfound) // new contact created
             {
-                res.push_back(*cit);
-                std::cout << "limb not matching  NEW :" <<*cit << std::endl;
+                res.push_back(lIndex);
             }
         }
-        std::cout << "limb new :" << res.size() << std::endl;
         return res;
     }
 
@@ -130,7 +127,6 @@ namespace
             cit != contacts.end(); ++cit)
         {
             // Find position in initial Configuration
-            std::cout << " je pousse " << scenario.limbs[*cit]->tag << std::endl;
             res.push_back(InterpolateLine(
                 planner::GetEffectorCenter(planner::GetChild(from.value, scenario.limbs[*cit]->id)),
                 to.contactLimbPositions[*cit]));
@@ -153,6 +149,10 @@ namespace
             for(std::vector<int>::const_iterator cit = involvedContacts_.begin();
                 cit!= involvedContacts_.end(); ++cit, ++intit)
             {
+                if(*cit >= current.contactLimbPositions.size())
+                {
+                    std::cout << "dafuq" << *cit << " val" << (*intit)(time) << std::endl;
+                }
                 current.contactLimbPositions[*cit] = (*intit)(time);
             }
         }
@@ -160,6 +160,31 @@ namespace
         const std::vector<InterpolateLine> contactInterpolation_;
     };
 
+    planner::T_State AnimateInternal(const planner::CompleteScenario& scenario, const planner::State& from, const planner::State& to, planner::T_State& res, int nbFrames)
+    {
+        InterpolateContacts interpolate(scenario,from,to);
+        planner::InterpolatePath path(MakeConfiguration(from),MakeConfiguration(to),0,1);
+        DoIk doIk(scenario,&to);
+        res.push_back(new State(&from));
+        State* current = new State(&from);
+        current->contactLimbPositions = to.contactLimbPositions;
+        current->contactLimbPositionsNormals = to.contactLimbPositionsNormals;
+        current->contactLimbs = to.contactLimbs;
+        double stepsize = double(1) / double(nbFrames-1); double step = stepsize;
+        for(int i = 1; i< nbFrames-1; ++i)
+        {
+            current = new State(current);
+            planner::Configuration conf = path.Evaluate(step);
+            current->value->SetFullRotation(conf.second, false);
+            current->value->SetPosition(conf.first, true);
+            interpolate(*current, step);
+            doIk(current);
+            res.push_back(current);
+            step += stepsize;
+        }
+        res.push_back(new State(&to));
+        return res;
+    }
 }
 
 planner::T_State planner::Animate(const planner::CompleteScenario& scenario, const planner::State& from, const planner::State& to, int nbFrames)
@@ -182,9 +207,25 @@ planner::T_State planner::Animate(const planner::CompleteScenario& scenario, con
         current->value->SetPosition(conf.first, true);
         interpolate(*current, step);
         doIk(current);
-        res.push_back(current);
+        //res.push_back(current);
         step += stepsize;
     }
     res.push_back(new State(&to));
+    return res;
+}
+
+planner::T_State planner::Animate(const planner::CompleteScenario& scenario, const planner::T_State& fullpath, int nbFrames)
+{
+    planner::T_State res;
+    res.reserve(nbFrames);
+    planner::T_State::const_iterator cit1 = fullpath.begin(); ++cit1;
+    planner::T_State::const_iterator cit2 = fullpath.begin(); ++cit2;++cit2;
+    int i = 0;
+    do
+    {
+        AnimateInternal(scenario,**cit1,**cit2,res,nbFrames);
+        ++cit1; ++cit2;
+         ++i;
+    } while(cit2 != fullpath.end());
     return res;
 }
