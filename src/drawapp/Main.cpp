@@ -519,7 +519,9 @@ void start()
     std::cout << " SAMPLES" << samples.size() << std::endl;
     std::cout << "done creating nodes " << path.size() << std::endl;
     states = planner::PostureSequence(*cScenario);
-    states = planner::Animate(*cScenario, states, 10);
+    std::cout << "done computing sequence " << path.size() << std::endl;
+    states = planner::Animate(*cScenario, states[2], states[5], 50);
+    std::cout << "done animating " << path.size() << std::endl;
     for(int i = 0; i< states.size(); ++i)
     {
         std::cout << "state : " << i << std::endl;

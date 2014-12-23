@@ -126,9 +126,10 @@ namespace
         for(std::vector<int>::const_iterator cit = contacts.begin();
             cit != contacts.end(); ++cit)
         {
+            int limbindex = to.contactLimbs[*cit];
             // Find position in initial Configuration
             res.push_back(InterpolateLine(
-                planner::GetEffectorCenter(planner::GetChild(from.value, scenario.limbs[*cit]->id)),
+                planner::GetEffectorCenter(planner::GetChild(from.value, scenario.limbs[limbindex]->id)),
                 to.contactLimbPositions[*cit]));
         }
         return res;
@@ -207,7 +208,7 @@ planner::T_State planner::Animate(const planner::CompleteScenario& scenario, con
         current->value->SetPosition(conf.first, true);
         interpolate(*current, step);
         doIk(current);
-        //res.push_back(current);
+        res.push_back(current);
         step += stepsize;
     }
     res.push_back(new State(&to));
