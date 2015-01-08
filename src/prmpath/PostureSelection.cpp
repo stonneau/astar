@@ -291,7 +291,7 @@ Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::
         ik::IKSolver solver;
         //solver.AddConstraint(ik::ForceManip);
         {
-            int limit = 0;
+            int limit = 100;
             //int limit2 = 100;
             while(limit > 0 && !solver.StepClamping(limb, position, position, constraints, true))
             {
@@ -542,7 +542,7 @@ namespace
                     state->contactLimbs.push_back(lIndex);
                     state->contactLimbPositions.push_back(target);
                     state->contactLimbPositionsNormals.push_back(normal);
-                    int limit = 0;
+                    int limit = 20;
                     //int limit2 = 100;
                     ik::IKSolver solver;
                     ik::VectorAlignmentConstraint constraint(normal);
@@ -640,7 +640,7 @@ namespace
     CT_Model developPath(const CT_Model& initpath )
     {
         CT_Model res;
-        if(initpath.size() <= 2) return initpath;
+        //if(initpath.size() <= 2) return initpath;
         CT_Model::const_iterator it2 = initpath.begin(); ++it2;
         for(CT_Model::const_iterator it = initpath.begin(); it2!=initpath.end(); ++it, ++it2)
         {
@@ -791,7 +791,7 @@ planner::T_State planner::PostureSequence(planner::CompleteScenario& scenario)
     //current->stable = Stable(current);
     res.push_back(current);
     CT_Model path;
-    if(scenario.path.size() > 2)
+    if(scenario.path.size() >= 2)
     {
         //scenario.spline = new planner::SplinePath(planner::SplineFromPath(collider,scenario.path,2,2));
         scenario.spline = new planner::SplinePath(planner::SplineShortCut(collider,scenario.path,2,2,0));

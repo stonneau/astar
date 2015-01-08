@@ -519,8 +519,6 @@ void start()
     std::cout << " SAMPLES" << samples.size() << std::endl;
     std::cout << "done creating nodes " << path.size() << std::endl;
     states = planner::PostureSequence(*cScenario);
-    std::cout << "done computing sequence " << path.size() << std::endl;
-    states = planner::Animate(*cScenario, states[2], states[5], 50);
     std::cout << "done animating " << path.size() << std::endl;
     for(int i = 0; i< states.size(); ++i)
     {
@@ -674,7 +672,14 @@ void command(int cmd)   /**  key control function; */
         break;
         case 'd' :
             SavePath();
-        break;
+        break;            
+        case 'f' :
+        {
+            std::cout << "computing animation " << std::endl;
+            states = planner::Animate(*cScenario, states, 24);
+            std::cout << "done " << std::endl;
+            break;
+        }
         case '+' :
         {
             current ++; if(states.size() <= current) current = states.size()-1;

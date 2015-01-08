@@ -271,6 +271,7 @@ CompleteScenario* planner::CompleteScenarioFromFile(const std::string& filename)
                 {
                     limb = true;
                     cScenario->limbs.push_back(res);
+cScenario->limbspeed.push_back(1); // TODO HAVE ACTUAL SPEED
                 }
                 else
                 {

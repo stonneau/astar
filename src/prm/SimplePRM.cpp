@@ -175,7 +175,7 @@ CT_Model SimplePRM::GetPath(const Model &from, const Model &to, float neighbourD
     CT_Model res = pImpl_->prm_->ComputePath(&from, &to, Distance, &pImpl_->planner_, neighbourDistance, ingraph);
     if(simplify && !res.empty())
     {
-        std::cout << " Simplifie" << std::endl;
+        std::cout << " Simplifie " << res.size() << std::endl;
         Simplify(pImpl_->planner_, 0, res);
     }
     return res;

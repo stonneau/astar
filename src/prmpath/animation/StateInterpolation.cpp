@@ -30,6 +30,12 @@ namespace
         {
             return from_ + t * (to_ - from_);
         }
+
+        double distance() const
+        {
+            return (to_ - from_).norm();
+        }
+
         Eigen::Vector3d from_;
         Eigen::Vector3d to_;
     };
@@ -45,7 +51,7 @@ namespace
                 planner::Node* limb =  planner::GetChild(state->value,scenario.limbs[*cit]->id);
                 std::vector<ik::PartialDerivativeConstraint*> constraints;
                 ik::MatchTargetConstraint* constraint = new ik::MatchTargetConstraint(limb);
-                constraints.push_back(constraint);
+                //constraints.push_back(constraint);
                 allconstraints.push_back(constraints);
             }
         }
@@ -135,11 +141,27 @@ namespace
         return res;
     }
 
+    double GetMinTime(const planner::CompleteScenario& scenario, const std::vector<InterpolateLine>& lines)
+    {
+        double min = 0;
+        for(std::vector<InterpolateLine>::const_iterator cit = lines.begin()
+            ; cit != lines.end(); ++cit)
+        {
+            double time = std::min (cit->distance() / (scenario.limbspeed.front() + 0.000000000001), 4.); // TODO
+            if(time > min)
+            {
+                min = time;
+            }
+        }
+        return min;
+    }
+
     struct InterpolateContacts
     {
         InterpolateContacts(const planner::CompleteScenario& scenario, const planner::State& from, const planner::State& to)
             :involvedContacts_(GetModifiedContacts(from, to))
             ,contactInterpolation_(ContactInterpolation(involvedContacts_, scenario, from, to))
+            , minTime_(GetMinTime(scenario, contactInterpolation_))
         {
             // NOTHING
         }
@@ -159,9 +181,10 @@ namespace
         }
         const std::vector<int> involvedContacts_;
         const std::vector<InterpolateLine> contactInterpolation_;
+        const double minTime_;
     };
 
-    planner::T_State AnimateInternal(const planner::CompleteScenario& scenario, const planner::State& from, const planner::State& to, planner::T_State& res, int nbFrames)
+    planner::T_State AnimateInternal(const planner::CompleteScenario& scenario, const planner::State& from, const planner::State& to, planner::T_State& res, int framerate)
     {
         InterpolateContacts interpolate(scenario,from,to);
         planner::InterpolatePath path(MakeConfiguration(from),MakeConfiguration(to),0,1);
@@ -171,6 +194,7 @@ namespace
         current->contactLimbPositions = to.contactLimbPositions;
         current->contactLimbPositionsNormals = to.contactLimbPositionsNormals;
         current->contactLimbs = to.contactLimbs;
+        double nbFrames = std::max((double)(framerate)*interpolate.minTime_,2.);
         double stepsize = double(1) / double(nbFrames-1); double step = stepsize;
         for(int i = 1; i< nbFrames-1; ++i)
         {
@@ -188,43 +212,23 @@ namespace
     }
 }
 
-planner::T_State planner::Animate(const planner::CompleteScenario& scenario, const planner::State& from, const planner::State& to, int nbFrames)
+planner::T_State planner::Animate(const planner::CompleteScenario& scenario, const planner::State& from, const planner::State& to, int framerate)
 {
-    InterpolateContacts interpolate(scenario,from,to);
-    planner::InterpolatePath path(MakeConfiguration(from),MakeConfiguration(to),0,1);
     planner::T_State res;
-    DoIk doIk(scenario,&to);
-    res.push_back(new State(&from));
-    State* current = new State(&from);
-    current->contactLimbPositions = to.contactLimbPositions;
-    current->contactLimbPositionsNormals = to.contactLimbPositionsNormals;
-    current->contactLimbs = to.contactLimbs;
-    double stepsize = double(1) / double(nbFrames-1); double step = stepsize;
-    for(int i = 1; i< nbFrames-1; ++i)
-    {
-        current = new State(current);
-        planner::Configuration conf = path.Evaluate(step);
-        current->value->SetFullRotation(conf.second, false);
-        current->value->SetPosition(conf.first, true);
-        interpolate(*current, step);
-        doIk(current);
-        res.push_back(current);
-        step += stepsize;
-    }
-    res.push_back(new State(&to));
+    AnimateInternal(scenario,from,to,res,framerate);
     return res;
 }
 
-planner::T_State planner::Animate(const planner::CompleteScenario& scenario, const planner::T_State& fullpath, int nbFrames)
+planner::T_State planner::Animate(const planner::CompleteScenario& scenario, const planner::T_State& fullpath, int framerate)
 {
     planner::T_State res;
-    res.reserve(nbFrames);
+    res.reserve(framerate);
     planner::T_State::const_iterator cit1 = fullpath.begin(); ++cit1;
     planner::T_State::const_iterator cit2 = fullpath.begin(); ++cit2;++cit2;
     int i = 0;
     do
     {
-        AnimateInternal(scenario,**cit1,**cit2,res,nbFrames);
+        AnimateInternal(scenario,**cit1,**cit2,res,framerate);
         ++cit1; ++cit2;
          ++i;
     } while(cit2 != fullpath.end());
