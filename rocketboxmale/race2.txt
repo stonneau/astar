@@ -2,6 +2,6 @@ MODEL = ../rocketboxmale/cenglobedt.obj ../rocketboxmale/roms.obj
 DEL = ../rocketboxmale/cenglobedt.obj ../rocketboxmale/cenglobingt.obj
 OBJECT = ../tests/collision/race_tight.obj
 qs = ../tests/fullscenarios/zombi_room.prm
-PRMFILE = ../tests/test.txt
+PRMFILE = ../tests/race_2.txt
 SIZ = 80 2 20
 VISIBILIT

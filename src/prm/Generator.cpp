@@ -71,8 +71,6 @@ Model* Generator::operator()()
     {
         -- limit;
         Model configuration(model_);
-        /*configuration.englobed = new Object(*model_.englobed);
-        configuration.englobing = new Object(*model_.englobing);*/
         // pick one object randomly
         SampleTriangle sampled;
         double r = ((double) rand() / (RAND_MAX));
@@ -90,8 +88,7 @@ Model* Generator::operator()()
         double r1, r2;
         r1 = ((double) rand() / (RAND_MAX)); r2 = ((double) rand() / (RAND_MAX));
         Eigen::Vector3d P = (1 - sqrt(r1)) * A + (sqrt(r1) * (1 - r2)) * B + (sqrt(r1) * r2) * C;
-if(P.y() > 0  && configuration.GetPosition().y() < 8 && std::abs(configuration.GetPosition().z()) < 2 && std::abs(configuration.GetPosition().x()) < 1)
-//if(P.y() > -0.3 && P.y() < 2.5)
+if(P.y() > -0.3)
 		{
 			configuration.SetPosition(P);
 			// random rotation
@@ -104,20 +101,17 @@ if(P.y() > 0  && configuration.GetPosition().y() < 8 && std::abs(configuration.G
             matrices::Vector3 z = matrices::Vector3(0,0,1);
             do
             {
-//rx = ((double) rand() / (RAND_MAX)) * M_PI * 2;
                 rx = ((double) rand() / (RAND_MAX)) * M_PI * 2;
                 rz = ((double) rand() / (RAND_MAX)) * M_PI *2;
-// ry = ((double) rand() / (RAND_MAX))  * M_PI *2;
-                ry = ((double) rand() / (RAND_MAX))  * M_PI / 8; // climb
+ ry = ((double) rand() / (RAND_MAX))  * M_PI *2;
+//                ry = ((double) rand() / (RAND_MAX))  * M_PI / 8; // climb
                 tranformComplete = matrices::Rotz3(rz);
                 tranformComplete*= matrices::Roty3(ry);
                 tranformComplete*= matrices::Rotx3(rx);
-                //tranformComplete= matrices::Roty3(rx);
-                //tranformComplete*= matrices::Rotx3(rx);
             }
-            while( !(y.dot(tranformComplete.block<3,1>(0,0)) < 0 && // torso not facing upward
-                     y.dot(tranformComplete.block<3,1>(0,1)) > 0.3 /*&&
-                     x.dot(tranformComplete.block<3,1>(0,1)) < -0.1 */
+            while( !(y.dot(tranformComplete.block<3,1>(0,0)) < 0 //&& // torso not facing upward
+                     //y.dot(tranformComplete.block<3,1>(0,1)) > 0.3 /*&&
+                     // x.dot(tranformComplete.block<3,1>(0,1)) < -0.1
                    )); // head not pointing too down
            // while( y.dot(tranformComplete.block<3,1>(0,0)) < 0.9);
             //while(false);
@@ -148,12 +142,12 @@ if(P.y() > 0  && configuration.GetPosition().y() < 8 && std::abs(configuration.G
 //collisions = configuration.EnglobingCollisionGround(sampled.first);
                 int maxStep = 5;
 //while(collisions.size()>0 && maxStep >0)
-                while((collisions.size()>1 || (configuration.GetPosition().y() >3.7 && collisions.size()>0)) && maxStep >0)
+                while(collisions.size()>0)
 				{
 					if(!collider_.IsColliding(configuration.englobed))
 					{
-if(configuration.GetPosition().y() > 0 && configuration.GetPosition().y() < 8 && std::abs(configuration.GetPosition().z()) < 2 && std::abs(configuration.GetPosition().x()) < 1)
-//if(configuration.GetPosition().y() > -0.3 && configuration.GetPosition().y() < 2.)
+//if(configuration.GetPosition().y() > 0 && configuration.GetPosition().y() < 8 && std::abs(configuration.GetPosition().z()) < 2 && std::abs(configuration.GetPosition().x()) < 1)
+if(configuration.GetPosition().y() > -0.3 )
                             return new Model(configuration);
 						break;
 					}
@@ -193,12 +187,12 @@ if(configuration.GetPosition().y() > 0 && configuration.GetPosition().y() < 8 &&
 
                 std::vector<size_t> collisions = configuration.EnglobingCollision(sampled.first);
 //while(collisions.size()>0)
-                while(collisions.size()>1 || (configuration.GetPosition().y() > 3.7 && collisions.size()>0))
+                while(collisions.size()>0) // || (configuration.GetPosition().y() > 3.7 && collisions.size()>0))
 				{
 					if(!collider_.IsColliding(configuration.englobed))
 					{
-if(configuration.GetPosition().y() > 0  && configuration.GetPosition().y() < 8  && std::abs(configuration.GetPosition().z()) < 2 && std::abs(configuration.GetPosition().x()) < 1)
-//if(configuration.GetPosition().y() > -0.3 && configuration.GetPosition().y() < 2.)
+//if(configuration.GetPosition().y() > 0  && configuration.GetPosition().y() < 8  && std::abs(configuration.GetPosition().z()) < 2 && std::abs(configuration.GetPosition().x()) < 1)
+if(configuration.GetPosition().y() > -0.3)
                             return new Model(configuration);
 						break;
 					}

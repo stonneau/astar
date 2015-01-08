@@ -1,6 +1,6 @@
 MODEL = ../rocketboxmale/cenglobedt.obj ../rocketboxmale/roms.obj
 DEL = ../rocketboxmale/cenglobedt.obj ../rocketboxmale/cenglobingt.obj
 OBJECT = ../tests/collision/race_climb.obj
-PRMFILE = ../tests/race_climb.prm
-SIZ = 80 2 20
-VISIBILIT
+PRMFIL = ../tests/race_climb.prm
+SIZE = 200 2 20
+VISIBILITY

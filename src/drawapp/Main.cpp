@@ -480,10 +480,10 @@ void start()
     //constraints.push_back(new ik::ForceManipulabilityConstraint);
     //ikSolver.AddConstraint(ik::ForceManip);
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/truck.scen");
-    //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/truck_front.scen");
+    cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/truck_front.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/truck_test.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/race2.scen");
-    cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/race_climb.scen");
+    //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/race_climb.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/climbing.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/zoey.scen");
     //cScenario = planner::CompleteScenarioFromFile("../tests/profile.scen");
