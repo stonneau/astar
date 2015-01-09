@@ -332,7 +332,7 @@ namespace
     void DrawNode(const planner::Node* node)
     {
         if(node->current)
-            DrawObject(node->current, true, false);
+            DrawObject(node->current, true, true);
         if (drawacis) DrawAcis(node);
         for(std::vector<planner::Node*>::const_iterator cit = node->children.begin();
             cit != node->children.end(); ++cit)

@@ -2,7 +2,7 @@ PRMSCENARIO file="../rocketboxmale/truck_up.txt"
 ROBOT_SKELETON file="../rocketboxmale/rocketbox_male.urdf"
 ROBOT_CONSTRAINTS file="../rocketboxmale/jointconstraints.txt"
 PATH_FROM matrix="0 -0 -1 -0.3 0 1 0 1.8 1 0 0 2.5 0 0 0 1"
-PATH_TO matrix="0 -0 -1 -0.3 0 1 0 2.4 1 0 0 4. 0 0 0 1"
+PATH_TO matrix="0 -0 -1 -0.3 0 1 0 2.4 1 0 0 3.5. 0 0 0 1"
 
 
 PATH_FROMOL matrix="0 -0 -1 -0.3 0 1 0 2 1 0 0 2.5 0 0 0 1"
