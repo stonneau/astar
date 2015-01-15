@@ -480,9 +480,9 @@ void start()
     //constraints.push_back(new ik::ForceManipulabilityConstraint);
     //ikSolver.AddConstraint(ik::ForceManip);
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/truck.scen");
-    cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/truck_front.scen");
+    //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/truck_front.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/truck_test.scen");
-    //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/race2.scen");
+    cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/race2.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/race_climb.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/climbing.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/zoey.scen");
@@ -522,10 +522,10 @@ void start()
     std::cout << "done animating " << path.size() << std::endl;
     for(int i = 0; i< states.size(); ++i)
     {
-        std::cout << "state : " << i << std::endl;
+       // std::cout << "state : " << i << std::endl;
         for(int w = 0; w< states[i]->contactLimbs.size(); ++w)
         {
-            std::cout << "   contact : " << states[i]->contactLimbs[w] << std::endl;
+         //   std::cout << "   contact : " << states[i]->contactLimbs[w] << std::endl;
         }
     }
 

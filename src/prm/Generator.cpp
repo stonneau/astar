@@ -103,15 +103,16 @@ if(P.y() > -0.3)
             {
                 rx = ((double) rand() / (RAND_MAX)) * M_PI * 2;
                 rz = ((double) rand() / (RAND_MAX)) * M_PI *2;
- ry = ((double) rand() / (RAND_MAX))  * M_PI *2;
+// ry = ((double) rand() / (RAND_MAX))  * M_PI *2;
+                 ry = 0;
 //                ry = ((double) rand() / (RAND_MAX))  * M_PI / 8; // climb
                 tranformComplete = matrices::Rotz3(rz);
                 tranformComplete*= matrices::Roty3(ry);
                 tranformComplete*= matrices::Rotx3(rx);
             }
-            while( !(y.dot(tranformComplete.block<3,1>(0,0)) < 0 //&& // torso not facing upward
-                     //y.dot(tranformComplete.block<3,1>(0,1)) > 0.3 /*&&
-                     // x.dot(tranformComplete.block<3,1>(0,1)) < -0.1
+            while( !(y.dot(tranformComplete.block<3,1>(0,0)) < 0 && // torso not facing upward
+                    // y.dot(tranformComplete.block<3,1>(0,1)) > 0.3 &&
+                     x.dot(tranformComplete.block<3,1>(0,1)) < -0.1
                    )); // head not pointing too down
            // while( y.dot(tranformComplete.block<3,1>(0,0)) < 0.9);
             //while(false);
@@ -142,12 +143,12 @@ if(P.y() > -0.3)
 //collisions = configuration.EnglobingCollisionGround(sampled.first);
                 int maxStep = 5;
 //while(collisions.size()>0 && maxStep >0)
-                while(collisions.size()>0)
+                while(collisions.size()>2)
 				{
 					if(!collider_.IsColliding(configuration.englobed))
 					{
-//if(configuration.GetPosition().y() > 0 && configuration.GetPosition().y() < 8 && std::abs(configuration.GetPosition().z()) < 2 && std::abs(configuration.GetPosition().x()) < 1)
-if(configuration.GetPosition().y() > -0.3 )
+if(configuration.GetPosition().y() > 0 && configuration.GetPosition().y() < 2 && std::abs(configuration.GetPosition().z()) < 1.3 ) // && std::abs(configuration.GetPosition().x()) < 1)
+//if(configuration.GetPosition().y() > -0.3 )
                             return new Model(configuration);
 						break;
 					}
@@ -187,12 +188,12 @@ if(configuration.GetPosition().y() > -0.3 )
 
                 std::vector<size_t> collisions = configuration.EnglobingCollision(sampled.first);
 //while(collisions.size()>0)
-                while(collisions.size()>0) // || (configuration.GetPosition().y() > 3.7 && collisions.size()>0))
+                while(collisions.size()>2) // || (configuration.GetPosition().y() > 3.7 && collisions.size()>0))
 				{
 					if(!collider_.IsColliding(configuration.englobed))
 					{
-//if(configuration.GetPosition().y() > 0  && configuration.GetPosition().y() < 8  && std::abs(configuration.GetPosition().z()) < 2 && std::abs(configuration.GetPosition().x()) < 1)
-if(configuration.GetPosition().y() > -0.3)
+if(configuration.GetPosition().y() > 0  && configuration.GetPosition().y() < 2 && std::abs(configuration.GetPosition().z()) < 1.3 ) ; //&& std::abs(configuration.GetPosition().x()) < 1)
+//if(configuration.GetPosition().y() > -0.3)
                             return new Model(configuration);
 						break;
 					}

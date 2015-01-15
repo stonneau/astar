@@ -501,8 +501,8 @@ void ReadJoint(const std::string& firstline, std::ifstream& file, std::map<std::
             {
                 joint->offset =ExtractOffset(line); // * 1.2;
                 joint->rpy =ExtractRpy(line);
-                std::cout << "joint : " << name << "\n" << joint->offset(0) <<" "<<
-                           joint->offset(1) <<" "<< joint->offset(2)  << std::endl;
+              //  std::cout << "joint : " << name << "\n" << joint->offset(0) <<" "<<
+              //             joint->offset(1) <<" "<< joint->offset(2)  << std::endl;
             }
             if(line.find("<parent link") != std::string::npos)
             {

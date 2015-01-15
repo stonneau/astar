@@ -15,8 +15,13 @@
 #include <iostream>
 #include <string>
 
+#include "tools/TimerPerf.h"
+#include "tools/Timer.h"
+
 using namespace std;
 using namespace planner;
+
+
 
 Scenario::Scenario(const std::string& filepath)
 {
@@ -92,7 +97,12 @@ Scenario::Scenario(const std::string& filepath)
 		{
             if(contactObjects_.empty())
             {
+                TimerPerf tp;
+                Timer timer; timer.Start();
+std::cout << " begining prm construction timer" << std::endl;
                 prm = new SimplePRM(model_, objects_, neighbourDistance, size, neighbours, visibility);
+                timer.Stop();
+std::cout << " prm construction timer, time :" << tp.elapsedTime() << "\n mon timer" << timer.GetTime()  <<  std::endl;
             }
             else
             {

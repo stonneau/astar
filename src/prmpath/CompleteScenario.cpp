@@ -5,6 +5,9 @@
 #include <sstream>
 #include <fstream>
 
+
+#include "tools/Timer.h"
+
 using namespace planner;
 
 using namespace std;
@@ -320,8 +323,11 @@ cScenario->limbspeed.push_back(1); // TODO HAVE ACTUAL SPEED
             limbnames.push_back((*cit)->tag);
         }
         cScenario->scenario->model_.SortEnglobingByName(limbnames);
-        // Generate path
+Timer timer; timer.Start();
+std::cout << " path request timer" << std::endl;
         cScenario->path = cScenario->scenario->prm->GetPath(*(cScenario->from), *(cScenario->to), 10, true, true);
+std::cout << " path request end timer, time :" <<  timer.GetTime() << std::endl;
+timer.Stop();
         if(cScenario->path.empty())
         {
             cScenario->path.push_back(cScenario->from);

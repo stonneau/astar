@@ -231,16 +231,16 @@ bool CheckEquilibrium(const T_Transform &contactTransforms, const T_Transform &g
     //now reconvert to H rep
     dd_FreeMatrix(G);dd_FreeMatrix(Hc);dd_FreeMatrix(matrix);dd_FreePolyhedra(poly);dd_FreePolyhedra(polyH);
     dd_free_global_constants();
-	/*std::cout << "Acg" << std::endl << Acg << std::endl;
+    /*std::cout << "Acg" << std::endl << Acg << std::endl;
 	std::cout << "bcg" << std::endl << bcg << std::endl;
 	std::cout << "V" << std::endl << V << std::endl;
 	std::cout << "Vp" << std::endl << Vp << std::endl;
 	std::cout << "Pac" << std::endl << Pac << std::endl;
-	std::cout << "H" << std::endl << H << std::endl;
+    std::cout << "H" << std::endl << H << std::endl;
 	std::cout << "h" << std::endl << h << std::endl;
 	std::cout << "h1" << std::endl << H1 << std::endl;
 	std::cout << "h2" << std::endl << H2 << std::endl;
-	std::cout << "res" << std::endl << res << std::endl;*/
+    std::cout << "res" << std::endl << res << std::endl;*/
     for(int i =0; i< res.rows();++i)
     {
         if(res(i)>0) return false;

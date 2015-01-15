@@ -56,9 +56,9 @@ bool Timer::IsRunning() {
 
 Timer::t_time Timer::GetTime() {
 	if(running_)
-		return ((t_time) clock() - beg_);
+        return ((t_time) clock() - beg_) / CLOCKS_PER_SEC;
 	else
-		return end_ - beg_;
+        return (end_ - beg_)/CLOCKS_PER_SEC;
 }
 
 

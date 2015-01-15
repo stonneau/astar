@@ -5,6 +5,7 @@
 #include "equilibrium/DynamicStability.h"
 #include "collision/Collider.h"
 #include "smoothing/smooth.h"
+#include "tools/Timer.h"
 
 #include <iostream>
 
@@ -788,13 +789,13 @@ planner::T_State planner::PostureSequence(planner::CompleteScenario& scenario)
     planner::T_State res;
     State* current = &scenario.initstate;
     planner::Collider collider(scenario.scenario->objects_);
-    //current->stable = Stable(current);
+    current->stable = Stable(current);
     res.push_back(current);
     CT_Model path;
     if(scenario.path.size() >= 2)
     {
         //scenario.spline = new planner::SplinePath(planner::SplineFromPath(collider,scenario.path,2,2));
-        scenario.spline = new planner::SplinePath(planner::SplineShortCut(collider,scenario.path,2,2,0));
+        scenario.spline = new planner::SplinePath(planner::SplineShortCut(collider,scenario.path,2,2,7));
         //CT_Model path0 = developPathSpline(*scenario.spline, scenario.scenario->model_);
         CT_Model path0 = developPath(scenario.path);
         path = PartialShortcut(path0, collider);
@@ -803,6 +804,8 @@ planner::T_State planner::PostureSequence(planner::CompleteScenario& scenario)
     {
         path = scenario.path;
     }
+    Timer tp; tp.Start();
+    std::cout << "posture selection timer" << std::endl;
     CT_Model::iterator it2 = path.begin(); ++it2;
     for(CT_Model::iterator it = path.begin(); it!=path.end(); ++it, ++it2)
     {
@@ -818,6 +821,7 @@ planner::T_State planner::PostureSequence(planner::CompleteScenario& scenario)
             //if(nbContactsChange.size()>1)
             if(it != path.begin() && nbContactsChange.size()>1)
             {
+                Stable(current);
                 CT_Model::iterator itbefore = it;
                 --itbefore;
                 for(std::vector<int>::const_iterator cit = nbContactsChange.begin();
@@ -830,8 +834,10 @@ planner::T_State planner::PostureSequence(planner::CompleteScenario& scenario)
                 current = Interpolate(scenario, *old, *it, *it2,nbContactsChange);
             }
         }
-        current->stable = false;// Stable(current);
+        current->stable = false;
         res.push_back(current);
     }
+    std::cout << "posture selection end:" << tp.GetTime() << std::endl;
+    std::cout << "num states:" << res.size() << std::endl;
     return res;
 }
