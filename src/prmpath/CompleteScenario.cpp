@@ -1,5 +1,6 @@
 #include "CompleteScenario.h"
 #include "prmpath/PostureSelection.h"
+#include "prmpath/sampling/Sample.h"
 
 #include <iostream>
 #include <sstream>
@@ -387,4 +388,195 @@ timer.Stop();
         }
         return cScenario;
     }
+}
+
+/*
+Structure:
+nbContacts contactLimb1 ... contactLimbnbC contactLimbPositions1 ... N contactLimbPositionsNormals1 .. N \\
+toujours sur la même ligne joint robots tous les robots, matrix rot, vector pos, plus values
+*/
+
+namespace
+{
+
+    void SaveVector(const Eigen::Vector3d& vec, std::stringstream& bvhStr )
+    {
+        for(int i=0; i<3; ++i)
+        {
+            bvhStr << vec(i) << " ";
+        }
+    }
+
+    void SaveMatrix(const Eigen::Matrix3d& matrix, std::stringstream& bvhStr )
+    {
+        for(int i=0; i<3; ++i)
+        {
+            for(int j=0; j<3; ++j)
+            {
+                bvhStr << matrix(i,j) << " ";
+            }
+        }
+    }
+
+    void SaveNodeRec(const planner::Node* node, std::stringstream& bvhStr)
+    {
+        bvhStr << node->value << " ";
+        for(std::vector<planner::Node*>::const_iterator it = node->children.begin();
+            it != node->children.end(); ++it)
+        {
+            SaveNodeRec(*it, bvhStr);
+        }
+    }
+
+    void SaveRobot(const planner::Robot& robot, std::stringstream& bvhStr)
+    {
+        //planner::sampling::RobotSample rs(robot);
+        // push matrix
+        SaveMatrix(robot.currentRotation, bvhStr);
+        SaveVector(robot.currentPosition, bvhStr);
+        SaveNodeRec(robot.node, bvhStr);
+    }
+
+    void SaveOneState(const planner::State& state, std::stringstream& bvhStr)
+    {
+        int nbC = state.contactLimbs.size();
+        bvhStr << nbC << " ";
+        for(int i=0; i < nbC; ++i)
+        {
+            bvhStr << state.contactLimbs[i] << " ";
+        }
+        for(int i=0; i < nbC; ++i)
+        {
+            SaveVector(state.contactLimbPositions[i], bvhStr);
+        }
+        for(int i=0; i < nbC; ++i)
+        {
+            SaveVector(state.contactLimbPositionsNormals[i], bvhStr);
+        }
+        //bvhStr << id << pos << normals << state.stable << " ";
+        SaveRobot(*(state.value), bvhStr);
+    }
+}
+
+bool planner::SaveStates(const T_State& states, const std::string& outfilename)
+{
+    std::stringstream sstream;
+    for(planner::T_State::const_iterator it = states.begin(); it != states.end(); ++it)
+    {
+        SaveOneState((*it), sstream);
+        sstream << "\n";
+    }
+    ofstream myfile;
+    myfile.open (outfilename.c_str());
+    if (myfile.is_open())
+    {
+        myfile << sstream.rdbuf();
+        myfile.close();
+        return true;
+    }
+    return false;
+}
+
+namespace
+{
+    double dfs(const std::string& s)
+    {
+        char value [20];
+        sscanf(s.c_str(),"%s", value);
+        return strtod (value, NULL);
+    }
+
+    Eigen::Vector3d readvector(const std::vector<std::string>& values, int id)
+    {
+         Eigen::Vector3d res;
+        for(int i =0; i< 3; ++i)
+        {
+            res(i) = dfs(values[id +i]);
+        }
+        return res;
+    }
+
+    Eigen::Matrix3d readmatrix3(const std::vector<std::string>& values, int id)
+    {
+        Eigen::Matrix3d res;
+        for(int i =0; i< 3; ++i)
+        {
+            for(int j =0; j< 3; ++j)
+            {
+                res(i,j) = dfs(values[id +i*3 + j]);
+            }
+        }
+        return res;
+    }
+
+    void LoadNodeRec(planner::Node* node, const std::vector<std::string>& values, int& id)
+    {
+        node->value = dfs(values[id]);++id;
+        for(std::vector<planner::Node*>::const_iterator it = node->children.begin();
+            it != node->children.end(); ++it)
+        {
+            LoadNodeRec(*it, values, id);
+        }
+    }
+
+
+    void LoadState(const planner::Robot* model, T_State& states, const std::string& line)
+    {
+        State* res = new State;
+        res->value = new planner::Robot(*model);
+        std::vector<std::string> values = splitSpace(line);
+        // d abord nb contacts
+        int nbC = (int)(dfs(values[0]));
+        int c_id = 1; // current index
+        // read contact index
+        for(int i = 0; i!= nbC; ++i)
+        {
+            res->contactLimbs.push_back(dfs(values[c_id]));
+            ++c_id;
+        }
+        // read positions of contacts
+        for(int i = 0; i!= nbC; ++i)
+        {
+            res->contactLimbPositions.push_back(readvector(values, c_id));
+            c_id += 3;
+        }
+        // read positions of contacts normals
+        for(int i = 0; i!= nbC; ++i)
+        {
+            res->contactLimbPositionsNormals.push_back(readvector(values, c_id));
+            c_id += 3;
+        }
+        // todo read balance
+        // read robot rotation and position
+        res->value->currentRotation = readmatrix3(values, c_id); c_id += 9;
+        res->value->SetPosition(readvector(values, c_id)); c_id += 3;
+        LoadNodeRec(res->value->node,values, c_id);
+        res->value->node->Update();
+        states.push_back(res);
+    }
+}
+
+
+T_State planner::LoadStates(const std::string& infilename, const planner::Robot* model)
+{
+    T_State res;
+    std::ifstream myfile (infilename);
+    if (myfile.is_open())
+    {
+        std::string line;
+        while (myfile.good())
+        {
+            getline(myfile, line);
+            if(!line.empty())
+            {
+                LoadState(model, res, line);
+            }
+        }
+        myfile.close();
+    }
+    else
+    {
+        std::cout << "can not find state file file " << infilename << std::endl;
+    }
+    return res;
 }

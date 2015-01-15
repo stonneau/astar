@@ -45,6 +45,7 @@ namespace
     bool drawNormals = false;
     bool solid = true;
     std::string outpath("../tests/testSerialization.txt");
+    std::string outstatepath("../tests/states.txt");
     std::string outfilename ("../tests/entrance.path");
     Eigen::Matrix3d itompTransform;
     int current = 0;
@@ -680,6 +681,21 @@ void command(int cmd)   /**  key control function; */
             std::cout << "done " << std::endl;
             break;
         }
+        case 'b' :
+        {
+            std::cout << "saving states " << std::endl;
+             planner::SaveStates(states, outstatepath);
+            std::cout << "done " << std::endl;
+            break;
+        }
+        case 'n' :
+        {
+            std::cout << "loadinf states " << std::endl;
+            states = planner::LoadStates(outstatepath, states[0]->value);
+            current = 0;
+            std::cout << "done " << std::endl;
+            break;
+        }
         case '+' :
         {
             current ++; if(states.size() <= current) current = states.size()-1;
@@ -698,13 +714,6 @@ void command(int cmd)   /**  key control function; */
 
             //currentSample = 0;
             //samples = planner::GetPosturesInContact(*cScenario->robot, cScenario->limbs[0], cScenario->limbSamples[0], cScenario->scenario->objects_ );
-
-            break;
-        }
-        case 'b' :
-        {
-            currentSample = 0;
-            samples = planner::GetPosturesOnTarget(*cScenario->robot, cScenario->limbs[0], cScenario->limbSamples[0], cScenario->scenario->objects_, planner::GetEffectors(cScenario->limbs[0])[0]->parent->position );
 
             break;
         }
@@ -757,7 +766,7 @@ void command(int cmd)   /**  key control function; */
         break;
 
         case 'u' :
-        planner::GetChild(cScenario->robot, "upper_right_arm_z_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_left_arm_z_joint")->value-0.1* dirIK);
+        planner::GetChild(cScenario->robot, "upper_left_arm_z_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_left_arm_z_joint")->value-0.1* dirIK);
         break;
         case 'i' :
         planner::GetChild(cScenario->robot, "upper_left_arm_y_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_left_arm_y_joint")->value-0.1* dirIK);

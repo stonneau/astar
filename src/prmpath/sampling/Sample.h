@@ -42,12 +42,13 @@ struct RobotSample
         : sample_(robot.node)
         , currentRotation_(robot.currentRotation)
         , position_(robot.currentPosition){}
+
     RobotSample(const RobotSample& parent)
         : sample_(parent.sample_)
         , currentRotation_(parent.currentRotation_)
         , position_(parent.position_){}
 
-    ~RobotSample();
+    ~RobotSample(){};
     const Sample sample_;
     const Eigen::Matrix3d currentRotation_;
     const Eigen::Vector3d position_;
