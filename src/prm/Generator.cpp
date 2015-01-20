@@ -110,9 +110,10 @@ if(P.y() > -0.3)
                 tranformComplete*= matrices::Roty3(ry);
                 tranformComplete*= matrices::Rotx3(rx);
             }
-            while( !(y.dot(tranformComplete.block<3,1>(0,0)) < 0 && // torso not facing upward
+            while( (false // && // torso not facing upward
+            //while( !(y.dot(tranformComplete.block<3,1>(0,0)) < 0 // && // torso not facing upward
                     // y.dot(tranformComplete.block<3,1>(0,1)) > 0.3 &&
-                     x.dot(tranformComplete.block<3,1>(0,1)) < -0.1
+                     //&& x.dot(tranformComplete.block<3,1>(0,1)) < -0.1
                    )); // head not pointing too down
            // while( y.dot(tranformComplete.block<3,1>(0,0)) < 0.9);
             //while(false);
@@ -147,12 +148,12 @@ if(P.y() > -0.3)
 				{
 					if(!collider_.IsColliding(configuration.englobed))
 					{
-if(configuration.GetPosition().y() > 0 && configuration.GetPosition().y() < 2 && std::abs(configuration.GetPosition().z()) < 1.3 ) // && std::abs(configuration.GetPosition().x()) < 1)
+if(configuration.GetPosition().y() > 0 && configuration.GetPosition().y() < 5 && std::abs(configuration.GetPosition().z()) < 1.3 ) // && std::abs(configuration.GetPosition().x()) < 1)
 //if(configuration.GetPosition().y() > -0.3 )
                             return new Model(configuration);
 						break;
 					}
-                    configuration.SetPosition(configuration.GetPosition() + (double) rand() / (RAND_MAX) / 4 * dir);
+                    configuration.SetPosition(configuration.GetPosition() + (double) rand() / (RAND_MAX) / 8 * dir);
                     collisions = configuration.EnglobingCollisionClimb(sampled.first, 0.3);
 //collisions = configuration.EnglobingCollisionGround(sampled.first);
                     maxStep--;
@@ -192,12 +193,12 @@ if(configuration.GetPosition().y() > 0 && configuration.GetPosition().y() < 2 &&
 				{
 					if(!collider_.IsColliding(configuration.englobed))
 					{
-if(configuration.GetPosition().y() > 0  && configuration.GetPosition().y() < 2 && std::abs(configuration.GetPosition().z()) < 1.3 ) ; //&& std::abs(configuration.GetPosition().x()) < 1)
+if(configuration.GetPosition().y() > 0  && configuration.GetPosition().y() < 5 && std::abs(configuration.GetPosition().z()) < 1.3 ) ; //&& std::abs(configuration.GetPosition().x()) < 1)
 //if(configuration.GetPosition().y() > -0.3)
                             return new Model(configuration);
 						break;
 					}
-                    configuration.SetPosition(configuration.GetPosition() + (double) rand() / (double)(RAND_MAX) / 2. * dir);
+                    configuration.SetPosition(configuration.GetPosition() + (double) rand() / (double)(RAND_MAX) / 8. * dir);
                     collisions = configuration.EnglobingCollisionGround(sampled.first);
 				}
 				--limit2;

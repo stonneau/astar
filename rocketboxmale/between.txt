@@ -1,6 +1,6 @@
-MODEL = ../rocketboxmale/cenglobedd.obj ../rocketboxmale/roms.obj
+MODEL = ../rocketboxmale/cenglobedchair.obj ../rocketboxmale/roms.obj
 OBJECT = ../tests/collision/between.obj
 qs = ../tests/fullscenarios/zombi_room.prm
-PRMFIL = ../tests/testSerialization.txt
-SIZE = 50 2 20
-VISBILITY
+PRMFILE = ../tests/chair_left.txt
+SIZ = 200 2 20
+VISIBILIT
