@@ -483,7 +483,8 @@ void start()
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/truck.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/truck_front.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/truck_test.scen");
-    cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/race2.scen");
+    //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/race2.scen");
+    cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/between.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/race_climb.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/climbing.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/zoey.scen");
@@ -519,7 +520,7 @@ void start()
     samples = cScenario->limbSamples[0];
     std::cout << " SAMPLES" << samples.size() << std::endl;
     std::cout << "done creating nodes " << path.size() << std::endl;
-    states = planner::PostureSequence(*cScenario);
+    states = planner::PostureSequence(*cScenario,3);
     std::cout << "done animating " << path.size() << std::endl;
     for(int i = 0; i< states.size(); ++i)
     {

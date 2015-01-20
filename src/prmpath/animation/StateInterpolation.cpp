@@ -44,6 +44,7 @@ namespace
     {
         DoIk(const planner::CompleteScenario& scenario, const planner::State* state)
             : scenario(scenario)
+            , solver(0.001, 0.01)
         {
             for(std::vector<int>::const_iterator cit = state->contactLimbs.begin();
                 cit != state->contactLimbs.end(); ++cit)
@@ -51,7 +52,7 @@ namespace
                 planner::Node* limb =  planner::GetChild(state->value,scenario.limbs[*cit]->id);
                 std::vector<ik::PartialDerivativeConstraint*> constraints;
                 ik::MatchTargetConstraint* constraint = new ik::MatchTargetConstraint(limb);
-                //constraints.push_back(constraint);
+                constraints.push_back(constraint);
                 allconstraints.push_back(constraints);
             }
         }
@@ -79,7 +80,7 @@ namespace
                 cit != state->contactLimbs.end(); ++cit, ++posit, ++normit, ++limbId)
             {
                 planner::Node* limb =  planner::GetChild(state->value,scenario.limbs[*cit]->id);
-                int limite = 100;
+                int limite = 200;
                 while(limite > 0 && !solver.StepClamping(limb, *posit, *posit, allconstraints[limbId], true))
                 {
                     limite--;

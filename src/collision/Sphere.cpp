@@ -45,3 +45,8 @@ const std::vector<int> planner::Intersect(const Sphere& R, const std::vector<Sph
     }
     return res;
 }
+
+const  bool planner::Contains(const Sphere& a, const Eigen::Vector3d& point, double margin)
+{
+    return (a.center_ - point).norm() < a.radius_ * margin;
+}

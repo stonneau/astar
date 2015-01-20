@@ -224,12 +224,43 @@ namespace
         }
         return 0;
     }
+
+    double CostMaintainContact(const planner::Sphere* currentRom, const std::vector<Sphere*> nextRoms, const Eigen::Vector3d& target)
+    {
+        // compute distance from intersection.
+        if (nextRoms.empty()) return 0;
+        int nbsuc = 0;
+        if (currentRom)
+        {
+            for(int i =0; i<nextRoms.size(); ++ i)
+            {
+                const Sphere* nextRom =  nextRoms[i];
+                {
+                    planner::SphereCollisionRes res = planner::Intersect(*currentRom,*nextRom,true);
+                    if(!res.infoComputed)
+                    {
+                        std::cout << "no intersection between succeeding roms, weird";
+                    }
+                    if (res.collisionType > 0)
+                    {
+                        ++nbsuc;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+        return nbsuc / nextRoms.size();
+    }
+
 }
 
 Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::T_Samples& samples
                                          , Object::T_Object& obstacles, const Eigen::Vector3d& direction
                                          , Eigen::Vector3d& position, Eigen::Vector3d& normalVector
-                                         , planner::CompleteScenario& scenario, const planner::Sphere* current_rom, const planner::Sphere* next_rom)
+                                         , planner::CompleteScenario& scenario, const std::vector<planner::Sphere*> next_rom, const planner::Sphere* current_rom)
 {
     Sample* save = new Sample(limb);
     Sample* res = 0;
@@ -314,7 +345,8 @@ Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::
                                          , Object::T_Object& obstacles, const Eigen::Vector3d& direction, CompleteScenario &scenario)
 {
     Eigen::Vector3d dummmy, dummmy2;
-    return GetPosturesInContact(robot, limb, samples, obstacles, direction, dummmy, dummmy2, scenario, 0);
+    std::vector<planner::Sphere*> dm;
+    return GetPosturesInContact(robot, limb, samples, obstacles, direction, dummmy, dummmy2, scenario, dm, 0);
 }
 
 sampling::T_Samples planner::GetContactCandidates(Robot& robot, Node* limb, const sampling::T_Samples& samples
@@ -379,58 +411,6 @@ namespace
         return res;
     }
 
-    /*planner::State* Interpolate(planner::CompleteScenario& scenario, const State& previous, const Model* next)
-    {
-        planner::State* res = new State;
-        Robot * robot = new planner::Robot(*(previous.value));
-        robot->SetConfiguration(next->englobed);
-        res->value = robot;
-        std::vector<Node*> limbs;
-        for(std::vector<Node*>::iterator it = scenario.limbs.begin()
-            ; it!=scenario.limbs.end(); ++it)
-        {
-            limbs.push_back(planner::GetChild(robot,(*it)->id));
-        }
-        //try to get back to previous state for starters.
-        for(std::vector<int>::const_iterator cit = previous.contactLimbs.begin();
-            cit != previous.contactLimbs.end(); ++cit)
-        {
-            T_Samples samples = GetPosturesOnTarget(*robot, limbs[*cit], scenario.limbSamples[*cit],
-                                                    scenario.scenario->objects_, planner::GetEffectors(limbs[*cit])[0]->parent->position);
-            if(!samples.empty())
-            {
-                res->contactLimbs.push_back(*cit);
-                planner::sampling::LoadSample(*(samples.front()),limbs[*cit]);
-            }
-        }
-        // create contacts then
-        Eigen::Vector3d direction = next->GetPosition() - previous.value->node->position;
-        if(direction.norm() != 0)
-        {
-            direction.normalize();
-        }
-        else
-        {
-            direction = Eigen::Vector3d(1,0,0);
-        }
-        std::vector<int> newContacts = GetLimbsToContact(res->contactLimbs, limbs.size());
-        Eigen::Vector3d tmp, normal;
-        for(std::vector<int>::const_iterator cit = newContacts.begin();
-            cit != newContacts.end(); ++cit)
-        {
-            Sample* sample = GetPosturesInContact(*robot, limbs[*cit], scenario.limbSamples[*cit],
-                                                    scenario.scenario->objects_, direction, tmp, normal);
-            if(sample)
-            {
-                res->contactLimbs.push_back(*cit);
-                res->contactLimbPositions.push_back(tmp);
-                res->contactLimbPositionsNormals.push_back(normal);
-                //planner::sampling::LoadSample(*sample,limbs[*cit]);
-            }
-        }
-        return res;
-    }*/
-
     void Vector3toArray(const Eigen::Vector3d& vect, double* arr)
     {
         for(int i=0; i<3; ++i)
@@ -439,7 +419,7 @@ namespace
         }
     }
 
-    planner::State* GenerateIntermediateState(planner::CompleteScenario& scenario, const State& previous, const Model* next, const Model* nextnext, const int nbContactsChange)
+    planner::State* GenerateIntermediateState(planner::CompleteScenario& scenario, const State& previous, const Model* next, const Model* nextnext, const CT_Model& nexts, const int nbContactsChange)
     {
         State* state = new State(&previous);
         Robot* robot = state->value;
@@ -464,15 +444,16 @@ namespace
             direction.normalize();
             if(lIndex == nbContactsChange)
             {
-                planner::Sphere* sphereCurrent(0);
-                planner::Sphere* sphereNext(0);
-                if(nextnext)
+                planner::Sphere* sphereCurrent = new Sphere(next->GetOrientation() * scenario.limbRoms[lIndex].center_ + next->GetPosition(), scenario.limbRoms[lIndex].radius_);
+
+                std::vector<planner::Sphere*> spheres;
+                for(int i =0; i<nexts.size(); ++i)
                 {
-                    sphereCurrent = new Sphere(next->GetOrientation() * scenario.limbRoms[lIndex].center_ + next->GetPosition(), scenario.limbRoms[lIndex].radius_);
-                    sphereNext = new Sphere(nextnext->GetOrientation() * scenario.limbRoms[lIndex].center_ + nextnext->GetPosition(), scenario.limbRoms[lIndex].radius_);
+                    const Model* nextnext = nexts[i];
+                    spheres.push_back(new Sphere(nextnext->GetOrientation() * scenario.limbRoms[lIndex].center_ + nextnext->GetPosition(), scenario.limbRoms[lIndex].radius_));
                 }
                 Sample* sample = GetPosturesInContact(*robot, *lit, scenario.limbSamples[lIndex],
-                                                      scenario.scenario->objects_, direction, target, normal, scenario, sphereCurrent, sphereNext);
+                                                      scenario.scenario->objects_, direction, target, normal, scenario, spheres, sphereCurrent);
                 if(sample)
                 {
                     state->contactLimbs.push_back(lIndex);
@@ -482,7 +463,10 @@ namespace
 //std::cout << " limb in contact " << lIndex <<  std::endl;
                 }
                 delete(sphereCurrent);
-                delete(sphereNext);
+                for(int i =0; i< spheres.size(); ++i)
+                {
+                    delete(spheres[i]);
+                }
             }
             else if(previous.InContact(lIndex, target, normal))
             {
@@ -494,7 +478,16 @@ namespace
         return state;
     }
 
-    planner::State* Interpolate(planner::CompleteScenario& scenario, const State& previous, const Model* next, const Model* nextnext, std::vector<int>& nbContactsChange)
+namespace
+{
+    bool SafeTargetDistance(planner::CompleteScenario& scenario, const Model* next, int index, const planner::Node* limb, const Eigen::Vector3d& target, float margin)
+    {
+        Sphere sphereCurrent(next->GetOrientation() * scenario.limbRoms[index].center_ + next->GetPosition(), scenario.limbRoms[index].radius_);
+        return Contains(sphereCurrent, target);
+    }
+}
+
+    planner::State* Interpolate(planner::CompleteScenario& scenario, const State& previous, const Model* next, const Model* nextnext, const CT_Model& depth, std::vector<int>& nbContactsChange)
     {
         nbContactsChange.clear();
         //std::cout << " Satate " <<  std::endl;
@@ -538,6 +531,7 @@ namespace
 //std::cout << " limb mainained in contact " << lIndex <<  std::endl;
                 }
                 else*/
+                //if(SafeTargetDistance(scenario, next, lIndex, *lit,target,0.92))
                 if(SafeTargetDistance(*lit,target,0.92))
                 {
                     state->contactLimbs.push_back(lIndex);
@@ -566,13 +560,21 @@ namespace
 // TODO INCLUDE SAFE TARGET DISTANCE
                 planner::Sphere* sphereCurrent(0);
                 planner::Sphere* sphereNext(0);
+
+                std::vector<planner::Sphere*> spheres;
                 if(nextnext)
                 {
+                    planner::Sphere* sphereCurrent = new Sphere(next->GetOrientation() * scenario.limbRoms[lIndex].center_ + next->GetPosition(), scenario.limbRoms[lIndex].radius_);
+                    for(int i =0; i<depth.size(); ++i)
+                    {
+                        const Model* nextnext = depth[i];
+                        spheres.push_back(new Sphere(nextnext->GetOrientation() * scenario.limbRoms[lIndex].center_ + nextnext->GetPosition(), scenario.limbRoms[lIndex].radius_));
+                    }
                     sphereCurrent = new Sphere(next->GetOrientation() * scenario.limbRoms[lIndex].center_ + next->GetPosition(), scenario.limbRoms[lIndex].radius_);
-                    sphereNext = new Sphere(nextnext->GetOrientation() * scenario.limbRoms[lIndex].center_ + nextnext->GetPosition(), scenario.limbRoms[lIndex].radius_);
+                    //sphereNext = new Sphere(nextnext->GetOrientation() * scenario.limbRoms[lIndex].center_ + nextnext->GetPosition(), scenario.limbRoms[lIndex].radius_);
                 }
                 Sample* sample = GetPosturesInContact(*robot, *lit, scenario.limbSamples[lIndex],
-                                                      scenario.scenario->objects_, direction, target, normal, scenario, sphereCurrent, sphereNext);
+                                                      scenario.scenario->objects_, direction, target, normal, scenario, spheres, sphereCurrent);
                 if(sample)
                 {
                     state->contactLimbs.push_back(lIndex);
@@ -582,7 +584,10 @@ namespace
 //std::cout << " limb in contact " << lIndex <<  std::endl;
                 }
                 delete(sphereCurrent);
-                delete(sphereNext);
+                for(int i =0; i< spheres.size(); ++i)
+                {
+                    delete(spheres[i]);
+                }
             }
         }
         return state;
@@ -784,18 +789,18 @@ namespace
 }
 
 
-planner::T_State planner::PostureSequence(planner::CompleteScenario& scenario)
+planner::T_State planner::PostureSequence(planner::CompleteScenario& scenario, int dpethcontact)
 {
     planner::T_State res;
     State* current = &scenario.initstate;
     planner::Collider collider(scenario.scenario->objects_);
-    current->stable = Stable(current);
+    current->stable = false; //Stable(current);
     res.push_back(current);
     CT_Model path;
     if(scenario.path.size() >= 2)
     {
         //scenario.spline = new planner::SplinePath(planner::SplineFromPath(collider,scenario.path,2,2));
-        scenario.spline = new planner::SplinePath(planner::SplineShortCut(collider,scenario.path,2,2,7));
+        scenario.spline = new planner::SplinePath(planner::SplineShortCut(collider,scenario.path,2,2,2));
         //CT_Model path0 = developPathSpline(*scenario.spline, scenario.scenario->model_);
         CT_Model path0 = developPath(scenario.path);
         path = PartialShortcut(path0, collider);
@@ -806,32 +811,39 @@ planner::T_State planner::PostureSequence(planner::CompleteScenario& scenario)
     }
     Timer tp; tp.Start();
     std::cout << "posture selection timer" << std::endl;
+    CT_Model depth;
     CT_Model::iterator it2 = path.begin(); ++it2;
     for(CT_Model::iterator it = path.begin(); it!=path.end(); ++it, ++it2)
     {
         std::vector<int> nbContactsChange;
         if(it2 == path.end())
         {
-            current = Interpolate(scenario, *current, *it, 0,nbContactsChange);
+            current = Interpolate(scenario, *current, *it, 0, depth, nbContactsChange);
         }
         else
         {
             State* old = current;
-            current = Interpolate(scenario, *current, *it, *it2,nbContactsChange);
+            depth.clear();
+            CT_Model::iterator it3 = it;
+            for(int k=0;k<dpethcontact && it3 != path.end();++k, ++it3)
+            {
+                depth.push_back(*it3);
+            }
+            current = Interpolate(scenario, *current, *it, *it2, depth, nbContactsChange);
             //if(nbContactsChange.size()>1)
             if(it != path.begin() && nbContactsChange.size()>1)
             {
-                Stable(current);
+                //Stable(current);
                 CT_Model::iterator itbefore = it;
                 --itbefore;
                 for(std::vector<int>::const_iterator cit = nbContactsChange.begin();
                     cit != nbContactsChange.end()-1; ++cit)
                 {
-                    old = GenerateIntermediateState(scenario, *old, *itbefore, *it2, *cit);
+                    old = GenerateIntermediateState(scenario, *old, *itbefore, *it2, depth, *cit);
                     old->stable = false;
                     res.push_back(old);
                 }
-                current = Interpolate(scenario, *old, *it, *it2,nbContactsChange);
+                current = Interpolate(scenario, *old, *it, *it2, depth, nbContactsChange);
             }
         }
         current->stable = false;

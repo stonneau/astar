@@ -62,5 +62,6 @@ public:
 
 const  SphereCollisionRes Intersect(const Sphere& a, const Sphere& b, bool computePoint = false);
 const  std::vector<int> Intersect(const Sphere& a, const std::vector<Sphere>spheres);
+const  bool Contains(const Sphere& a, const Eigen::Vector3d& point, double margin = 1);
 }//namespace planner;
 #endif //_CLASS_COLLIDER
