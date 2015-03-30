@@ -244,18 +244,21 @@ namespace
 		outstream <<  "      </link>" <<'\n';
 		outstream <<  "      <joint name=\"base_prismatic_joint_x\" type=\"prismatic\">" <<'\n';
 		outstream <<  "        <axis xyz=\"1 0 0\"/>" <<'\n';
+        outstream <<  "        <limit effort=\"10000\" lower =\"-5.0\" upper=\"5.0\" velocity =\"0.6\"/>" <<'\n';
 		outstream <<  "        <origin rpy=\"0 0 0\" xyz=\"0 0 1.1713\"/>" <<'\n';
 		outstream <<  "        <parent link=\"root_link\"/>" <<'\n';
 		outstream <<  "        <child link=\"base_prismatic_dummy1\"/>" <<'\n';
 		outstream <<  "      </joint>" <<'\n';
 		outstream <<  "      <joint name=\"base_prismatic_joint_y\" type=\"prismatic\">" <<'\n';
 		outstream <<  "        <axis xyz=\"0 1 0\"/>" <<'\n';
+        outstream <<  "        <limit effort=\"10000\" lower =\"-5.0\" upper=\"5.0\" velocity =\"0.6\"/>" <<'\n';
 		outstream <<  "        <origin rpy=\"0 0 0\" xyz=\"0 0 0\"/>" <<'\n';
 		outstream <<  "        <parent link=\"base_prismatic_dummy1\"/>" <<'\n';
 		outstream <<  "        <child link=\"base_prismatic_dummy2\"/>" <<'\n';
 		outstream <<  "      </joint>" <<'\n';
 		outstream <<  "      <joint name=\"base_prismatic_joint_z\" type=\"prismatic\">" <<'\n';
 		outstream <<  "        <axis xyz=\"0 0 1\"/>" <<'\n';
+        outstream <<  "        <limit effort=\"10000\" lower =\"-5.0\" upper=\"5.0\" velocity =\"0.6\"/>" <<'\n';
 		outstream <<  "        <origin rpy=\"0 0 0\" xyz=\"0 0 0\"/>" <<'\n';
 		outstream <<  "        <parent link=\"base_prismatic_dummy2\"/>" <<'\n';
 		outstream <<  "        <child link=\"base_prismatic_dummy3\"/>" <<'\n';
@@ -281,40 +284,56 @@ namespace
 		outstream <<  "      <link name=\"pelvis_link\"/>" <<'\n';
     }
 
-    enum axis {x,y,z};
+    std::string from_double(double dbl)
+    {
+        std::ostringstream strs;
+        strs << dbl;
+        return strs.str();
+    }
+
+    enum axis {z,y,x};
     void exportOneNodeJoint(std::stringstream& outstream, axis ax, Node* node)
     {
-        std::string rotaxis;
+        std::string rotaxis, offset;
         std::string axisname;
+        std::string parent, son;
+        std::string ox, oy ,oz;
+        ox = from_double(node->offset(0));
+        oy = from_double(node->offset(1));
+        oz = from_double(node->offset(2));
         switch(ax) {
-            case x   : {rotaxis = "1 0 0"; axisname = "x"; }
-            case y   : {rotaxis = "0 1 0"; axisname = "y"; }
-            case z   : {rotaxis = "0 0 1"; axisname = "z"; }
+            case x   : {offset = "0 0 0"; rotaxis = "1 0 0"; axisname = "x"; parent = node->tag + "_y_link"; son = node->tag + "_x_link"; break;}
+            case y   : {offset = "0 0 0"; rotaxis = "0 1 0"; axisname = "y"; parent = node->tag + "_z_link"; son = node->tag + "_y_link"; break; }
+            case z   : {offset = "" + ox + " " + oy + " " + oz; rotaxis = "0 0 1"; axisname = "z";
+                        parent = node->parent->tag + "_x_link";
+                        if(node->parent->tag.find("pelvis") != std::string::npos) parent = node->parent->tag + "_link";
+                        son = node->tag + "_z_link"; break;}
         }
-        /*outstream <<  "      <joint name=\"" << name << "_" << axisname << "_joint" << "\" type =\"revolute\">" <<'\n';
-        outstream <<  "          <axis xyz=\"" << rotaxis << "\"/>" <<'\n';        
-        outstream <<  "          <origin rpy=\"0 0 0\" xyz=\"" <<  <<" " <<  << " " << << "\"/>" <<'\n';
-        outstream <<  "			 <parent link=\"" << node->tag  << "\"/>" <<'\n';
-		outstream <<  "          <child link=\""torso_x_link << "\"/>" <<'\n';
-        outstream <<  "      </joint>" <<'\n';        */
+        outstream <<  "      <joint name=\"" << node->tag << "_" << axisname << "_joint" << "\" type =\"revolute\">" <<'\n';
+        outstream <<  "          <axis xyz=\"" << rotaxis << "\"/>" <<'\n';                
+        outstream <<  "          <limit effort=\"10000\" lower =\"-3.14\" upper=\"3.14\" velocity =\"0.6\"/>" <<'\n';
+        outstream <<  "          <origin rpy=\"0 0 0\" xyz=\"" <<  offset << "\"/>" <<'\n';
+        outstream <<  "          <parent link=\"" << parent  << "\"/>" <<'\n';
+        outstream <<  "          <child link=\"" << son << "\"/>" <<'\n';
+        outstream <<  "      </joint>" <<'\n';
     }
 
     void exportLinks(std::stringstream& outstream, const std::string& name) //
     {
         outstream <<  "      <link name=\"" << name << "_z_link" << "\"/>" <<'\n';
         outstream <<  "      <link name=\"" << name << "_y_link" << "\"/>" <<'\n';
-        outstream <<  "      <link name=\"" << name << "_x_link" << "\"x>" <<'\n';
+        outstream <<  "      <link name=\"" << name << "_x_link" << "\">" <<'\n';
         outstream <<  "        <visual>" <<'\n';
         outstream <<  "          <origin rpy=\"0 0 0\" xyz=\"0 0 0\"/>" <<'\n';
         outstream <<  "          <geometry>" <<'\n';
-        outstream <<  "            <mesh filename=\"dummy.obj\"/>" <<'\n';
+        outstream <<  "            <mesh filename=\"./dummy.obj\"/>" <<'\n';
         outstream <<  "          </geometry>" <<'\n';
         outstream <<  "          <material name=\"Blue\"/>" <<'\n';
         outstream <<  "        </visual>" <<'\n';
         outstream <<  "        <collision>" <<'\n';
         outstream <<  "          <origin rpy=\"0 0 0\" xyz=\"0 0 0\"/>" <<'\n';
         outstream <<  "          <geometry>" <<'\n';
-        outstream <<  "            <mesh filename=\"dummy.obj\"/>" <<'\n';
+        outstream <<  "            <mesh filename=\"./dummy.obj\"/>" <<'\n';
         outstream <<  "          </geometry>" <<'\n';
         outstream <<  "        </collision>" <<'\n';
         outstream <<  "      </link>" <<'\n';
@@ -323,6 +342,10 @@ namespace
     void exportNodeRec(std::stringstream& outstream, Node* cnode)
     {
         exportLinks(outstream, cnode->tag);
+        for(int i = 0; i< 3; ++i)
+        {
+            exportOneNodeJoint(outstream, (::axis(i)), cnode);
+        }
         for(std::vector<Node*>::iterator it = cnode->children.begin();
             it != cnode->children.end(); ++it)
         {
