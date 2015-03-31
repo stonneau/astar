@@ -1,0 +1,18 @@
+constraint joint_name="RightShoulder_x_joint" min="-45" max="140" default="0"
+constraint joint_name="RightShoulder_z_joint" min="-75" max="75" default="0"
+constraint joint_name="RightShoulder_x_joint" min="-140" max="120" default="0"
+constraint joint_name="RightForeArm_x_joint"   min="0" max="90" default="0"
+constraint joint_name="RightHand_z_joint"   min="-0" max="0" default="0"
+constraint joint_name="RightHand_y_joint"   min="-90" max="90" default="0"
+constraint joint_name="RightHand_x_joint"   min="-45" max="45" default="0"
+
+
+rom joint1="RightShoulder_z_joint" joint2="RightShoulder_y_joint" joint3="RightShoulder_x_joint" romfile ="../humandes/rightarm_itomp.rom"
+rom joint1="LeftShoulder1_z_joint" joint2="LeftShoulder1_y_joint" joint3="LeftShoulder1_x_joint" romfile ="../humandes/left_arm_itomp.rom"
+rom joint1="RightUpLeg_z_joint" joint2="RightUpLeg_y_joint" joint3="RightUpLeg_x_joint" romfile ="../humandes/right_ankle_itomp.rom"
+rom joint1="LeftUpLeg_z_joint" joint2="LeftUpLeg_y_joint" joint3="LeftUpLeg_x_joint" romfile ="../humandes/left_ankle_itomp.rom"
+
+normal limb="RightUpLeg_z_joint" normal="1 0 0"
+normal limb="LeftShoulder1_z_joint" normal="-1 0 0"
+normal limb="RightUpLeg_z_joint" normal="0 0 1"
+normal limb="RightUpLeg_z_joint" normal="0 0 1"

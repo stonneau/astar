@@ -11,6 +11,8 @@
 #include <stack>
 #include <Eigen/Dense>
 
+#include "create_obj_box.h"
+
 struct Node
 {
     Node() : tag (""), axis(Eigen::Vector3d(0,0,0)), offset(axis){}
@@ -101,7 +103,7 @@ namespace
         return current;
     }*/
 
-    Node* ProcessLine(const std::string& line, Node* current, std::stack<Node*>& stack)
+    Node* ProcessLine(const std::string& line, Node* current, std::stack<Node*>& stack, double scale)
     {
         // case:
         // empty line or { we go down one level
@@ -129,7 +131,7 @@ namespace
         {
             for(int i =1; i<4; ++i)
             {
-                current->offset(i-1) = StrToD(split[i]);
+                current->offset(i-1) = StrToD(split[i]) * scale;
             }
         }
         if(line.find("CHANNELS") != string::npos)
@@ -301,6 +303,7 @@ namespace
         ox = from_double(node->offset(0));
         oy = from_double(node->offset(1));
         oz = from_double(node->offset(2));
+        objects::create_obj_box(node->tag, node->offset);
         switch(ax) {
             case x   : {offset = "0 0 0"; rotaxis = "1 0 0"; axisname = "x"; parent = node->tag + "_y_link"; son = node->tag + "_x_link"; break;}
             case y   : {offset = "0 0 0"; rotaxis = "0 1 0"; axisname = "y"; parent = node->tag + "_z_link"; son = node->tag + "_y_link"; break; }
@@ -326,14 +329,17 @@ namespace
         outstream <<  "        <visual>" <<'\n';
         outstream <<  "          <origin rpy=\"0 0 0\" xyz=\"0 0 0\"/>" <<'\n';
         outstream <<  "          <geometry>" <<'\n';
-        outstream <<  "            <mesh filename=\"./dummy.obj\"/>" <<'\n';
+        //outstream <<  "            <mesh filename=\"./"<< "dummy" <<".obj\"/>" <<'\n';
+        outstream <<  "            <mesh filename=\"../rami/models/"<< name <<".obj\"/>" <<'\n';
         outstream <<  "          </geometry>" <<'\n';
         outstream <<  "          <material name=\"Blue\"/>" <<'\n';
         outstream <<  "        </visual>" <<'\n';
         outstream <<  "        <collision>" <<'\n';
         outstream <<  "          <origin rpy=\"0 0 0\" xyz=\"0 0 0\"/>" <<'\n';
         outstream <<  "          <geometry>" <<'\n';
-        outstream <<  "            <mesh filename=\"./dummy.obj\"/>" <<'\n';
+        //outstream <<  "            <mesh filename=\"./"<< "dummy" <<".obj\"/>" <<'\n';
+        //outstream <<  "            <mesh filename=\"./"<< name <<".obj\"/>" <<'\n';
+        outstream <<  "            <mesh filename=\"../rami/models/"<< name <<".obj\"/>" <<'\n';
         outstream <<  "          </geometry>" <<'\n';
         outstream <<  "        </collision>" <<'\n';
         outstream <<  "      </link>" <<'\n';
@@ -386,6 +392,8 @@ int main(int argc, char *argv[])
     std::stack<Node*> stack;
     std::string bvhpath = argv[1];
     std::string urdfpath = argv[2];
+    std::string scale = (argc > 3)  ? (argv[3]) : (std::string ("1"));
+    double s = StrToD(scale);
     std::ifstream myfile (bvhpath);
     // first parse bvh and get structure
     if (myfile.is_open())
@@ -394,7 +402,7 @@ int main(int argc, char *argv[])
         while (myfile.good())
         {
             getline(myfile, line);
-            current = ProcessLine(line, current, stack);
+            current = ProcessLine(line, current, stack, s);
         }
         myfile.close();
     }
