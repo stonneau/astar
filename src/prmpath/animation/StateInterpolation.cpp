@@ -20,6 +20,16 @@ namespace
         return std::make_pair(state.value->currentPosition, emap.log());
     }
 
+    planner::Object* GetEffector(planner::Node* limb)
+    {
+        if(limb->children.size() != 0)
+        {
+            planner::Object* res = GetEffector(limb->children[0]);
+            if(res) return res;
+        }
+        return limb->current;
+    }
+
     struct InterpolateLine
     {
         InterpolateLine(const Eigen::Vector3d& from, const Eigen::Vector3d& to)
@@ -38,6 +48,59 @@ namespace
 
         Eigen::Vector3d from_;
         Eigen::Vector3d to_;
+    };
+
+    std::vector<double> create_intervals(const std::vector<InterpolateLine>& lines)
+    {
+        // first assert continuity between lines
+        std::vector<double> intervals;
+        double total_distance(0);
+        for(std::vector<InterpolateLine>::const_iterator cit = lines.begin();
+            cit!= lines.end(); ++cit)
+        {
+            if(cit != lines.begin())
+            {
+                assert((*(cit-1)).to_ ==(*cit).from_);
+            }
+            total_distance += ((*cit).to_ - (*cit).from_).norm();
+            intervals.push_back(total_distance);
+        }
+        for(std::vector<double>::iterator it = intervals.begin(); it != intervals.end();
+        ++it)
+        {
+            *it = (*it) / total_distance;
+        }
+        return intervals;
+    }
+
+    struct InterpolateLines
+    {
+        InterpolateLines(const std::vector<InterpolateLine>& lines)
+            : lines_(lines)
+            , intervals_(create_intervals(lines)){}
+        ~InterpolateLines(){}
+
+        Eigen::Vector3d operator () (double t) const
+        {
+            for(std::size_t i=0; i< intervals_.size();++i)
+            {
+                if(t < intervals_[i])
+                {
+                    double previous = (i == 0) ? 0 : intervals_[i-1];
+                    double scaledt =  (t - previous) / (intervals_[i] - previous);
+                    return lines_[i](scaledt);
+                }
+            }
+            return lines_.back().to_;
+        }
+
+        double distance() const
+        {
+            return intervals_.back();
+        }
+
+        std::vector<InterpolateLine> lines_;
+        std::vector<double> intervals_;
     };
 
     struct DoIk
@@ -127,25 +190,33 @@ namespace
         return res;
     }
 
-    std::vector<InterpolateLine> ContactInterpolation(const std::vector<int>& contacts, const planner::CompleteScenario& scenario, const planner::State& from, const planner::State& to)
+    InterpolateLines avoidObstacles(const InterpolateLine& il, const planner::CompleteScenario& scenario)
     {
         std::vector<InterpolateLine> res;
+
+        return InterpolateLines(res);
+    }
+
+    std::vector<InterpolateLines> ContactInterpolation(const std::vector<int>& contacts, const planner::CompleteScenario& scenario, const planner::State& from, const planner::State& to)
+    {
+        std::vector<InterpolateLines> res;
         for(std::vector<int>::const_iterator cit = contacts.begin();
             cit != contacts.end(); ++cit)
         {
             int limbindex = to.contactLimbs[*cit];
+            Node* child = planner::GetChild(from.value, scenario.limbs[limbindex]->id);
             // Find position in initial Configuration
-            res.push_back(InterpolateLine(
-                planner::GetEffectorCenter(planner::GetChild(from.value, scenario.limbs[limbindex]->id)),
-                to.contactLimbPositions[*cit]));
+            InterpolateLine il = InterpolateLine(planner::GetEffectorCenter(child),
+                            to.contactLimbPositions[*cit]);
+            res.push_back(avoidObstacles(il, scenario);
         }
         return res;
     }
 
-    double GetMinTime(const planner::CompleteScenario& scenario, const std::vector<InterpolateLine>& lines)
+    double GetMinTime(const planner::CompleteScenario& scenario, const std::vector<InterpolateLines>& lines)
     {
         double min = 0;
-        for(std::vector<InterpolateLine>::const_iterator cit = lines.begin()
+        for(std::vector<InterpolateLines>::const_iterator cit = lines.begin()
             ; cit != lines.end(); ++cit)
         {
             double time = std::min (cit->distance() / (scenario.limbspeed.front() + 0.000000000001), 4.); // TODO
@@ -169,7 +240,7 @@ namespace
         ~InterpolateContacts(){}
         void operator ()(planner::State& current, double time) const
         {
-            std::vector<InterpolateLine>::const_iterator intit = contactInterpolation_.begin();
+            std::vector<InterpolateLines>::const_iterator intit = contactInterpolation_.begin();
             for(std::vector<int>::const_iterator cit = involvedContacts_.begin();
                 cit!= involvedContacts_.end(); ++cit, ++intit)
             {
@@ -181,7 +252,7 @@ namespace
             }
         }
         const std::vector<int> involvedContacts_;
-        const std::vector<InterpolateLine> contactInterpolation_;
+        const std::vector<InterpolateLines> contactInterpolation_;
         const double minTime_;
     };
 

@@ -678,7 +678,7 @@ void command(int cmd)   /**  key control function; */
         case 'f' :
         {
             std::cout << "computing animation " << std::endl;
-            states = planner::Animate(*cScenario, states, 24);
+            states = planner::Animate(*cScenario, states, 3);
             std::cout << "done " << std::endl;
             break;
         }
