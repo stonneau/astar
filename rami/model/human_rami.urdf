@@ -136,7 +136,7 @@
       <joint name="RightUpLeg_z_joint" type ="revolute">
           <axis xyz="0 0 1"/>
           <limit effort="10000" lower ="-3.14" upper="3.14" velocity ="0.6"/>
-          <origin rpy="0 0 0" xyz="-0.089458 -0.0866707 0.00101652"/>
+          <origin rpy="0 0 0" xyz="-0.089458 -0.0866707 0.0010165"/>
           <parent link="pelvis_link"/>
           <child link="RightUpLeg_z_link"/>
       </joint>
@@ -212,7 +212,7 @@
       <joint name="RightFoot_z_joint" type ="revolute">
           <axis xyz="0 0 1"/>
           <limit effort="10000" lower ="-3.14" upper="3.14" velocity ="0.6"/>
-          <origin rpy="0 0 0" xyz="0.00253549 -0.420924 -0.0146059"/>
+          <origin rpy="0 0 0" xyz="0.0025355 -0.420924 -0.0146059"/>
           <parent link="RightLeg_x_link"/>
           <child link="RightFoot_z_link"/>
       </joint>
@@ -250,7 +250,7 @@
       <joint name="RightToes_z_joint" type ="revolute">
           <axis xyz="0 0 1"/>
           <limit effort="10000" lower ="-3.14" upper="3.14" velocity ="0.6"/>
-          <origin rpy="0 0 0" xyz="-0.0008 -0.00137448 0.0977979"/>
+          <origin rpy="0 0 0" xyz="0.0004 -0.0441509 0.084991"/>
           <parent link="RightFoot_x_link"/>
           <child link="RightToes_z_link"/>
       </joint>
@@ -267,6 +267,30 @@
           <origin rpy="0 0 0" xyz="0 0 0"/>
           <parent link="RightToes_y_link"/>
           <child link="RightToes_x_link"/>
+      </joint>
+      <link name="RightToesendsite_z_link"/>
+      <link name="RightToesendsite_y_link"/>
+      <link name="RightToesendsite_x_link"/>
+      <joint name="RightToesendsite_z_joint" type ="revolute">
+          <axis xyz="0 0 1"/>
+          <limit effort="10000" lower ="-3.14" upper="3.14" velocity ="0.6"/>
+          <origin rpy="0 0 0" xyz="-0.0008 -0.0013745 0.0977979"/>
+          <parent link="RightToes_x_link"/>
+          <child link="RightToesendsite_z_link"/>
+      </joint>
+      <joint name="RightToesendsite_y_joint" type ="revolute">
+          <axis xyz="0 1 0"/>
+          <limit effort="10000" lower ="-3.14" upper="3.14" velocity ="0.6"/>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <parent link="RightToesendsite_z_link"/>
+          <child link="RightToesendsite_y_link"/>
+      </joint>
+      <joint name="RightToesendsite_x_joint" type ="revolute">
+          <axis xyz="1 0 0"/>
+          <limit effort="10000" lower ="-3.14" upper="3.14" velocity ="0.6"/>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <parent link="RightToesendsite_y_link"/>
+          <child link="RightToesendsite_x_link"/>
       </joint>
       <link name="Spine_z_link"/>
       <link name="Spine_y_link"/>
@@ -288,7 +312,7 @@
       <joint name="Spine_z_joint" type ="revolute">
           <axis xyz="0 0 1"/>
           <limit effort="10000" lower ="-3.14" upper="3.14" velocity ="0.6"/>
-          <origin rpy="0 0 0" xyz="0 0.118905 0"/>
+          <origin rpy="0 0 0" xyz="0 0.118905 -0"/>
           <parent link="pelvis_link"/>
           <child link="Spine_z_link"/>
       </joint>
@@ -326,7 +350,7 @@
       <joint name="Spine1_z_joint" type ="revolute">
           <axis xyz="0 0 1"/>
           <limit effort="10000" lower ="-3.14" upper="3.14" velocity ="0.6"/>
-          <origin rpy="0 0 0" xyz="0 0.256574 0.00127663"/>
+          <origin rpy="0 0 0" xyz="0 0.256574 0.0012766"/>
           <parent link="Spine_x_link"/>
           <child link="Spine1_z_link"/>
       </joint>
@@ -344,43 +368,67 @@
           <parent link="Spine1_y_link"/>
           <child link="Spine1_x_link"/>
       </joint>
-      <link name="HEad_z_link"/>
-      <link name="HEad_y_link"/>
-      <link name="HEad_x_link">
+      <link name="head_z_link"/>
+      <link name="head_y_link"/>
+      <link name="head_x_link">
         <visual>
           <origin rpy="0 0 0" xyz="0 0 0"/>
           <geometry>
-            <mesh filename="../rami/model/HEad.obj"/>
+            <mesh filename="../rami/model/head.obj"/>
           </geometry>
           <material name="Blue"/>
         </visual>
         <collision>
           <origin rpy="0 0 0" xyz="0 0 0"/>
           <geometry>
-            <mesh filename="../rami/model/HEad.obj"/>
+            <mesh filename="../rami/model/head.obj"/>
           </geometry>
         </collision>
       </link>
-      <joint name="HEad_z_joint" type ="revolute">
+      <joint name="head_z_joint" type ="revolute">
           <axis xyz="0 0 1"/>
           <limit effort="10000" lower ="-3.14" upper="3.14" velocity ="0.6"/>
-          <origin rpy="0 0 0" xyz="-0.0029 0.127742 0.0251395"/>
+          <origin rpy="0 0 0" xyz="0 0.0873416 0.0001134"/>
           <parent link="Spine1_x_link"/>
-          <child link="HEad_z_link"/>
+          <child link="head_z_link"/>
       </joint>
-      <joint name="HEad_y_joint" type ="revolute">
+      <joint name="head_y_joint" type ="revolute">
           <axis xyz="0 1 0"/>
           <limit effort="10000" lower ="-3.14" upper="3.14" velocity ="0.6"/>
           <origin rpy="0 0 0" xyz="0 0 0"/>
-          <parent link="HEad_z_link"/>
-          <child link="HEad_y_link"/>
+          <parent link="head_z_link"/>
+          <child link="head_y_link"/>
       </joint>
-      <joint name="HEad_x_joint" type ="revolute">
+      <joint name="head_x_joint" type ="revolute">
           <axis xyz="1 0 0"/>
           <limit effort="10000" lower ="-3.14" upper="3.14" velocity ="0.6"/>
           <origin rpy="0 0 0" xyz="0 0 0"/>
-          <parent link="HEad_y_link"/>
-          <child link="HEad_x_link"/>
+          <parent link="head_y_link"/>
+          <child link="head_x_link"/>
+      </joint>
+      <link name="headendsite_z_link"/>
+      <link name="headendsite_y_link"/>
+      <link name="headendsite_x_link"/>
+      <joint name="headendsite_z_joint" type ="revolute">
+          <axis xyz="0 0 1"/>
+          <limit effort="10000" lower ="-3.14" upper="3.14" velocity ="0.6"/>
+          <origin rpy="0 0 0" xyz="-0.0029 0.127742 0.0251395"/>
+          <parent link="head_x_link"/>
+          <child link="headendsite_z_link"/>
+      </joint>
+      <joint name="headendsite_y_joint" type ="revolute">
+          <axis xyz="0 1 0"/>
+          <limit effort="10000" lower ="-3.14" upper="3.14" velocity ="0.6"/>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <parent link="headendsite_z_link"/>
+          <child link="headendsite_y_link"/>
+      </joint>
+      <joint name="headendsite_x_joint" type ="revolute">
+          <axis xyz="1 0 0"/>
+          <limit effort="10000" lower ="-3.14" upper="3.14" velocity ="0.6"/>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <parent link="headendsite_y_link"/>
+          <child link="headendsite_x_link"/>
       </joint>
       <link name="LeftShoulder1_z_link"/>
       <link name="LeftShoulder1_y_link"/>
@@ -402,7 +450,7 @@
       <joint name="LeftShoulder1_z_joint" type ="revolute">
           <axis xyz="0 0 1"/>
           <limit effort="10000" lower ="-3.14" upper="3.14" velocity ="0.6"/>
-          <origin rpy="0 0 0" xyz="0.0899 -0.00362252 -0.0022"/>
+          <origin rpy="0 0 0" xyz="0.0899 -0.0036225 -0.0022"/>
           <parent link="Spine1_x_link"/>
           <child link="LeftShoulder1_z_link"/>
       </joint>
@@ -440,7 +488,7 @@
       <joint name="LeftArm_z_joint" type ="revolute">
           <axis xyz="0 0 1"/>
           <limit effort="10000" lower ="-3.14" upper="3.14" velocity ="0.6"/>
-          <origin rpy="0 0 0" xyz="0.102827 -3.37999e-05 0.00322123"/>
+          <origin rpy="0 0 0" xyz="0.102827 -3.38e-05 0.0032212"/>
           <parent link="LeftShoulder1_x_link"/>
           <child link="LeftArm_z_link"/>
       </joint>
@@ -478,7 +526,7 @@
       <joint name="LeftForeArm_z_joint" type ="revolute">
           <axis xyz="0 0 1"/>
           <limit effort="10000" lower ="-3.14" upper="3.14" velocity ="0.6"/>
-          <origin rpy="0 0 0" xyz="0.262597 0.00099144 -0.0142434"/>
+          <origin rpy="0 0 0" xyz="0.327669 0.0009914 -0.0142434"/>
           <parent link="LeftArm_x_link"/>
           <child link="LeftForeArm_z_link"/>
       </joint>
@@ -516,7 +564,7 @@
       <joint name="LeftHand_z_joint" type ="revolute">
           <axis xyz="0 0 1"/>
           <limit effort="10000" lower ="-3.14" upper="3.14" velocity ="0.6"/>
-          <origin rpy="0 0 0" xyz="0.134179 -0.00600076 0.0150291"/>
+          <origin rpy="0 0 0" xyz="0.275643 0.0008536 0.0102216"/>
           <parent link="LeftForeArm_x_link"/>
           <child link="LeftHand_z_link"/>
       </joint>
@@ -533,6 +581,30 @@
           <origin rpy="0 0 0" xyz="0 0 0"/>
           <parent link="LeftHand_y_link"/>
           <child link="LeftHand_x_link"/>
+      </joint>
+      <link name="LeftHandendsite_z_link"/>
+      <link name="LeftHandendsite_y_link"/>
+      <link name="LeftHandendsite_x_link"/>
+      <joint name="LeftHandendsite_z_joint" type ="revolute">
+          <axis xyz="0 0 1"/>
+          <limit effort="10000" lower ="-3.14" upper="3.14" velocity ="0.6"/>
+          <origin rpy="0 0 0" xyz="0.167443 -0.006 0.0150291"/>
+          <parent link="LeftHand_x_link"/>
+          <child link="LeftHandendsite_z_link"/>
+      </joint>
+      <joint name="LeftHandendsite_y_joint" type ="revolute">
+          <axis xyz="0 1 0"/>
+          <limit effort="10000" lower ="-3.14" upper="3.14" velocity ="0.6"/>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <parent link="LeftHandendsite_z_link"/>
+          <child link="LeftHandendsite_y_link"/>
+      </joint>
+      <joint name="LeftHandendsite_x_joint" type ="revolute">
+          <axis xyz="1 0 0"/>
+          <limit effort="10000" lower ="-3.14" upper="3.14" velocity ="0.6"/>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <parent link="LeftHandendsite_y_link"/>
+          <child link="LeftHandendsite_x_link"/>
       </joint>
       <link name="RightShoulder_z_link"/>
       <link name="RightShoulder_y_link"/>
@@ -554,7 +626,7 @@
       <joint name="RightShoulder_z_joint" type ="revolute">
           <axis xyz="0 0 1"/>
           <limit effort="10000" lower ="-3.14" upper="3.14" velocity ="0.6"/>
-          <origin rpy="0 0 0" xyz="-0.0899 -0.00362252 -0.0022"/>
+          <origin rpy="0 0 0" xyz="-0.0899 -0.0036225 -0.0022"/>
           <parent link="Spine1_x_link"/>
           <child link="RightShoulder_z_link"/>
       </joint>
@@ -592,7 +664,7 @@
       <joint name="RightArm_z_joint" type ="revolute">
           <axis xyz="0 0 1"/>
           <limit effort="10000" lower ="-3.14" upper="3.14" velocity ="0.6"/>
-          <origin rpy="0 0 0" xyz="-0.102827 -3.38e-05 0.00322123"/>
+          <origin rpy="0 0 0" xyz="-0.102827 -3.38e-05 0.0032212"/>
           <parent link="RightShoulder_x_link"/>
           <child link="RightArm_z_link"/>
       </joint>
@@ -630,7 +702,7 @@
       <joint name="RightForeArm_z_joint" type ="revolute">
           <axis xyz="0 0 1"/>
           <limit effort="10000" lower ="-3.14" upper="3.14" velocity ="0.6"/>
-          <origin rpy="0 0 0" xyz="-0.26364 0.00099144 -0.0142434"/>
+          <origin rpy="0 0 0" xyz="-0.328971 0.0009914 -0.0142434"/>
           <parent link="RightArm_x_link"/>
           <child link="RightForeArm_z_link"/>
       </joint>
@@ -668,7 +740,7 @@
       <joint name="RightHand_z_joint" type ="revolute">
           <axis xyz="0 0 1"/>
           <limit effort="10000" lower ="-3.14" upper="3.14" velocity ="0.6"/>
-          <origin rpy="0 0 0" xyz="-0.133273 -0.00600075 0.0150291"/>
+          <origin rpy="0 0 0" xyz="-0.274921 0.0008536 0.0102216"/>
           <parent link="RightForeArm_x_link"/>
           <child link="RightHand_z_link"/>
       </joint>
@@ -685,6 +757,30 @@
           <origin rpy="0 0 0" xyz="0 0 0"/>
           <parent link="RightHand_y_link"/>
           <child link="RightHand_x_link"/>
+      </joint>
+      <link name="RightHandendsite_z_link"/>
+      <link name="RightHandendsite_y_link"/>
+      <link name="RightHandendsite_x_link"/>
+      <joint name="RightHandendsite_z_joint" type ="revolute">
+          <axis xyz="0 0 1"/>
+          <limit effort="10000" lower ="-3.14" upper="3.14" velocity ="0.6"/>
+          <origin rpy="0 0 0" xyz="-0.166312 -0.006 0.0150291"/>
+          <parent link="RightHand_x_link"/>
+          <child link="RightHandendsite_z_link"/>
+      </joint>
+      <joint name="RightHandendsite_y_joint" type ="revolute">
+          <axis xyz="0 1 0"/>
+          <limit effort="10000" lower ="-3.14" upper="3.14" velocity ="0.6"/>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <parent link="RightHandendsite_z_link"/>
+          <child link="RightHandendsite_y_link"/>
+      </joint>
+      <joint name="RightHandendsite_x_joint" type ="revolute">
+          <axis xyz="1 0 0"/>
+          <limit effort="10000" lower ="-3.14" upper="3.14" velocity ="0.6"/>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <parent link="RightHandendsite_y_link"/>
+          <child link="RightHandendsite_x_link"/>
       </joint>
       <link name="LeftUpLeg_z_link"/>
       <link name="LeftUpLeg_y_link"/>
@@ -706,7 +802,7 @@
       <joint name="LeftUpLeg_z_joint" type ="revolute">
           <axis xyz="0 0 1"/>
           <limit effort="10000" lower ="-3.14" upper="3.14" velocity ="0.6"/>
-          <origin rpy="0 0 0" xyz="0.089458 -0.0866707 0.00101652"/>
+          <origin rpy="0 0 0" xyz="0.089458 -0.0866707 0.0010165"/>
           <parent link="pelvis_link"/>
           <child link="LeftUpLeg_z_link"/>
       </joint>
@@ -782,7 +878,7 @@
       <joint name="LeftFoot_z_joint" type ="revolute">
           <axis xyz="0 0 1"/>
           <limit effort="10000" lower ="-3.14" upper="3.14" velocity ="0.6"/>
-          <origin rpy="0 0 0" xyz="-0.00253549 -0.420924 -0.0146059"/>
+          <origin rpy="0 0 0" xyz="-0.0025355 -0.420924 -0.0146059"/>
           <parent link="LeftLeg_x_link"/>
           <child link="LeftFoot_z_link"/>
       </joint>
@@ -820,7 +916,7 @@
       <joint name="LeftToes_z_joint" type ="revolute">
           <axis xyz="0 0 1"/>
           <limit effort="10000" lower ="-3.14" upper="3.14" velocity ="0.6"/>
-          <origin rpy="0 0 0" xyz="0.0008 -0.00047448 0.0977979"/>
+          <origin rpy="0 0 0" xyz="-0.0004 -0.0441509 0.084991"/>
           <parent link="LeftFoot_x_link"/>
           <child link="LeftToes_z_link"/>
       </joint>
@@ -837,6 +933,30 @@
           <origin rpy="0 0 0" xyz="0 0 0"/>
           <parent link="LeftToes_y_link"/>
           <child link="LeftToes_x_link"/>
+      </joint>
+      <link name="LeftToesendsite_z_link"/>
+      <link name="LeftToesendsite_y_link"/>
+      <link name="LeftToesendsite_x_link"/>
+      <joint name="LeftToesendsite_z_joint" type ="revolute">
+          <axis xyz="0 0 1"/>
+          <limit effort="10000" lower ="-3.14" upper="3.14" velocity ="0.6"/>
+          <origin rpy="0 0 0" xyz="0.0008 -0.0004745 0.0977979"/>
+          <parent link="LeftToes_x_link"/>
+          <child link="LeftToesendsite_z_link"/>
+      </joint>
+      <joint name="LeftToesendsite_y_joint" type ="revolute">
+          <axis xyz="0 1 0"/>
+          <limit effort="10000" lower ="-3.14" upper="3.14" velocity ="0.6"/>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <parent link="LeftToesendsite_z_link"/>
+          <child link="LeftToesendsite_y_link"/>
+      </joint>
+      <joint name="LeftToesendsite_x_joint" type ="revolute">
+          <axis xyz="1 0 0"/>
+          <limit effort="10000" lower ="-3.14" upper="3.14" velocity ="0.6"/>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <parent link="LeftToesendsite_y_link"/>
+          <child link="LeftToesendsite_x_link"/>
       </joint>
 
 </robot>
