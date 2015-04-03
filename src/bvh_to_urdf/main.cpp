@@ -127,6 +127,17 @@ namespace
             current = son;
             current->tag = split[1];
         }
+        if((line.find("End Site") != string::npos) && split.size() >1)
+        {
+            Node * son = new Node;
+            if(current)
+            {
+                son->parent = current;
+                current->children.push_back(son);
+                son->tag = current->tag + "endsite";
+            }
+            current = son;
+        }
         if((line.find("OFFSET") != string::npos) && split.size() == 4)
         {
             for(int i =1; i<4; ++i)
@@ -330,7 +341,7 @@ namespace
         outstream <<  "          <origin rpy=\"0 0 0\" xyz=\"0 0 0\"/>" <<'\n';
         outstream <<  "          <geometry>" <<'\n';
         //outstream <<  "            <mesh filename=\"./"<< "dummy" <<".obj\"/>" <<'\n';
-        outstream <<  "            <mesh filename=\"../rami/models/"<< name <<".obj\"/>" <<'\n';
+        outstream <<  "            <mesh filename=\"../rami/model/"<< name <<".obj\"/>" <<'\n';
         outstream <<  "          </geometry>" <<'\n';
         outstream <<  "          <material name=\"Blue\"/>" <<'\n';
         outstream <<  "        </visual>" <<'\n';
@@ -339,7 +350,7 @@ namespace
         outstream <<  "          <geometry>" <<'\n';
         //outstream <<  "            <mesh filename=\"./"<< "dummy" <<".obj\"/>" <<'\n';
         //outstream <<  "            <mesh filename=\"./"<< name <<".obj\"/>" <<'\n';
-        outstream <<  "            <mesh filename=\"../rami/models/"<< name <<".obj\"/>" <<'\n';
+        outstream <<  "            <mesh filename=\"../rami/model/"<< name <<".obj\"/>" <<'\n';
         outstream <<  "          </geometry>" <<'\n';
         outstream <<  "        </collision>" <<'\n';
         outstream <<  "      </link>" <<'\n';
