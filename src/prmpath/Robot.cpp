@@ -509,7 +509,7 @@ void ReadJoint(const std::string& firstline, std::ifstream& file, std::map<std::
                 std::map<std::string, Link*>::iterator it = links.find(ExtractQuotes(line));
                 if(it == links.end())
                 {
-                    std::cout << "error in urdf file missing parent joint" << ExtractQuotes(line) << std::endl;
+                    std::cout << "-error in urdf file missing parent link " << ExtractQuotes(line) << std::endl;
                 }
                 else
                 {
