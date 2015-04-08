@@ -743,19 +743,19 @@ void command(int cmd)   /**  key control function; */
             break;
         }
         case 'a' :
-        planner::GetChild(cScenario->robot, "FrontLeftUpperLimb_z_joint")->SetRotation(planner::GetChild(cScenario->robot,"FrontLeftUpperLimb_z_joint")->value-0.1* dirIK);
+        planner::GetChild(cScenario->robot, "MiddleLeftUpperLimb_z_joint")->SetRotation(planner::GetChild(cScenario->robot,"MiddleLeftUpperLimb_z_joint")->value-0.1* dirIK);
         break;
         case 'z' :
-        planner::GetChild(cScenario->robot, "FrontLeftUpperLimb_y_joint")->SetRotation(planner::GetChild(cScenario->robot,"FrontLeftUpperLimb_y_joint")->value-0.1* dirIK);
+        planner::GetChild(cScenario->robot, "MiddleLeftUpperLimb_y_joint")->SetRotation(planner::GetChild(cScenario->robot,"MiddleLeftUpperLimb_y_joint")->value-0.1* dirIK);
         break;
         case 'e' :
-        planner::GetChild(cScenario->robot, "FrontLeftUpperLimb_x_joint")->SetRotation(planner::GetChild(cScenario->robot,"FrontLeftUpperLimb_x_joint")->value-0.1* dirIK);
+        planner::GetChild(cScenario->robot, "MiddleLeftUpperLimb_x_joint")->SetRotation(planner::GetChild(cScenario->robot,"MiddleLeftUpperLimb_x_joint")->value-0.1* dirIK);
         break;
         case 'r' :
-        planner::GetChild(cScenario->robot, "FrontLeftLimb_joint")->SetRotation(planner::GetChild(cScenario->robot,"FrontLeftLimb_joint")->value-0.1* dirIK);
+        planner::GetChild(cScenario->robot, "MiddleLeftLimb_joint")->SetRotation(planner::GetChild(cScenario->robot,"MiddleLeftLimb_joint")->value-0.1* dirIK);
         break;
         case 'A' :
-        planner::GetChild(cScenario->robot, "FrontLeftLowerLimb_joint")->SetRotation(planner::GetChild(cScenario->robot,"FrontLeftLowerLimb_joint")->value-0.1* dirIK);
+        planner::GetChild(cScenario->robot, "MiddleLeftLowerLimb_joint")->SetRotation(planner::GetChild(cScenario->robot,"MiddleLeftLowerLimb_joint")->value-0.1* dirIK);
         break;
         case 'Z' :
         planner::GetChild(cScenario->robot, "right_hand_y_joint")->SetRotation(planner::GetChild(cScenario->robot,"right_hand_y_joint")->value-0.1* dirIK);
