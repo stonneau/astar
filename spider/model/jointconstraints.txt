@@ -4,11 +4,11 @@ constraint joint_name="BackRightshoulder_joint" min="135" max="135" default="135
 constraint joint_name="MiddleRightshoulder_joint" min="180" max="180" default="180"
 constraint joint_name="FrontRightshoulder_joint" min="225" max="225" default="225"
 
-constraint joint_name="FrontLeftUpperLimb_z_joint" min="-15" max="15" default="0"
-constraint joint_name="FrontLeftUpperLimb_y_joint" min="-15" max="15" default="0"
-constraint joint_name="FrontLeftUpperLimb_x_joint" min="-15" max="15" default="0"
+constraint joint_name="FrontLeftUpperLimb_z_joint" min="-150" max="150" default="0"
+constraint joint_name="FrontLeftUpperLimb_y_joint" min="-150" max="150" default="0"
+constraint joint_name="FrontLeftUpperLimb_x_joint" min="-150" max="150" default="0"
 
-constraint joint_name="FrontLeftLimb_joint" min="-15" max="15" default="0"
+constraint joint_name="FrontLeftLimb_joint" min="-150" max="150" default="0"
 
-constraint joint_name="FrontLeftLowerLimb_joint" min="-15" max="15" default="0"
+constraint joint_name="FrontLeftLowerLimb_joint" min="-150" max="150" default="0"
 

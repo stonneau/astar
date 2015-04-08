@@ -9,5 +9,6 @@ constraint joint_name="FrontLeftUpperLimb_y_joint" min="-15" max="15" default="0
 constraint joint_name="FrontLeftUpperLimb_x_joint" min="-15" max="15" default="0"
 
 constraint joint_name="FrontLeftLimb_joint" min="-15" max="15" default="0"
+
 constraint joint_name="FrontLeftLowerLimb_joint" min="-15" max="15" default="0"
 

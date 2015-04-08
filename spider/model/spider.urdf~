@@ -613,10 +613,10 @@
   </link>
 	
 	  
-  <joint name="Frontleft_foot_endeffector_joint" type="fixed">
+  <joint name="Frontleft_foot_endeffector_joint" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="15" lower="-0.001" upper="0.001" velocity="5"/>
-    <origin rpy="0 0 0" xyz="-0.024924 -0.097428 0.001788"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
     <parent link="FrontLeftEffector_x_link"/>
     <child link="Frontleft_foot_endeffector_link"/>
   </joint>
@@ -691,28 +691,28 @@
     <axis xyz="0 0 1"/>
     <limit effort="15" lower="0" upper="0" velocity="5"/>
     <origin rpy="0 0 0" xyz="0.08027 0.27372 -0.12195"/>
-    <parent link="FrontLeftEffector_x_link"/>
+    <parent link="Frontleft_foot_endeffector_link"/>
     <child link="Frontleft_foot_cp_1_link"/>
   </joint>
   <joint name="Frontleft_foot_cp_2_joint" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="15" lower="0" upper="0" velocity="5"/>
     <origin rpy="0 0 0" xyz="-0.09166 0.27372 -0.12195"/>
-    <parent link="FrontLeftEffector_x_link"/>
+    <parent link="Frontleft_foot_endeffector_link"/>
     <child link="Frontleft_foot_cp_2_link"/>
   </joint>
   <joint name="Frontleft_foot_cp_3_joint" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="15" lower="0" upper="0" velocity="5"/>
     <origin rpy="0 0 0" xyz="-0.09166 -0.07769 -0.12195"/>
-    <parent link="FrontLeftEffector_x_link"/>
+    <parent link="Frontleft_foot_endeffector_link"/>
     <child link="Frontleft_foot_cp_3_link"/>
   </joint>
   <joint name="Frontleft_foot_cp_4_joint" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="15" lower="0" upper="0" velocity="5"/>
     <origin rpy="0 0 0" xyz="0.08027 -0.07769 -0.12195"/>
-    <parent link="FrontLeftEffector_x_link"/>
+    <parent link="Frontleft_foot_endeffector_link"/>
     <child link="Frontleft_foot_cp_4_link"/>
   </joint>
 
@@ -1508,6 +1508,271 @@
     <origin rpy="0 0 0" xyz="0.08027 -0.07769 -0.12195"/>
     <parent link="MiddleRightEffector_x_link"/>
     <child link="MiddleRight_foot_cp_4_link"/>
+  </joint>
+
+ <joint name="FrontRightshoulder_joint" type="revolute">
+    <axis xyz="0 0 1"/>
+    <limit effort="15" lower="-1.57" upper="1" velocity="5"/>
+
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="head_link"/>
+    <child link="FrontRightshoulder_link"/>
+  </joint>
+
+  <link name="FrontRightshoulder_link"/>
+  
+  <joint name="FrontRightUpperLimb_z_joint" type="revolute">
+    <axis xyz="0 0 1"/>
+    <limit effort="15" lower="-1.57" upper="1" velocity="5"/>
+
+    <origin rpy="0 0 0" xyz="-0.1891 0 -0.0795"/>
+    <parent link="FrontRightshoulder_link"/>
+    <child link="FrontRightUpperLimb_z_link"/>
+  </joint>
+  <joint name="FrontRightUpperLimb_y_joint" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="15" lower="-1.57" upper="0.7" velocity="5"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="FrontRightUpperLimb_z_link"/>
+    <child link="FrontRightUpperLimb_y_link"/>
+  </joint>
+  <joint name="FrontRightUpperLimb_x_joint" type="revolute">
+    <axis xyz="1 0 0"/>
+    <limit effort="15" lower="-1.2" upper="1.57" velocity="5"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="FrontRightUpperLimb_y_link"/>
+    <child link="FrontRightUpperLimb_x_link"/>
+  </joint>
+
+  <link name="FrontRightUpperLimb_z_link"/>
+  <link name="FrontRightUpperLimb_y_link"/>
+  <link name="FrontRightUpperLimb_x_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../spider/model/mesh/MiddleLeftUpperLimb.obj"/>
+      </geometry>
+      <material name="Blue"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../spider/model/mesh/MiddleLeftUpperLimb.obj"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="11.28066677275"/>
+      <inertia ixx="0.258606759375" ixy="0.000002463301455" ixz="0.00032211891975" iyy="0.258311314375" iyz="-0.000065609605275" izz="0.021073428046875"/>
+      <origin xyz="-0.00364974 -0.00003172 -0.19576731"/>
+    </inertial>
+  </link>
+
+  <joint name="FrontRightLimb_joint" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="15" lower="-2.4" upper="0" velocity="5"/>
+    <origin rpy="0 0 0" xyz="-0.4456 0.0015 0.1781"/>
+    <parent link="FrontRightUpperLimb_x_link"/>
+    <child link="FrontRightLimb_link"/>
+  </joint>
+
+  <link name="FrontRightLimb_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../spider/model/mesh/MiddleLeftLimb.obj"/>
+      </geometry>
+      <material name="Blue"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../spider/model/mesh/MiddleLeftLimb.obj"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="8.394054321"/>
+      <inertia ixx="0.1879741409375" ixy="0.000000001719205" ixz="-0.00000000509231" iyy="0.1879741525" iyz="-0.00000001780773" izz="0.01166299402353"/>
+      <origin xyz="0.0 -0.00029422 -0.20195734"/>
+    </inertial>
+  </link>
+
+  <joint name="FrontRightLowerLimb_joint" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="15" lower="-2.4" upper="0" velocity="5"/>
+    <origin rpy="0 0 0" xyz="-0.3928 -0.0167 -0.3044"/>
+    <parent link="FrontRightLimb_link"/>
+    <child link="FrontRightLowerLimb_link"/>
+  </joint>
+
+  <link name="FrontRightLowerLimb_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../spider/model/mesh/MiddleLeftLowerLimb.obj"/>
+      </geometry>
+      <material name="Blue"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../spider/model/mesh/MiddleLeftLowerLimb.obj"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="8.394054321"/>
+      <inertia ixx="0.1879741409375" ixy="0.000000001719205" ixz="-0.00000000509231" iyy="0.1879741525" iyz="-0.00000001780773" izz="0.01166299402353"/>
+      <origin xyz="0.0 -0.00029422 -0.20195734"/>
+    </inertial>
+  </link>
+
+
+  <joint name="FrontRightEffector_z_joint" type="revolute">
+    <axis xyz="0 0 1"/>
+    <limit effort="15" lower="-0.01" upper="0" velocity="5"/>
+    <origin rpy="0 0 0" xyz="-0.4343 -0.054 -0.1597"/>
+    <parent link="FrontRightLowerLimb_link"/>
+    <child link="FrontRightEffector_z_link"/>
+  </joint>
+  <joint name="FrontRightEffector_y_joint" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="15" lower="-0.5" upper="0.5" velocity="5"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="FrontRightEffector_z_link"/>
+    <child link="FrontRightEffector_y_link"/>
+  </joint>
+  <joint name="FrontRightEffector_x_joint" type="revolute">
+    <axis xyz="1 0 0"/>
+    <limit effort="15" lower="-0.8" upper="0.6" velocity="5"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="FrontRightEffector_y_link"/>
+    <child link="FrontRightEffector_x_link"/>
+  </joint>
+
+  <link name="FrontRightEffector_z_link"/>
+  <link name="FrontRightEffector_y_link"/>
+  <link name="FrontRightEffector_x_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../spider/model/mesh/MiddleLeftEffector.obj"/>
+      </geometry>
+      <material name="Blue"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../spider/model/mesh/MiddleLeftEffector.obj"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="2.24629475115"/>
+      <inertia ixx="0.00997119431636" ixy="-0.00032381616821" ixz="0.00003556416949" iyy="0.00325251065432" iyz="0.00137797584221" izz="0.01040399675772"/>
+      <origin xyz="-0.00160579 0.04884521 -0.0783361"/>
+    </inertial>
+  </link>
+	
+	  
+  <joint name="FrontRight_foot_endeffector_joint" type="fixed">
+    <axis xyz="0 0 1"/>
+    <limit effort="15" lower="-0.001" upper="0.001" velocity="5"/>
+    <origin rpy="0 0 0" xyz="-0.024924 -0.097428 0.001788"/>
+    <parent link="FrontRightEffector_x_link"/>
+    <child link="FrontRight_foot_endeffector_link"/>
+  </joint>
+
+  <link name="FrontRight_foot_endeffector_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="Blue"/>
+    </visual>
+  </link>  
+  
+<link name="FrontRight_foot_cp_1_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="Blue"/>
+    </visual>
+    <inertial>
+      <mass value="0"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="0"/>
+      <origin xyz="0 0 0"/>
+    </inertial>
+  </link>
+  <link name="FrontRight_foot_cp_2_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="Blue"/>
+    </visual>
+    <inertial>
+      <mass value="0"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="0"/>
+      <origin xyz="0 0 0"/>
+    </inertial>
+  </link>
+  <link name="FrontRight_foot_cp_3_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="Blue"/>
+    </visual>
+    <inertial>
+      <mass value="0"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="0"/>
+      <origin xyz="0 0 0"/>
+    </inertial>
+  </link>
+  <link name="FrontRight_foot_cp_4_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="Blue"/>
+    </visual>
+    <inertial>
+      <mass value="0"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="0"/>
+      <origin xyz="0 0 0"/>
+    </inertial>
+  </link>
+  <joint name="FrontRight_foot_cp_1_joint" type="revolute">
+    <axis xyz="0 0 1"/>
+    <limit effort="15" lower="0" upper="0" velocity="5"/>
+    <origin rpy="0 0 0" xyz="0.08027 0.27372 -0.12195"/>
+    <parent link="FrontRightEffector_x_link"/>
+    <child link="FrontRight_foot_cp_1_link"/>
+  </joint>
+  <joint name="FrontRight_foot_cp_2_joint" type="revolute">
+    <axis xyz="0 0 1"/>
+    <limit effort="15" lower="0" upper="0" velocity="5"/>
+    <origin rpy="0 0 0" xyz="-0.09166 0.27372 -0.12195"/>
+    <parent link="FrontRightEffector_x_link"/>
+    <child link="FrontRight_foot_cp_2_link"/>
+  </joint>
+  <joint name="FrontRight_foot_cp_3_joint" type="revolute">
+    <axis xyz="0 0 1"/>
+    <limit effort="15" lower="0" upper="0" velocity="5"/>
+    <origin rpy="0 0 0" xyz="-0.09166 -0.07769 -0.12195"/>
+    <parent link="FrontRightEffector_x_link"/>
+    <child link="FrontRight_foot_cp_3_link"/>
+  </joint>
+  <joint name="FrontRight_foot_cp_4_joint" type="revolute">
+    <axis xyz="0 0 1"/>
+    <limit effort="15" lower="0" upper="0" velocity="5"/>
+    <origin rpy="0 0 0" xyz="0.08027 -0.07769 -0.12195"/>
+    <parent link="FrontRightEffector_x_link"/>
+    <child link="FrontRight_foot_cp_4_link"/>
   </joint>
 
 
