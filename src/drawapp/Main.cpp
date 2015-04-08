@@ -725,7 +725,7 @@ void command(int cmd)   /**  key control function; */
         std::cout << " SAMPLES" << samples.size() << std::endl;
             if(samples.empty()) return;
             currentSample ++; if(samples.size() <= currentSample) currentSample = samples.size()-1;
-            planner::sampling::LoadSample(*(samples[currentSample]),planner::GetChild(cScenario->robot, "upper_right_arm_z_joint"));
+            planner::sampling::LoadSample(*(samples[currentSample]),planner::GetChild(cScenario->robot, "FrontLeftUpperLimb_z_joint"));
             break;
         }
         break;
@@ -734,7 +734,7 @@ void command(int cmd)   /**  key control function; */
         std::cout << " SAMPLES" << samples.size() << std::endl;
             if(samples.empty()) return;
             currentSample --; if(currentSample < 0) currentSample = 0;
-            planner::sampling::LoadSample(*(samples[currentSample]),planner::GetChild(cScenario->robot, "upper_right_arm_z_joint"));
+            planner::sampling::LoadSample(*(samples[currentSample]),planner::GetChild(cScenario->robot, "FrontLeftUpperLimb_z_joint"));
             break;
         }
         case 'm' :
@@ -743,7 +743,7 @@ void command(int cmd)   /**  key control function; */
             break;
         }
         case 'a' :
-        planner::GetChild(cScenario->robot, "MiddleLeftUpperLimb_z_joint")->SetRotation(planner::GetChild(cScenario->robot,"MiddleLeftUpperLimb_z_joint")->value-0.1* dirIK);
+        planner::GetChild(cScenario->robot, "FrontLeftUpperLimb_z_joint")->SetRotation(planner::GetChild(cScenario->robot,"FrontLeftUpperLimb_z_joint")->value-0.1* dirIK);
         break;
         case 'z' :
         planner::GetChild(cScenario->robot, "MiddleLeftUpperLimb_y_joint")->SetRotation(planner::GetChild(cScenario->robot,"MiddleLeftUpperLimb_y_joint")->value-0.1* dirIK);
@@ -758,7 +758,7 @@ void command(int cmd)   /**  key control function; */
         planner::GetChild(cScenario->robot, "MiddleLeftLowerLimb_joint")->SetRotation(planner::GetChild(cScenario->robot,"MiddleLeftLowerLimb_joint")->value-0.1* dirIK);
         break;
         case 'Z' :
-        planner::GetChild(cScenario->robot, "right_hand_y_joint")->SetRotation(planner::GetChild(cScenario->robot,"right_hand_y_joint")->value-0.1* dirIK);
+        planner::GetChild(cScenario->robot, "middleleftshoulder_joint")->SetRotation(planner::GetChild(cScenario->robot,"middleleftshoulder_joint")->value-0.1* dirIK);
         break;
         case 'E' :
         planner::GetChild(cScenario->robot, "right_hand_x_joint")->SetRotation(planner::GetChild(cScenario->robot,"right_hand_x_joint")->value-0.1* dirIK);
