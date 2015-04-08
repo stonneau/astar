@@ -185,13 +185,24 @@
   </joint>
 
   <link name="head_link"/>
+
+   <joint name="Shoulder_joint" type="revolute">
+    <axis xyz="0 0 1"/>
+    <limit effort="15" lower="-1.57" upper="1" velocity="5"/>
+
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="head_link"/>
+    <child link="middleleftshoulder_link"/>
+  </joint>
+
+  <link name="middleleftshoulder_link"/>
   
   <joint name="MiddleLeftUpperLimb_z_joint" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="15" lower="-1.57" upper="1" velocity="5"/>
 
     <origin rpy="0 0 0" xyz="-0.1891 0 -0.0795"/>
-    <parent link="head_link"/>
+    <parent link="middleleftshoulder_link"/>
     <child link="MiddleLeftUpperLimb_z_link"/>
   </joint>
   <joint name="MiddleLeftUpperLimb_y_joint" type="revolute">
