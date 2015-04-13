@@ -439,7 +439,7 @@
   <joint name="Middleleft_foot_cp_3_joint" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="15" lower="0" upper="0" velocity="5"/>
-    <origin rpy="0 0 0" xyz="-0.09166 -0.07769 -0.12195"/>
+    <origin rpy="0 0 0" xyz="-0.12 -0.08 -0.005"/>
     <parent link="MiddleLeftEffector_x_link"/>
     <child link="Middleleft_foot_cp_3_link"/>
   </joint>
@@ -687,31 +687,32 @@
       <origin xyz="0 0 0"/>
     </inertial>
   </link>
+
   <joint name="Frontleft_foot_cp_1_joint" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="15" lower="0" upper="0" velocity="5"/>
-    <origin rpy="0 0 0" xyz="0.08027 0.27372 0"/>
+    <origin rpy="0 0 0" xyz="-0.05 0.02 -0.005"/>
     <parent link="Frontleft_foot_endeffector_link"/>
     <child link="Frontleft_foot_cp_1_link"/>
   </joint>
   <joint name="Frontleft_foot_cp_2_joint" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="15" lower="0" upper="0" velocity="5"/>
-    <origin rpy="0 0 0" xyz="-0.09166 0.27372 0"/>
+    <origin rpy="0 0 0" xyz="-0.12 0.02 -0.005"/>
     <parent link="Frontleft_foot_endeffector_link"/>
     <child link="Frontleft_foot_cp_2_link"/>
   </joint>
   <joint name="Frontleft_foot_cp_3_joint" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="15" lower="0" upper="0" velocity="5"/>
-    <origin rpy="0 0 0" xyz="-0.09166 -0.07769 0"/>
-    <parent link="Frontleft_foot_endeffector_link"/>
+    <origin rpy="0 0 0" xyz="-0.12 -0.08 -0.005"/>
+    <parent link="FrontLeftEffector_x_link"/>
     <child link="Frontleft_foot_cp_3_link"/>
   </joint>
   <joint name="Frontleft_foot_cp_4_joint" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="15" lower="0" upper="0" velocity="5"/>
-    <origin rpy="0 0 0" xyz="0.08027 -0.07769 0"/>
+    <origin rpy="0 0 0" xyz="-0.05 -0.08 -0.005"/>
     <parent link="Frontleft_foot_endeffector_link"/>
     <child link="Frontleft_foot_cp_4_link"/>
   </joint>
@@ -1234,7 +1235,7 @@
   <joint name="BackRight_foot_cp_3_joint" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="15" lower="0" upper="0" velocity="5"/>
-    <origin rpy="0 0 0" xyz="-0.09166 -0.07769 -0.12195"/>
+    <origin rpy="0 0 0" xyz="-0.12 -0.08 -0.005"/>
     <parent link="BackRightEffector_x_link"/>
     <child link="BackRight_foot_cp_3_link"/>
   </joint>
@@ -1498,7 +1499,7 @@
   <joint name="MiddleRight_foot_cp_3_joint" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="15" lower="0" upper="0" velocity="5"/>
-    <origin rpy="0 0 0" xyz="-0.09166 -0.07769 -0.12195"/>
+    <origin rpy="0 0 0" xyz="-0.12 -0.08 -0.005"/>
     <parent link="MiddleRightEffector_x_link"/>
     <child link="MiddleRight_foot_cp_3_link"/>
   </joint>
@@ -1763,7 +1764,7 @@
   <joint name="FrontRight_foot_cp_3_joint" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="15" lower="0" upper="0" velocity="5"/>
-    <origin rpy="0 0 0" xyz="-0.09166 -0.07769 -0.12195"/>
+    <origin rpy="0 0 0" xyz="-0.12 -0.08 -0.005"/>
     <parent link="FrontRightEffector_x_link"/>
     <child link="FrontRight_foot_cp_3_link"/>
   </joint>
