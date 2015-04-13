@@ -7,8 +7,44 @@ constraint joint_name="FrontRightshoulder_joint" min="225" max="225" default="22
 constraint joint_name="FrontLeftUpperLimb_z_joint" min="-15" max="15" default="0"
 constraint joint_name="FrontLeftUpperLimb_y_joint" min="-15" max="15" default="0"
 constraint joint_name="FrontLeftUpperLimb_x_joint" min="-15" max="15" default="0"
-
 constraint joint_name="FrontLeftLimb_joint" min="-15" max="15" default="0"
-
 constraint joint_name="FrontLeftLowerLimb_joint" min="-15" max="15" default="0"
+
+constraint joint_name="MiddleLeftUpperLimb_z_joint" min="-15" max="15" default="0"
+constraint joint_name="MiddleLeftUpperLimb_y_joint" min="-15" max="15" default="0"
+constraint joint_name="MiddleLeftUpperLimb_x_joint" min="-15" max="15" default="0"
+constraint joint_name="MiddleLeftLimb_joint" min="-15" max="15" default="0"
+constraint joint_name="MiddleLeftLowerLimb_joint" min="-15" max="15" default="0"
+
+
+constraint joint_name="BackLeftUpperLimb_z_joint" min="-15" max="15" default="0"
+constraint joint_name="BackLeftUpperLimb_y_joint" min="-15" max="15" default="0"
+constraint joint_name="BackLeftUpperLimb_x_joint" min="-15" max="15" default="0"
+constraint joint_name="BackLeftLimb_joint" min="-15" max="15" default="0"
+constraint joint_name="BackLeftLowerLimb_joint" min="-15" max="15" default="0"
+
+
+constraint joint_name="FrontRightUpperLimb_z_joint" min="-15" max="15" default="0"
+constraint joint_name="FrontRightUpperLimb_y_joint" min="-15" max="15" default="0"
+constraint joint_name="FrontRightUpperLimb_x_joint" min="-15" max="15" default="0"
+constraint joint_name="FrontRightLimb_joint" min="-15" max="15" default="0"
+constraint joint_name="FrontRightLowerLimb_joint" min="-15" max="15" default="0"
+
+constraint joint_name="MiddleRightUpperLimb_z_joint" min="-15" max="15" default="0"
+constraint joint_name="MiddleRightUpperLimb_y_joint" min="-15" max="15" default="0"
+constraint joint_name="MiddleRightUpperLimb_x_joint" min="-15" max="15" default="0"
+constraint joint_name="MiddleRightLimb_joint" min="-15" max="15" default="0"
+constraint joint_name="MiddleRightLowerLimb_joint" min="-15" max="15" default="0"
+
+
+constraint joint_name="BackRightUpperLimb_z_joint" min="-15" max="15" default="0"
+constraint joint_name="BackRightUpperLimb_y_joint" min="-15" max="15" default="0"
+constraint joint_name="BackRightUpperLimb_x_joint" min="-15" max="15" default="0"
+constraint joint_name="BackRightLimb_joint" min="-15" max="15" default="0"
+constraint joint_name="BackRightLowerLimb_joint" min="-15" max="15" default="0"
+
+
+
+
+
 

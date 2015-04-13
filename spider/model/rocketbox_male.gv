@@ -1,0 +1,287 @@
+digraph G {
+node [shape=box];
+"root_link" [label="root_link"];
+"base_prismatic_dummy1" [label="base_prismatic_dummy1"];
+"base_prismatic_dummy2" [label="base_prismatic_dummy2"];
+"base_prismatic_dummy3" [label="base_prismatic_dummy3"];
+"base_revolute_dummy1" [label="base_revolute_dummy1"];
+"base_revolute_dummy2" [label="base_revolute_dummy2"];
+"pelvis_link" [label="pelvis_link"];
+"torso_z_link" [label="torso_z_link"];
+"torso_y_link" [label="torso_y_link"];
+"torso_x_link" [label="torso_x_link"];
+"head_link" [label="head_link"];
+"BackLeftshoulder_link" [label="BackLeftshoulder_link"];
+"BackLeftUpperLimb_z_link" [label="BackLeftUpperLimb_z_link"];
+"BackLeftUpperLimb_y_link" [label="BackLeftUpperLimb_y_link"];
+"BackLeftUpperLimb_x_link" [label="BackLeftUpperLimb_x_link"];
+"BackLeftLimb_link" [label="BackLeftLimb_link"];
+"BackLeftLowerLimb_link" [label="BackLeftLowerLimb_link"];
+"BackLeftEffector_z_link" [label="BackLeftEffector_z_link"];
+"BackLeftEffector_y_link" [label="BackLeftEffector_y_link"];
+"BackLeftEffector_x_link" [label="BackLeftEffector_x_link"];
+"BackLeft_foot_cp_1_link" [label="BackLeft_foot_cp_1_link"];
+"BackLeft_foot_cp_2_link" [label="BackLeft_foot_cp_2_link"];
+"BackLeft_foot_cp_3_link" [label="BackLeft_foot_cp_3_link"];
+"BackLeft_foot_cp_4_link" [label="BackLeft_foot_cp_4_link"];
+"BackLeft_foot_endeffector_link" [label="BackLeft_foot_endeffector_link"];
+"BackRightshoulder_link" [label="BackRightshoulder_link"];
+"BackRightUpperLimb_z_link" [label="BackRightUpperLimb_z_link"];
+"BackRightUpperLimb_y_link" [label="BackRightUpperLimb_y_link"];
+"BackRightUpperLimb_x_link" [label="BackRightUpperLimb_x_link"];
+"BackRightLimb_link" [label="BackRightLimb_link"];
+"BackRightLowerLimb_link" [label="BackRightLowerLimb_link"];
+"BackRightEffector_z_link" [label="BackRightEffector_z_link"];
+"BackRightEffector_y_link" [label="BackRightEffector_y_link"];
+"BackRightEffector_x_link" [label="BackRightEffector_x_link"];
+"BackRight_foot_cp_1_link" [label="BackRight_foot_cp_1_link"];
+"BackRight_foot_cp_2_link" [label="BackRight_foot_cp_2_link"];
+"BackRight_foot_cp_3_link" [label="BackRight_foot_cp_3_link"];
+"BackRight_foot_cp_4_link" [label="BackRight_foot_cp_4_link"];
+"BackRight_foot_endeffector_link" [label="BackRight_foot_endeffector_link"];
+"FrontRightshoulder_link" [label="FrontRightshoulder_link"];
+"FrontRightUpperLimb_z_link" [label="FrontRightUpperLimb_z_link"];
+"FrontRightUpperLimb_y_link" [label="FrontRightUpperLimb_y_link"];
+"FrontRightUpperLimb_x_link" [label="FrontRightUpperLimb_x_link"];
+"FrontRightLimb_link" [label="FrontRightLimb_link"];
+"FrontRightLowerLimb_link" [label="FrontRightLowerLimb_link"];
+"FrontRightEffector_z_link" [label="FrontRightEffector_z_link"];
+"FrontRightEffector_y_link" [label="FrontRightEffector_y_link"];
+"FrontRightEffector_x_link" [label="FrontRightEffector_x_link"];
+"FrontRight_foot_cp_1_link" [label="FrontRight_foot_cp_1_link"];
+"FrontRight_foot_cp_2_link" [label="FrontRight_foot_cp_2_link"];
+"FrontRight_foot_cp_3_link" [label="FrontRight_foot_cp_3_link"];
+"FrontRight_foot_cp_4_link" [label="FrontRight_foot_cp_4_link"];
+"FrontRight_foot_endeffector_link" [label="FrontRight_foot_endeffector_link"];
+"MiddleRightshoulder_link" [label="MiddleRightshoulder_link"];
+"MiddleRightUpperLimb_z_link" [label="MiddleRightUpperLimb_z_link"];
+"MiddleRightUpperLimb_y_link" [label="MiddleRightUpperLimb_y_link"];
+"MiddleRightUpperLimb_x_link" [label="MiddleRightUpperLimb_x_link"];
+"MiddleRightLimb_link" [label="MiddleRightLimb_link"];
+"MiddleRightLowerLimb_link" [label="MiddleRightLowerLimb_link"];
+"MiddleRightEffector_z_link" [label="MiddleRightEffector_z_link"];
+"MiddleRightEffector_y_link" [label="MiddleRightEffector_y_link"];
+"MiddleRightEffector_x_link" [label="MiddleRightEffector_x_link"];
+"MiddleRight_foot_cp_1_link" [label="MiddleRight_foot_cp_1_link"];
+"MiddleRight_foot_cp_2_link" [label="MiddleRight_foot_cp_2_link"];
+"MiddleRight_foot_cp_3_link" [label="MiddleRight_foot_cp_3_link"];
+"MiddleRight_foot_cp_4_link" [label="MiddleRight_foot_cp_4_link"];
+"MiddleRight_foot_endeffector_link" [label="MiddleRight_foot_endeffector_link"];
+"frontleftshoulder_link" [label="frontleftshoulder_link"];
+"FrontLeftUpperLimb_z_link" [label="FrontLeftUpperLimb_z_link"];
+"FrontLeftUpperLimb_y_link" [label="FrontLeftUpperLimb_y_link"];
+"FrontLeftUpperLimb_x_link" [label="FrontLeftUpperLimb_x_link"];
+"FrontLeftLimb_link" [label="FrontLeftLimb_link"];
+"FrontLeftLowerLimb_link" [label="FrontLeftLowerLimb_link"];
+"FrontLeftEffector_z_link" [label="FrontLeftEffector_z_link"];
+"FrontLeftEffector_y_link" [label="FrontLeftEffector_y_link"];
+"FrontLeftEffector_x_link" [label="FrontLeftEffector_x_link"];
+"Frontleft_foot_cp_1_link" [label="Frontleft_foot_cp_1_link"];
+"Frontleft_foot_cp_2_link" [label="Frontleft_foot_cp_2_link"];
+"Frontleft_foot_cp_3_link" [label="Frontleft_foot_cp_3_link"];
+"Frontleft_foot_cp_4_link" [label="Frontleft_foot_cp_4_link"];
+"Frontleft_foot_endeffector_link" [label="Frontleft_foot_endeffector_link"];
+"middleleftshoulder_link" [label="middleleftshoulder_link"];
+"MiddleLeftUpperLimb_z_link" [label="MiddleLeftUpperLimb_z_link"];
+"MiddleLeftUpperLimb_y_link" [label="MiddleLeftUpperLimb_y_link"];
+"MiddleLeftUpperLimb_x_link" [label="MiddleLeftUpperLimb_x_link"];
+"MiddleLeftLimb_link" [label="MiddleLeftLimb_link"];
+"MiddleLeftLowerLimb_link" [label="MiddleLeftLowerLimb_link"];
+"MiddleLeftEffector_z_link" [label="MiddleLeftEffector_z_link"];
+"MiddleLeftEffector_y_link" [label="MiddleLeftEffector_y_link"];
+"MiddleLeftEffector_x_link" [label="MiddleLeftEffector_x_link"];
+"Middleleft_foot_cp_1_link" [label="Middleleft_foot_cp_1_link"];
+"Middleleft_foot_cp_2_link" [label="Middleleft_foot_cp_2_link"];
+"Middleleft_foot_cp_3_link" [label="Middleleft_foot_cp_3_link"];
+"Middleleft_foot_cp_4_link" [label="Middleleft_foot_cp_4_link"];
+"Middleleft_foot_endeffector_link" [label="Middleleft_foot_endeffector_link"];
+node [shape=ellipse, color=blue, fontcolor=blue];
+"root_link" -> "base_prismatic_joint_x" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"base_prismatic_joint_x" -> "base_prismatic_dummy1"
+"base_prismatic_dummy1" -> "base_prismatic_joint_y" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"base_prismatic_joint_y" -> "base_prismatic_dummy2"
+"base_prismatic_dummy2" -> "base_prismatic_joint_z" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"base_prismatic_joint_z" -> "base_prismatic_dummy3"
+"base_prismatic_dummy3" -> "base_revolute_joint_x" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"base_revolute_joint_x" -> "base_revolute_dummy1"
+"base_revolute_dummy1" -> "base_revolute_joint_y" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"base_revolute_joint_y" -> "base_revolute_dummy2"
+"base_revolute_dummy2" -> "base_revolute_joint_z" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"base_revolute_joint_z" -> "pelvis_link"
+"pelvis_link" -> "torso_z_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"torso_z_joint" -> "torso_z_link"
+"torso_z_link" -> "torso_y_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"torso_y_joint" -> "torso_y_link"
+"torso_y_link" -> "torso_x_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"torso_x_joint" -> "torso_x_link"
+"torso_x_link" -> "head_joint" [label="xyz: 0 0.4982 0 \nrpy: 0 -0 0"]
+"head_joint" -> "head_link"
+"head_link" -> "BackLeftshoulder_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"BackLeftshoulder_joint" -> "BackLeftshoulder_link"
+"BackLeftshoulder_link" -> "BackLeftUpperLimb_z_joint" [label="xyz: -0.1891 0 -0.0795 \nrpy: 0 -0 0"]
+"BackLeftUpperLimb_z_joint" -> "BackLeftUpperLimb_z_link"
+"BackLeftUpperLimb_z_link" -> "BackLeftUpperLimb_y_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"BackLeftUpperLimb_y_joint" -> "BackLeftUpperLimb_y_link"
+"BackLeftUpperLimb_y_link" -> "BackLeftUpperLimb_x_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"BackLeftUpperLimb_x_joint" -> "BackLeftUpperLimb_x_link"
+"BackLeftUpperLimb_x_link" -> "BackLeftLimb_joint" [label="xyz: -0.4456 0.0015 0.1781 \nrpy: 0 -0 0"]
+"BackLeftLimb_joint" -> "BackLeftLimb_link"
+"BackLeftLimb_link" -> "BackLeftLowerLimb_joint" [label="xyz: -0.3928 -0.0167 -0.3044 \nrpy: 0 -0 0"]
+"BackLeftLowerLimb_joint" -> "BackLeftLowerLimb_link"
+"BackLeftLowerLimb_link" -> "BackLeftEffector_z_joint" [label="xyz: -0.4343 -0.054 -0.1597 \nrpy: 0 -0 0"]
+"BackLeftEffector_z_joint" -> "BackLeftEffector_z_link"
+"BackLeftEffector_z_link" -> "BackLeftEffector_y_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"BackLeftEffector_y_joint" -> "BackLeftEffector_y_link"
+"BackLeftEffector_y_link" -> "BackLeftEffector_x_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"BackLeftEffector_x_joint" -> "BackLeftEffector_x_link"
+"BackLeftEffector_x_link" -> "BackLeft_foot_cp_1_joint" [label="xyz: -0.05 0.02 -0.005 \nrpy: 0 -0 0"]
+"BackLeft_foot_cp_1_joint" -> "BackLeft_foot_cp_1_link"
+"BackLeftEffector_x_link" -> "BackLeft_foot_cp_2_joint" [label="xyz: -0.12 0.02 -0.005 \nrpy: 0 -0 0"]
+"BackLeft_foot_cp_2_joint" -> "BackLeft_foot_cp_2_link"
+"BackLeftEffector_x_link" -> "BackLeft_foot_cp_3_joint" [label="xyz: -0.12 -0.08 -0.005 \nrpy: 0 -0 0"]
+"BackLeft_foot_cp_3_joint" -> "BackLeft_foot_cp_3_link"
+"BackLeftEffector_x_link" -> "BackLeft_foot_cp_4_joint" [label="xyz: -0.05 -0.08 -0.005 \nrpy: 0 -0 0"]
+"BackLeft_foot_cp_4_joint" -> "BackLeft_foot_cp_4_link"
+"BackLeftEffector_x_link" -> "BackLeft_foot_endeffector_joint" [label="xyz: -0.024924 -0.097428 0.001788 \nrpy: 0 -0 0"]
+"BackLeft_foot_endeffector_joint" -> "BackLeft_foot_endeffector_link"
+"head_link" -> "BackRightshoulder_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"BackRightshoulder_joint" -> "BackRightshoulder_link"
+"BackRightshoulder_link" -> "BackRightUpperLimb_z_joint" [label="xyz: -0.1891 0 -0.0795 \nrpy: 0 -0 0"]
+"BackRightUpperLimb_z_joint" -> "BackRightUpperLimb_z_link"
+"BackRightUpperLimb_z_link" -> "BackRightUpperLimb_y_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"BackRightUpperLimb_y_joint" -> "BackRightUpperLimb_y_link"
+"BackRightUpperLimb_y_link" -> "BackRightUpperLimb_x_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"BackRightUpperLimb_x_joint" -> "BackRightUpperLimb_x_link"
+"BackRightUpperLimb_x_link" -> "BackRightLimb_joint" [label="xyz: -0.4456 0.0015 0.1781 \nrpy: 0 -0 0"]
+"BackRightLimb_joint" -> "BackRightLimb_link"
+"BackRightLimb_link" -> "BackRightLowerLimb_joint" [label="xyz: -0.3928 -0.0167 -0.3044 \nrpy: 0 -0 0"]
+"BackRightLowerLimb_joint" -> "BackRightLowerLimb_link"
+"BackRightLowerLimb_link" -> "BackRightEffector_z_joint" [label="xyz: -0.4343 -0.054 -0.1597 \nrpy: 0 -0 0"]
+"BackRightEffector_z_joint" -> "BackRightEffector_z_link"
+"BackRightEffector_z_link" -> "BackRightEffector_y_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"BackRightEffector_y_joint" -> "BackRightEffector_y_link"
+"BackRightEffector_y_link" -> "BackRightEffector_x_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"BackRightEffector_x_joint" -> "BackRightEffector_x_link"
+"BackRightEffector_x_link" -> "BackRight_foot_cp_1_joint" [label="xyz: -0.05 0.02 -0.005 \nrpy: 0 -0 0"]
+"BackRight_foot_cp_1_joint" -> "BackRight_foot_cp_1_link"
+"BackRightEffector_x_link" -> "BackRight_foot_cp_2_joint" [label="xyz: -0.12 0.02 -0.005 \nrpy: 0 -0 0"]
+"BackRight_foot_cp_2_joint" -> "BackRight_foot_cp_2_link"
+"BackRightEffector_x_link" -> "BackRight_foot_cp_3_joint" [label="xyz: -0.12 -0.08 -0.005 \nrpy: 0 -0 0"]
+"BackRight_foot_cp_3_joint" -> "BackRight_foot_cp_3_link"
+"BackRightEffector_x_link" -> "BackRight_foot_cp_4_joint" [label="xyz: -0.05 -0.08 -0.005 \nrpy: 0 -0 0"]
+"BackRight_foot_cp_4_joint" -> "BackRight_foot_cp_4_link"
+"BackRightEffector_x_link" -> "BackRight_foot_endeffector_joint" [label="xyz: -0.024924 -0.097428 0.001788 \nrpy: 0 -0 0"]
+"BackRight_foot_endeffector_joint" -> "BackRight_foot_endeffector_link"
+"head_link" -> "FrontRightshoulder_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"FrontRightshoulder_joint" -> "FrontRightshoulder_link"
+"FrontRightshoulder_link" -> "FrontRightUpperLimb_z_joint" [label="xyz: -0.1891 0 -0.0795 \nrpy: 0 -0 0"]
+"FrontRightUpperLimb_z_joint" -> "FrontRightUpperLimb_z_link"
+"FrontRightUpperLimb_z_link" -> "FrontRightUpperLimb_y_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"FrontRightUpperLimb_y_joint" -> "FrontRightUpperLimb_y_link"
+"FrontRightUpperLimb_y_link" -> "FrontRightUpperLimb_x_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"FrontRightUpperLimb_x_joint" -> "FrontRightUpperLimb_x_link"
+"FrontRightUpperLimb_x_link" -> "FrontRightLimb_joint" [label="xyz: -0.4456 0.0015 0.1781 \nrpy: 0 -0 0"]
+"FrontRightLimb_joint" -> "FrontRightLimb_link"
+"FrontRightLimb_link" -> "FrontRightLowerLimb_joint" [label="xyz: -0.3928 -0.0167 -0.3044 \nrpy: 0 -0 0"]
+"FrontRightLowerLimb_joint" -> "FrontRightLowerLimb_link"
+"FrontRightLowerLimb_link" -> "FrontRightEffector_z_joint" [label="xyz: -0.4343 -0.054 -0.1597 \nrpy: 0 -0 0"]
+"FrontRightEffector_z_joint" -> "FrontRightEffector_z_link"
+"FrontRightEffector_z_link" -> "FrontRightEffector_y_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"FrontRightEffector_y_joint" -> "FrontRightEffector_y_link"
+"FrontRightEffector_y_link" -> "FrontRightEffector_x_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"FrontRightEffector_x_joint" -> "FrontRightEffector_x_link"
+"FrontRightEffector_x_link" -> "FrontRight_foot_cp_1_joint" [label="xyz: -0.05 0.02 -0.005 \nrpy: 0 -0 0"]
+"FrontRight_foot_cp_1_joint" -> "FrontRight_foot_cp_1_link"
+"FrontRightEffector_x_link" -> "FrontRight_foot_cp_2_joint" [label="xyz: -0.12 0.02 -0.005 \nrpy: 0 -0 0"]
+"FrontRight_foot_cp_2_joint" -> "FrontRight_foot_cp_2_link"
+"FrontRightEffector_x_link" -> "FrontRight_foot_cp_3_joint" [label="xyz: -0.12 -0.08 -0.005 \nrpy: 0 -0 0"]
+"FrontRight_foot_cp_3_joint" -> "FrontRight_foot_cp_3_link"
+"FrontRightEffector_x_link" -> "FrontRight_foot_cp_4_joint" [label="xyz: -0.05 -0.08 -0.005 \nrpy: 0 -0 0"]
+"FrontRight_foot_cp_4_joint" -> "FrontRight_foot_cp_4_link"
+"FrontRightEffector_x_link" -> "FrontRight_foot_endeffector_joint" [label="xyz: -0.024924 -0.097428 0.001788 \nrpy: 0 -0 0"]
+"FrontRight_foot_endeffector_joint" -> "FrontRight_foot_endeffector_link"
+"head_link" -> "MiddleRightshoulder_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"MiddleRightshoulder_joint" -> "MiddleRightshoulder_link"
+"MiddleRightshoulder_link" -> "MiddleRightUpperLimb_z_joint" [label="xyz: -0.1891 0 -0.0795 \nrpy: 0 -0 0"]
+"MiddleRightUpperLimb_z_joint" -> "MiddleRightUpperLimb_z_link"
+"MiddleRightUpperLimb_z_link" -> "MiddleRightUpperLimb_y_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"MiddleRightUpperLimb_y_joint" -> "MiddleRightUpperLimb_y_link"
+"MiddleRightUpperLimb_y_link" -> "MiddleRightUpperLimb_x_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"MiddleRightUpperLimb_x_joint" -> "MiddleRightUpperLimb_x_link"
+"MiddleRightUpperLimb_x_link" -> "MiddleRightLimb_joint" [label="xyz: -0.4456 0.0015 0.1781 \nrpy: 0 -0 0"]
+"MiddleRightLimb_joint" -> "MiddleRightLimb_link"
+"MiddleRightLimb_link" -> "MiddleRightLowerLimb_joint" [label="xyz: -0.3928 -0.0167 -0.3044 \nrpy: 0 -0 0"]
+"MiddleRightLowerLimb_joint" -> "MiddleRightLowerLimb_link"
+"MiddleRightLowerLimb_link" -> "MiddleRightEffector_z_joint" [label="xyz: -0.4343 -0.054 -0.1597 \nrpy: 0 -0 0"]
+"MiddleRightEffector_z_joint" -> "MiddleRightEffector_z_link"
+"MiddleRightEffector_z_link" -> "MiddleRightEffector_y_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"MiddleRightEffector_y_joint" -> "MiddleRightEffector_y_link"
+"MiddleRightEffector_y_link" -> "MiddleRightEffector_x_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"MiddleRightEffector_x_joint" -> "MiddleRightEffector_x_link"
+"MiddleRightEffector_x_link" -> "MiddleRight_foot_cp_1_joint" [label="xyz: -0.05 0.02 -0.005 \nrpy: 0 -0 0"]
+"MiddleRight_foot_cp_1_joint" -> "MiddleRight_foot_cp_1_link"
+"MiddleRightEffector_x_link" -> "MiddleRight_foot_cp_2_joint" [label="xyz: -0.12 0.02 -0.005 \nrpy: 0 -0 0"]
+"MiddleRight_foot_cp_2_joint" -> "MiddleRight_foot_cp_2_link"
+"MiddleRightEffector_x_link" -> "MiddleRight_foot_cp_3_joint" [label="xyz: -0.12 -0.08 -0.005 \nrpy: 0 -0 0"]
+"MiddleRight_foot_cp_3_joint" -> "MiddleRight_foot_cp_3_link"
+"MiddleRightEffector_x_link" -> "MiddleRight_foot_cp_4_joint" [label="xyz: -0.05 -0.08 -0.005 \nrpy: 0 -0 0"]
+"MiddleRight_foot_cp_4_joint" -> "MiddleRight_foot_cp_4_link"
+"MiddleRightEffector_x_link" -> "MiddleRight_foot_endeffector_joint" [label="xyz: -0.024924 -0.097428 0.001788 \nrpy: 0 -0 0"]
+"MiddleRight_foot_endeffector_joint" -> "MiddleRight_foot_endeffector_link"
+"head_link" -> "frontleftshoulder_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"frontleftshoulder_joint" -> "frontleftshoulder_link"
+"frontleftshoulder_link" -> "FrontLeftUpperLimb_z_joint" [label="xyz: -0.1891 0 -0.0795 \nrpy: 0 -0 0"]
+"FrontLeftUpperLimb_z_joint" -> "FrontLeftUpperLimb_z_link"
+"FrontLeftUpperLimb_z_link" -> "FrontLeftUpperLimb_y_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"FrontLeftUpperLimb_y_joint" -> "FrontLeftUpperLimb_y_link"
+"FrontLeftUpperLimb_y_link" -> "FrontLeftUpperLimb_x_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"FrontLeftUpperLimb_x_joint" -> "FrontLeftUpperLimb_x_link"
+"FrontLeftUpperLimb_x_link" -> "FrontLeftLimb_joint" [label="xyz: -0.4456 0.0015 0.1781 \nrpy: 0 -0 0"]
+"FrontLeftLimb_joint" -> "FrontLeftLimb_link"
+"FrontLeftLimb_link" -> "FrontLeftLowerLimb_joint" [label="xyz: -0.3928 -0.0167 -0.3044 \nrpy: 0 -0 0"]
+"FrontLeftLowerLimb_joint" -> "FrontLeftLowerLimb_link"
+"FrontLeftLowerLimb_link" -> "FrontLeftEffector_z_joint" [label="xyz: -0.4343 -0.054 -0.1597 \nrpy: 0 -0 0"]
+"FrontLeftEffector_z_joint" -> "FrontLeftEffector_z_link"
+"FrontLeftEffector_z_link" -> "FrontLeftEffector_y_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"FrontLeftEffector_y_joint" -> "FrontLeftEffector_y_link"
+"FrontLeftEffector_y_link" -> "FrontLeftEffector_x_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"FrontLeftEffector_x_joint" -> "FrontLeftEffector_x_link"
+"FrontLeftEffector_x_link" -> "Frontleft_foot_cp_1_joint" [label="xyz: -0.05 0.02 -0.005 \nrpy: 0 -0 0"]
+"Frontleft_foot_cp_1_joint" -> "Frontleft_foot_cp_1_link"
+"FrontLeftEffector_x_link" -> "Frontleft_foot_cp_2_joint" [label="xyz: -0.12 0.02 -0.005 \nrpy: 0 -0 0"]
+"Frontleft_foot_cp_2_joint" -> "Frontleft_foot_cp_2_link"
+"FrontLeftEffector_x_link" -> "Frontleft_foot_cp_3_joint" [label="xyz: -0.12 -0.08 -0.005 \nrpy: 0 -0 0"]
+"Frontleft_foot_cp_3_joint" -> "Frontleft_foot_cp_3_link"
+"FrontLeftEffector_x_link" -> "Frontleft_foot_cp_4_joint" [label="xyz: -0.05 -0.08 -0.005 \nrpy: 0 -0 0"]
+"Frontleft_foot_cp_4_joint" -> "Frontleft_foot_cp_4_link"
+"FrontLeftEffector_x_link" -> "Frontleft_foot_endeffector_joint" [label="xyz: -0.1086 -0.0059 -0.0138 \nrpy: 0 -0 0"]
+"Frontleft_foot_endeffector_joint" -> "Frontleft_foot_endeffector_link"
+"head_link" -> "middleleftshoulder_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"middleleftshoulder_joint" -> "middleleftshoulder_link"
+"middleleftshoulder_link" -> "MiddleLeftUpperLimb_z_joint" [label="xyz: -0.1891 0 -0.0795 \nrpy: 0 -0 0"]
+"MiddleLeftUpperLimb_z_joint" -> "MiddleLeftUpperLimb_z_link"
+"MiddleLeftUpperLimb_z_link" -> "MiddleLeftUpperLimb_y_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"MiddleLeftUpperLimb_y_joint" -> "MiddleLeftUpperLimb_y_link"
+"MiddleLeftUpperLimb_y_link" -> "MiddleLeftUpperLimb_x_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"MiddleLeftUpperLimb_x_joint" -> "MiddleLeftUpperLimb_x_link"
+"MiddleLeftUpperLimb_x_link" -> "MiddleLeftLimb_joint" [label="xyz: -0.4456 0.0015 0.1781 \nrpy: 0 -0 0"]
+"MiddleLeftLimb_joint" -> "MiddleLeftLimb_link"
+"MiddleLeftLimb_link" -> "MiddleLeftLowerLimb_joint" [label="xyz: -0.3928 -0.0167 -0.3044 \nrpy: 0 -0 0"]
+"MiddleLeftLowerLimb_joint" -> "MiddleLeftLowerLimb_link"
+"MiddleLeftLowerLimb_link" -> "MiddleLeftEffector_z_joint" [label="xyz: -0.4343 -0.054 -0.1597 \nrpy: 0 -0 0"]
+"MiddleLeftEffector_z_joint" -> "MiddleLeftEffector_z_link"
+"MiddleLeftEffector_z_link" -> "MiddleLeftEffector_y_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"MiddleLeftEffector_y_joint" -> "MiddleLeftEffector_y_link"
+"MiddleLeftEffector_y_link" -> "MiddleLeftEffector_x_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"MiddleLeftEffector_x_joint" -> "MiddleLeftEffector_x_link"
+"MiddleLeftEffector_x_link" -> "Middleleft_foot_cp_1_joint" [label="xyz: -0.05 0.02 -0.005 \nrpy: 0 -0 0"]
+"Middleleft_foot_cp_1_joint" -> "Middleleft_foot_cp_1_link"
+"MiddleLeftEffector_x_link" -> "Middleleft_foot_cp_2_joint" [label="xyz: -0.12 0.02 -0.005 \nrpy: 0 -0 0"]
+"Middleleft_foot_cp_2_joint" -> "Middleleft_foot_cp_2_link"
+"MiddleLeftEffector_x_link" -> "Middleleft_foot_cp_3_joint" [label="xyz: -0.12 -0.08 -0.005 \nrpy: 0 -0 0"]
+"Middleleft_foot_cp_3_joint" -> "Middleleft_foot_cp_3_link"
+"MiddleLeftEffector_x_link" -> "Middleleft_foot_cp_4_joint" [label="xyz: -0.05 -0.08 -0.005 \nrpy: 0 -0 0"]
+"Middleleft_foot_cp_4_joint" -> "Middleleft_foot_cp_4_link"
+"MiddleLeftEffector_x_link" -> "Middleleft_foot_endeffector_joint" [label="xyz: -0.024924 -0.097428 0.001788 \nrpy: 0 -0 0"]
+"Middleleft_foot_endeffector_joint" -> "Middleleft_foot_endeffector_link"
+}

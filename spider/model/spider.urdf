@@ -348,7 +348,7 @@
   </link>
 	
 	  
-  <joint name="Middleleft_foot_endeffector_joint" type="fixed">
+  <joint name="Middleleft_foot_endeffector_joint" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="15" lower="-0.001" upper="0.001" velocity="5"/>
     <origin rpy="0 0 0" xyz="-0.024924 -0.097428 0.001788"/>
@@ -879,7 +879,7 @@
   </link>
 	
 	  
-  <joint name="BackLeft_foot_endeffector_joint" type="fixed">
+  <joint name="BackLeft_foot_endeffector_joint" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="15" lower="-0.001" upper="0.001" velocity="5"/>
     <origin rpy="0 0 0" xyz="-0.024924 -0.097428 0.001788"/>
@@ -1144,7 +1144,7 @@
   </link>
 	
 	  
-  <joint name="BackRight_foot_endeffector_joint" type="fixed">
+  <joint name="BackRight_foot_endeffector_joint" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="15" lower="-0.001" upper="0.001" velocity="5"/>
     <origin rpy="0 0 0" xyz="-0.024924 -0.097428 0.001788"/>
@@ -1408,7 +1408,7 @@
   </link>
 	
 	  
-  <joint name="MiddleRight_foot_endeffector_joint" type="fixed">
+  <joint name="MiddleRight_foot_endeffector_joint" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="15" lower="-0.001" upper="0.001" velocity="5"/>
     <origin rpy="0 0 0" xyz="-0.024924 -0.097428 0.001788"/>
@@ -1673,7 +1673,7 @@
   </link>
 	
 	  
-  <joint name="FrontRight_foot_endeffector_joint" type="fixed">
+  <joint name="FrontRight_foot_endeffector_joint" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="15" lower="-0.001" upper="0.001" velocity="5"/>
     <origin rpy="0 0 0" xyz="-0.024924 -0.097428 0.001788"/>
