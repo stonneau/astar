@@ -341,6 +341,33 @@ Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::
     return res;
 }
 
+Sample* planner::GetCollisionFreePosture(Robot& robot, Node* limb, const sampling::T_Samples& samples
+                                         , Object::T_Object& obstacles)
+{
+    Sample* save = new Sample(limb);
+    Sample* res = 0;
+    for(T_Samples::const_iterator sit = samples.begin(); sit != samples.end(); ++sit)
+    {
+            LoadSample(*(*sit),limb);
+            if(!(planner::IsSelfColliding(&robot, limb) || LimbColliding(limb, obstacles)))
+            {
+                res = *sit;
+                break;
+            }
+    }
+    /*So we have our sample. Time to perform some IK to align pose*/
+    if(res)
+    {
+        LoadSample(*res,limb);
+    }
+    else
+    {
+        planner::sampling::LoadSample(*save, limb);
+    }
+
+    return res;
+}
+
 Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::T_Samples& samples
                                          , Object::T_Object& obstacles, const Eigen::Vector3d& direction, CompleteScenario &scenario)
 {
@@ -373,33 +400,6 @@ sampling::T_Samples planner::GetContactCandidates(Robot& robot, Node* limb, cons
     }
     planner::sampling::LoadSample(*save, limb);
     return res;
-}
-
-Sample* planner::GetCollisionFreePosture(Robot& robot, Node* limb, const sampling::T_Samples& samples
-                                         , Object::T_Object& obstacles)
-{
-    Sample* save = new Sample(limb);
-    Sample* res = 0;
-    for(T_Samples::const_iterator sit = samples.begin(); sit != samples.end(); ++sit)
-    {
-            LoadSample(*(*sit),limb);
-            if(!(planner::IsSelfColliding(&robot, limb) || LimbColliding(limb, obstacles)))
-            {
-                res = *sit;
-                break;
-            }
-    }
-    /*So we have our sample. Time to perform some IK to align pose*/
-    if(res)
-    {
-        LoadSample(*res,limb);
-    }
-    else
-    {
-        planner::sampling::LoadSample(*save, limb);
-    }
-
-    return 0;
 }
 
 
@@ -489,11 +489,6 @@ namespace
                     //planner::sampling::LoadSample(*sample,limbs[*cit]);
 //std::cout << " limb in contact " << lIndex <<  std::endl;
                 }
-                else
-                {
-                    sample = GetCollisionFreePosture(*robot, *lit, scenario.limbSamples[lIndex],
-                                                             scenario.scenario->objects_);
-                }
                 delete(sphereCurrent);
                 for(int i =0; i< spheres.size(); ++i)
                 {
@@ -560,11 +555,11 @@ namespace
                     state->contactLimbPositions.push_back(target);
                     state->contactLimbPositionsNormals.push_back(normal);
                     planner::sampling::LoadSample(*(samples.front()),*lit);
-//std::cout << " limb mainained in contact " << lIndex <<  std::endl;
+std::cout << " limb mainained in contact " << lIndex <<  std::endl;
                 }
                 else
-                //if(SafeTargetDistance(scenario, next, lIndex, *lit,target,0.92))
-                if(SafeTargetDistance(*lit,target,0.92))
+                if(SafeTargetDistance(scenario, next, lIndex, *lit,target,0.92))
+                //if(SafeTargetDistance(*lit,target,0.92))
                 {
                     state->contactLimbs.push_back(lIndex);
                     state->contactLimbPositions.push_back(target);
@@ -583,7 +578,9 @@ namespace
                 }
                 else
                 {
-                    nbContactsChange.push_back(lIndex);
+                    GetCollisionFreePosture(*robot, *lit, scenario.limbSamples[lIndex],
+                                                                 scenario.scenario->objects_);
+                   nbContactsChange.push_back(lIndex);
                 }
 
             }

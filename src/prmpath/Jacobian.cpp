@@ -54,7 +54,7 @@ void Jacobian::ComputeJacobian(Node* root)
     toWorldCoordinates.inverse();
 	Invalidate();
     int dim = planner::GetNumChildren(root);
-    std::vector<Node*> effectors = planner::GetEffectors(root, false);
+    std::vector<Node*> effectors = planner::GetEffectors(root, true);
     jacobian_ = MatrixX(3 * effectors.size(), dim);
     // Traverse this to find all end effectors
     for(int i=0; i!=effectors.size(); ++i)

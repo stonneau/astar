@@ -110,8 +110,8 @@ if(P.y() > -0.3)
                 tranformComplete*= matrices::Roty3(ry);
                 tranformComplete*= matrices::Rotx3(rx);
             }
-            while( (false // && // torso not facing upward
-            //while( !(y.dot(tranformComplete.block<3,1>(0,0)) < 0 // && // torso not facing upward
+            //while( (false // && // torso not facing upward
+            while( !(y.dot(tranformComplete.block<3,1>(0,0)) < 0 // && // torso not facing upward
                     // y.dot(tranformComplete.block<3,1>(0,1)) > 0.3 &&
                      //&& x.dot(tranformComplete.block<3,1>(0,1)) < -0.1
                    )); // head not pointing too down

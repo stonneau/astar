@@ -51,6 +51,7 @@ namespace
             node->maxAngleValue = strtod (max, NULL) * M_PI / 180;
             node->minAngleValue = strtod (min, NULL) * M_PI / 180;
             node->defaultAngleValue = strtod (defaut, NULL) * M_PI / 180;
+            node->value = node->defaultAngleValue;
             return true;
         }
         else

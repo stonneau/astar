@@ -1,0 +1,7 @@
+function [xc, Rc] = genall()
+[xc, Rc] = effectorRomToObj('FrontLeftUpperLimb_z_joint.erom','FrontLeftUpperLimb_z_joint.obj')
+[xc, Rc] = effectorRomToObj('FrontRightUpperLimb_z_joint.erom','FrontRightUpperLimb_z_joint.obj')
+[xc, Rc] = effectorRomToObj('MiddleLeftUpperLimb_z_joint.erom','MiddleLeftUpperLimb_z_joint.obj')
+[xc, Rc] = effectorRomToObj('MiddleRightUpperLimb_z_joint.erom','MiddleRightUpperLimb_z_joint.obj')
+[xc, Rc] = effectorRomToObj('BackLeftUpperLimb_z_joint.erom','BackLeftUpperLimb_z_joint.obj')
+[xc, Rc] = effectorRomToObj('BackRightUpperLimb_z_joint.erom','BackRightUpperLimb_z_joint.obj')
