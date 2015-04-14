@@ -514,7 +514,7 @@ namespace
 {
     bool SafeTargetDistance(planner::CompleteScenario& scenario, const Model* next, int index, const planner::Node* limb, const Eigen::Vector3d& target, float margin)
     {
-        Sphere sphereCurrent(next->GetOrientation() * scenario.limbRoms[index].center_ + next->GetPosition(), scenario.limbRoms[index].radius_ * 2);
+        Sphere sphereCurrent(next->GetOrientation() * scenario.limbRoms[index].center_ + next->GetPosition(), scenario.limbRoms[index].radius_ * 1.5);
         return Contains(sphereCurrent, target);
     }
 }
@@ -560,10 +560,10 @@ namespace
                     state->contactLimbPositions.push_back(target);
                     state->contactLimbPositionsNormals.push_back(normal);
                     planner::sampling::LoadSample(*(samples.front()),*lit);
+                    maintainPreviousTarget = true;
 //std::cout << " limb mainained in contact " << lIndex <<  std::endl;
                 }
-                else
-                if(SafeTargetDistance(scenario, next, lIndex, *lit,target,0.92))
+                else if(SafeTargetDistance(scenario, next, lIndex, *lit,target,0.92))
                 //if(SafeTargetDistance(*lit,target,0.92))
                 {
                     state->contactLimbs.push_back(lIndex);

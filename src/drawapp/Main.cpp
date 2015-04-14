@@ -365,6 +365,29 @@ namespace
         }
     }
 
+    void PerformIkSteps(planner::CompleteScenario& scenario, planner::State* state, bool obs = false)
+    {
+        ik::IKSolver solver;
+        std::vector<Eigen::Vector3d>::iterator posit = state->contactLimbPositions.begin();
+        std::vector<Eigen::Vector3d>::iterator normit = state->contactLimbPositionsNormals.begin();
+        planner::Collider collider(scenario.scenario->objects_);
+        for(std::vector<int>::const_iterator cit = state->contactLimbs.begin();
+            cit != state->contactLimbs.end(); ++cit, ++posit, ++normit)
+        {
+            planner::Node* limb =  planner::GetChild(scenario.robot,scenario.limbs[*cit]->id);
+            ik::VectorAlignmentConstraint constraint(*normit);
+            ik::ObstacleAvoidanceConstraint obsconstraint(collider);
+            std::vector<ik::PartialDerivativeConstraint*> constraints;
+            if(!obs)
+                constraints.push_back(&constraint);
+            //constraints.push_back(&obsconstraint);
+            //solver.AddConstraint(ik::ForceManip);
+            {
+                solver.StepClamping(limb, *posit, *posit, constraints, true);
+            }
+        }
+    }
+
     void PerformIkStep(planner::CompleteScenario& scenario, planner::Node* limb, bool obs = false)
     {
         planner::State* state = states[current];
