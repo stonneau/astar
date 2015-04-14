@@ -136,9 +136,9 @@ namespace
         return limb->current;
     }
 
-    bool LimbColliding(Node* limb, planner::Object::T_Object& obstacles)
+    bool LimbColliding(Node* limb, planner::Object::T_Object& obstacles, bool effector = true)
     {
-        if(limb->current && limb->current->IsColliding(obstacles))
+        if( limb->current && ((effector || limb->current != GetEffector(limb)) && limb->current->IsColliding(obstacles)))
         {
                 return true;
         }
@@ -412,7 +412,7 @@ T_Samples planner::GetPosturesOnTarget(Robot& robot, Node* limb, const sampling:
     for(T_Samples::const_iterator sit = samples.begin(); sit != samples.end(); ++sit)
     {
         LoadSample(*(*sit),limb);
-        if((effector->GetPosition() - worldposition).norm()<2*epsilon && !effector->IsColliding(obstacles))
+        if((effector->GetPosition() - worldposition).norm()<2*epsilon && !LimbColliding(limb, obstacles))
         {
             //std::cout << "si si ca arrive " << std::endl;
             res.push_back(*sit);
@@ -514,7 +514,7 @@ namespace
 {
     bool SafeTargetDistance(planner::CompleteScenario& scenario, const Model* next, int index, const planner::Node* limb, const Eigen::Vector3d& target, float margin)
     {
-        Sphere sphereCurrent(next->GetOrientation() * scenario.limbRoms[index].center_ + next->GetPosition(), scenario.limbRoms[index].radius_);
+        Sphere sphereCurrent(next->GetOrientation() * scenario.limbRoms[index].center_ + next->GetPosition(), scenario.limbRoms[index].radius_ * 2);
         return Contains(sphereCurrent, target);
     }
 }
@@ -563,13 +563,13 @@ namespace
 //std::cout << " limb mainained in contact " << lIndex <<  std::endl;
                 }
                 else
-                //if(SafeTargetDistance(scenario, next, lIndex, *lit,target,0.92))
-                if(SafeTargetDistance(*lit,target,0.92))
+                if(SafeTargetDistance(scenario, next, lIndex, *lit,target,0.92))
+                //if(SafeTargetDistance(*lit,target,0.92))
                 {
                     state->contactLimbs.push_back(lIndex);
                     state->contactLimbPositions.push_back(target);
                     state->contactLimbPositionsNormals.push_back(normal);
-                    int limit = 20;
+                    int limit = 50;
                     //int limit2 = 100;
                     ik::IKSolver solver;
                     ik::VectorAlignmentConstraint constraint(normal);
@@ -579,7 +579,14 @@ namespace
                     {
                         limit--;
                     }
-                    maintainPreviousTarget = true; // MOVE OUT OF BLOCK WITH IK USE
+                    //if(!LimbColliding(*lit, scenario.scenario->objects_, false))
+                    {
+                        maintainPreviousTarget = true; // MOVE OUT OF BLOCK WITH IK USE
+                    }
+                    //else
+                    {
+                        //nbContactsChange.push_back(lIndex);
+                    }
                 }
                 else
                 {

@@ -2,5 +2,5 @@ MODEL = ../spider/model/mesh/roms/englobed.obj ../spider/model/mesh/roms/englobi
 OBJECT = ../spider/scenes/truck_spider11light.obj
 qs = ../tests/fullscenarios/zombi_room.prm
 PRMFIL = ../spider/outputs/lateral.prm
-SIZE = 100 2 20
-VISIBILITY
+SIZE = 2 2 20
+VISIBILIT
