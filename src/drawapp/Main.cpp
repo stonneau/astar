@@ -508,7 +508,8 @@ void start()
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/truck_test.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/race2.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/between.scen");
-    cScenario = planner::CompleteScenarioFromFile("../spider/scenario/truck_spider.scen");
+    //cScenario = planner::CompleteScenarioFromFile("../spider/scenario/truck_spider.scen");
+    cScenario = planner::CompleteScenarioFromFile("../spider/scenario/teapot.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/race_climb.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/climbing.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/zoey.scen");

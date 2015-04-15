@@ -24,7 +24,7 @@ public:
     typedef std::pair<Object*, T_TriangleNormal> SampleTriangle;
 public:
     ///\brief Constructor
-    Generator(Object::T_Object& objects, Object::T_Object& collisionObjects,  const Model& model);
+    Generator(Object::T_Object& objects, Object::T_Object& collisionObjects,  const Model& model, int NbEnblobingConstraints=2);
 
     ///\brief Destructor
     ~Generator();
@@ -46,6 +46,7 @@ private:
 private:
     std::vector<float> weights_;
     std::vector<SampleTriangle > triangles_;
+    const int NbEnblobingConstraints_;
 };
 } //namespace planner
 #endif //_CLASS_GENERATOR

@@ -275,7 +275,7 @@ Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::
     Eigen::Vector3d dirn = dir;
     /*if (found==std::string::npos)
     {*/
-        dirn = Eigen::Vector3d(0,1.,0.);
+        dirn = Eigen::Vector3d(0,-1.,0.);
         dirn.normalize();
     /*}*/
     dir = robot.currentRotation * dir; //Eigen::Vector3d(0,1,0.);

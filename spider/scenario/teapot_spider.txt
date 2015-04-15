@@ -1,0 +1,5 @@
+MODEL = ../spider/model/mesh/roms/englobed.obj ../spider/model/mesh/roms/higherdof/englobing.obj
+OBJECT = ../spider/scenes/grasp/teapot083.obj
+PRMFILE = ../spider/outputs/grasp/teapot17.prm
+SIZ = 200 5 20
+VISIBILIT
