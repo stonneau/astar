@@ -769,10 +769,10 @@ void command(int cmd)   /**  key control function; */
         planner::GetChild(cScenario->robot, "FrontRightUpperLimb_y_joint")->SetRotation(planner::GetChild(cScenario->robot,"FrontRightUpperLimb_y_joint")->value-0.1* dirIK);
         break;
         case 'z' :
-        planner::GetChild(cScenario->robot, "FrontRightLimb_joint")->SetRotation(planner::GetChild(cScenario->robot,"MiddleLeftLimb_joint")->value-0.1* dirIK);
+        planner::GetChild(cScenario->robot, "FrontRightLimb_joint")->SetRotation(planner::GetChild(cScenario->robot,"FrontRightLimb_joint")->value-0.1* dirIK);
         break;
         case 'e' :
-        planner::GetChild(cScenario->robot, "MiddleLeftLowerLimb_joint")->SetRotation(planner::GetChild(cScenario->robot,"MiddleLeftLowerLimb_joint")->value-0.1* dirIK);
+        planner::GetChild(cScenario->robot, "FrontRightLowerLimb_joint")->SetRotation(planner::GetChild(cScenario->robot,"FrontRightLowerLimb_joint")->value-0.1* dirIK);
         break;
         case 'r' :
         planner::GetChild(cScenario->robot, "MiddleLeftLimb_joint")->SetRotation(planner::GetChild(cScenario->robot,"MiddleLeftLimb_joint")->value-0.1* dirIK);
