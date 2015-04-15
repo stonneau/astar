@@ -1,0 +1,5 @@
+MODEL = ../spider/model/mesh/roms/englobed.obj ../spider/model/mesh/roms/englobing.obj
+OBJECT = ../spider/scenes/grasp/pen/pen.obj
+PRMFILE = ../spider/outputs/grasp/testpen.prm
+SIZ = 40 5 20
+VISIBILIT

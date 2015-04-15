@@ -1,0 +1,14 @@
+PRMSCENARIO file="../spider/scenario/pen.txt"
+ROBOT_SKELETON file="../spider/model/spider.urdf"
+ROBOT_CONSTRAINTS file="../spider/model/jointconstraintspen.txt"
+
+PATH_FROM matrix="1 0 0 -0.5 0 1 0 1.7 0 0 1 0.1 0 0 0 1"
+PATH_TO matrix="1 0 0 -0.5 0 1 0 0.5 0 0 1 0 0 0 0 1"
+
+
+CONSTANT_ROTATION matrix="0 1 0 0 0 1 1 0 0"
+LIMB joint_name="MiddleLeftUpperLimb_z_joint" SPHERE="0.4332 -0.3516 -1.2047  0.3518"
+LIMB joint_name="FrontRightUpperLimb_z_joint" SPHERE="1.3625 -0.4076 0.8238  0.3492"
+LIMB joint_name="BackRightUpperLimb_z_joint" SPHERE="0.2747 -0.4323 0.8910  0.3492"
+NBSAMPLES N="100000"
+INITCONTACTS 
