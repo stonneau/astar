@@ -45,7 +45,7 @@ namespace planner
         PImpl(const Model& model, Object::T_Object& objects, Object::T_Object& collisionObjects, float neighbourDistance, int size, int k, bool visibility)
             : planner_(objects, collisionObjects, model)
         {
-            Generator* gen = new Generator(objects, collisionObjects, model); // TODO MEME
+            Generator* gen = new Generator(objects, collisionObjects, model, 1); // TODO MEME
 			
 #if PROFILE
 Timer timer;

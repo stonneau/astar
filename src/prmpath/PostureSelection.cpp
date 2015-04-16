@@ -514,7 +514,7 @@ namespace
 {
     bool SafeTargetDistance(planner::CompleteScenario& scenario, const Model* next, int index, const planner::Node* limb, const Eigen::Vector3d& target, float margin)
     {
-        Sphere sphereCurrent(next->GetOrientation() * scenario.limbRoms[index].center_ + next->GetPosition(), scenario.limbRoms[index].radius_ * 1.5);
+        Sphere sphereCurrent(next->GetOrientation() * scenario.limbRoms[index].center_ + next->GetPosition(), scenario.limbRoms[index].radius_ * 1.7);
         return Contains(sphereCurrent, target);
     }
 }
