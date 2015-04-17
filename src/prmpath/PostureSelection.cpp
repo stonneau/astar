@@ -383,6 +383,8 @@ sampling::T_Samples planner::GetContactCandidates(Robot& robot, Node* limb, cons
 Sample* planner::GetCollisionFreePosture(Robot& robot, Node* limb, const sampling::T_Samples& samples
                                          , Object::T_Object& obstacles)
 {
+    Eigen::Vector3d origPos = GetEffector(limb)->GetPosition();
+    double minDistance = std::numeric_limits<double>::max();
     Sample* save = new Sample(limb);
     Sample* res = 0;
     for(T_Samples::const_iterator sit = samples.begin(); sit != samples.end(); ++sit)
@@ -390,8 +392,13 @@ Sample* planner::GetCollisionFreePosture(Robot& robot, Node* limb, const samplin
             LoadSample(*(*sit),limb);
             if(!(planner::IsSelfColliding(&robot, limb) || LimbColliding(limb, obstacles)))
             {
-                res = *sit;
-                break;
+                double tmpDist = (origPos - GetEffector(limb)->GetPosition()).norm();
+                if(tmpDist < minDistance)
+                {
+                    minDistance = tmpDist;
+                    res = *sit;
+                }
+                //break;
             }
     }
     /*So we have our sample. Time to perform some IK to align pose*/
@@ -527,6 +534,7 @@ namespace
     planner::State* Interpolate(planner::CompleteScenario& scenario, const State& previous, const Model* next, const Model* nextnext, const CT_Model& depth, std::vector<int>& nbContactsChange)
     {
         Eigen::Vector3d y(0,1,0);
+        Eigen::Vector3d ym(0,-1,0);
         nbContactsChange.clear();
         //std::cout << " Satate " <<  std::endl;
         // Create new state and move it to path location
@@ -592,8 +600,9 @@ namespace
                     ik::VectorAlignmentConstraint constraint(normal);
                     std::vector<ik::PartialDerivativeConstraint*> constraints;
                     constraints.push_back(&constraint);
-                    while(limit > 0 && !solver.StepClamping(*lit, target, direction, constraints, true))
+                    while(limit > 0 )
                     {
+                        solver.StepClamping(*lit, target, direction, constraints, true);
                         limit--;
                     }
                     //if(!LimbColliding(*lit, scenario.scenario->objects_, false))
@@ -636,6 +645,18 @@ namespace
                     state->contactLimbs.push_back(lIndex);
                     state->contactLimbPositions.push_back(target);
                     state->contactLimbPositionsNormals.push_back(normal);
+
+                    int limit = 50;
+                    //int limit2 = 100;
+                    ik::IKSolver solver;
+                    ik::VectorAlignmentConstraint constraint(normal);
+                    std::vector<ik::PartialDerivativeConstraint*> constraints;
+                    constraints.push_back(&constraint);
+                    while(limit > 0 )
+                    {
+                        solver.StepClamping(*lit, target, direction, constraints, true);
+                        limit--;
+                    }
                     //planner::sampling::LoadSample(*sample,limbs[*cit]);
 //std::cout << " limb in contact " << lIndex <<  std::endl;
                 }

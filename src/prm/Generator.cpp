@@ -138,13 +138,14 @@ if(P.y() > -0.3)
                     }*/
                 }
                 if(dir.norm() == 0) break;
-				dir.normalize();
+                dir.normalize();
                 // add random direction and check for collision
+                configuration.SetPosition(configuration.GetPosition() + (double) rand() / (RAND_MAX) * dir);
                 std::vector<size_t> collisions = configuration.EnglobingCollisionClimb(sampled.first, 0.3);
 //collisions = configuration.EnglobingCollisionGround(sampled.first);
                 int maxStep = 5;
 //while(collisions.size()>0 && maxStep >0)
-                while(collisions.size()>0)
+                while(collisions.size()>1)
 				{
 					if(!collider_.IsColliding(configuration.englobed))
 					{
@@ -157,7 +158,7 @@ if(configuration.GetPosition().y() > 0 && configuration.GetPosition().y() < 5 &&
                     collisions = configuration.EnglobingCollisionClimb(sampled.first, 0.3);
 //collisions = configuration.EnglobingCollisionGround(sampled.first);
                     maxStep--;
-				}
+                }
 				--limitstraight;
 			}
             /*tranform*= matrices::Roty3(ry);
@@ -189,8 +190,8 @@ if(configuration.GetPosition().y() > 0 && configuration.GetPosition().y() < 5 &&
 
                 std::vector<size_t> collisions = configuration.EnglobingCollision(sampled.first);
 //while(collisions.size()>0)
-                while(collisions.size()>0) // || (configuration.GetPosition().y() > 3.7 && collisions.size()>0))
-				{
+                while(collisions.size()>1) // || (configuration.GetPosition().y() > 3.7 && collisions.size()>0))
+                {
 					if(!collider_.IsColliding(configuration.englobed))
 					{
 if(configuration.GetPosition().y() > 0  && configuration.GetPosition().y() < 5 && std::abs(configuration.GetPosition().z()) < 1.3 ) ; //&& std::abs(configuration.GetPosition().x()) < 1)
@@ -198,7 +199,7 @@ if(configuration.GetPosition().y() > 0  && configuration.GetPosition().y() < 5 &
                             return new Model(configuration);
 						break;
 					}
-                    configuration.SetPosition(configuration.GetPosition() + (double) rand() / (double)(RAND_MAX) / 8. * dir);
+                    configuration.SetPosition(configuration.GetPosition() + (double) rand() / (double)(RAND_MAX)  * dir);
                     collisions = configuration.EnglobingCollisionGround(sampled.first);
 				}
 				--limit2;

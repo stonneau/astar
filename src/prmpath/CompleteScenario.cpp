@@ -326,7 +326,7 @@ cScenario->limbspeed.push_back(1); // TODO HAVE ACTUAL SPEED
         cScenario->scenario->model_.SortEnglobingByName(limbnames);
 Timer timer; timer.Start();
 std::cout << " path request timer" << std::endl;
-        cScenario->path = cScenario->scenario->prm->GetPath(*(cScenario->from), *(cScenario->to), 10, true, true);
+        cScenario->path = cScenario->scenario->prm->GetPath(*(cScenario->from), *(cScenario->to), 10, false, true);
 std::cout << " path request end timer, time :" <<  timer.GetTime() << std::endl;
 timer.Stop();
         if(cScenario->path.empty())

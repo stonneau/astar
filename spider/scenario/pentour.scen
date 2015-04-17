@@ -1,0 +1,17 @@
+PRMSCENARIO file="../spider/scenario/pentour.txt"
+ROBOT_SKELETON file="../spider/model/hand.urdf"
+ROBOT_CONSTRAINTS file="../spider/model/jointconstraintsgrasp.txt"
+
+PATH_FROM matrix="-1 0 0 0.5 0 1 0 2 0 0 -1 1 0 0 0 1"
+PATH_TO matrix="-1 0 0 0.5 0 -1 0 0 0 0 1 1 0 0 0 1"
+PATH_sdTO matrix="1 0 0 0. 0 -1 0 0 0 0 -1 2 0 0 0 1"
+
+PATH_TlO matrix="-1 0 0 0.5 0 -1 0 0.2 0 0 1 2 0 0 0 1"
+
+
+CONSTANT_ROTATION matrix="0 1 0 0 0 1 1 0 0"
+LIMB joint_name="MiddleLeftUpperLimb_z_joint" SPHERE="0.4332 -0.3516 -1.2047 0.771"
+LIMB joint_name="FrontRightUpperLimb_z_joint" SPHERE="1.3625 -0.4076 0.8238  0.771"
+LIMB joint_name="BackRightUpperLimb_z_joint" SPHERE="0.2747 -0.4323 0.8910  0.771"
+NBSAMPLES N="100000"
+INITCONTACTS 
