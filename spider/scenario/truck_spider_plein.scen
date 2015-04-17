@@ -1,8 +1,8 @@
-PRMSCENARIO file="../spider/scenario/truck_spider.txt"
+PRMSCENARIO file="../spider/scenario/truck_spider_plein.txt"
 ROBOT_SKELETON file="../spider/model/spider.urdf"
 ROBOT_CONSTRAINTS file="../spider/model/jointconstraints.txt"
-PATH_FROM matrix="0 -0 -1 -0.3 0 1 0 3 1 0 0 3.3 0 0 0 1"
-PATH_TO matrix="0 -0 -1 -0.3 0 1 0 3.3 1 0 0 7 0 0 0 1"
+PATH_FROM matrix="0 -0 -1 -0.3 0 1 0 2.6 1 0 0 2. 0 0 0 1"
+PATH_TO matrix="0 -0 -1 -0.3 0 1 0 1.6 1 0 0 8 0 0 0 1"
 
 
 PATH_FOLDROM matrix="0 -0 -1 -0.3 0 1 0 2.2 1 0 0 2.3 0 0 0 1"
@@ -18,5 +18,5 @@ LIMB joint_name="MiddleLeftUpperLimb_z_joint" SPHERE="0.4332 -0.3516 -1.2047  0.
 LIMB joint_name="FrontRightUpperLimb_z_joint" SPHERE="1.3625 -0.4076 0.8238  0.3492"
 LIMB joint_name="MiddleRightUpperLimb_z_joint" SPHERE="0.4332 -0.3516 1.2047  0.3518"
 LIMB joint_name="BackRightUpperLimb_z_joint" SPHERE="0.2747 -0.4323 0.8910  0.3492"
-NBSAMPLES N="1000"
+NBSAMPLES N="10"
 INITCONTACTS 

@@ -144,7 +144,7 @@ if(P.y() > -0.3)
 //collisions = configuration.EnglobingCollisionGround(sampled.first);
                 int maxStep = 5;
 //while(collisions.size()>0 && maxStep >0)
-                while(collisions.size()>2)
+                while(collisions.size()>0)
 				{
 					if(!collider_.IsColliding(configuration.englobed))
 					{
@@ -189,7 +189,7 @@ if(configuration.GetPosition().y() > 0 && configuration.GetPosition().y() < 5 &&
 
                 std::vector<size_t> collisions = configuration.EnglobingCollision(sampled.first);
 //while(collisions.size()>0)
-                while(collisions.size()>2) // || (configuration.GetPosition().y() > 3.7 && collisions.size()>0))
+                while(collisions.size()>0) // || (configuration.GetPosition().y() > 3.7 && collisions.size()>0))
 				{
 					if(!collider_.IsColliding(configuration.englobed))
 					{

@@ -129,16 +129,16 @@ bool CheckEquilibrium(const T_Transform &contactTransforms, const T_Transform &g
         {
             C.block<3,3>(0,3*i) = skew(contactTransforms[i].block<3,1>(0, 3));
             const Rotation& Ri = contactTransforms[i].block<3,3>(0, 0);
-            const Vector vi = Ri*Z;
-            const Vector si = Ri*X;
-            const Vector ti = Ri*Y;
+            const Vector vi = Ri*Y;
+            const Vector si = Ri*X; // inversing Z and Y because Y up
+            const Vector ti = Ri*Z;
             Eigen::Matrix4d beta_i;
             beta_i.block<1,3>(0,0) = -(friction * vi + si).transpose();
             beta_i.block<1,3>(1,0) = -(friction * vi - si).transpose();
             beta_i.block<1,3>(2,0) = -(friction * vi + ti).transpose();
             beta_i.block<1,3>(3,0) = -(friction * vi - ti).transpose();
             Af.block<4,3>(4*i,3*i) = beta_i.block<4,3>(0,0);
-            Af(acIndex, 3*i + 2) = 1.;
+            Af(acIndex, 3*i + 1) = 1.; // +2 ??? Z Y
         }
     }
     if(nbGrasps > 0)
@@ -211,7 +211,17 @@ bool CheckEquilibrium(const T_Transform &contactTransforms, const T_Transform &g
 	std::cout << "bcg" << std::endl << bcg << std::endl;
 	std::cout << "V" << std::endl << V << std::endl;
 	std::cout << "Vp" << std::endl << Vp << std::endl;*/
+    if(error != dd_NoError)
+    {
+        std::cout << "numerical inst " << std::endl;
+        return false;
+    }
     dd_PolyhedraPtr polyH = dd_DDMatrix2Poly(Vpc, &error);
+    if(error != dd_NoError)
+    {
+        std::cout << "numerical inst " << std::endl;
+        return false;
+    }
     dd_MatrixPtr Hc = dd_CopyInequalities(polyH);
     Eigen::MatrixXd H(Hc->rowsize, Hc->colsize-1);
     Eigen::MatrixXd h(Hc->rowsize, 1);
@@ -223,7 +233,9 @@ bool CheckEquilibrium(const T_Transform &contactTransforms, const T_Transform &g
             H(i-1, j-2) = -(double)(*(Hc->matrix[i-1][j-1]));
         }
     }
-    Eigen::Vector3d gravity(0,0,-9.81);
+
+    //Eigen::Vector3d gravity(0,0,-9.81);
+    Eigen::Vector3d gravity(0,-9.81,0);
     Eigen::Vector3d W = mass * acceleration - mass * gravity;
     Eigen::MatrixXd H1 = H.block(0,0,H.rows(),3);
     Eigen::MatrixXd H2 = H.block(0,3,H.rows(),3);
@@ -239,12 +251,16 @@ bool CheckEquilibrium(const T_Transform &contactTransforms, const T_Transform &g
     std::cout << "H" << std::endl << H << std::endl;
 	std::cout << "h" << std::endl << h << std::endl;
 	std::cout << "h1" << std::endl << H1 << std::endl;
-	std::cout << "h2" << std::endl << H2 << std::endl;
-    std::cout << "res" << std::endl << res << std::endl;*/
+    std::cout << "h2" << std::endl << H2 << std::endl;*/
+    //std::cout << "res" << std::endl << res << std::endl;
     for(int i =0; i< res.rows();++i)
     {
-        if(res(i)>0) return false;
+        if(res(i)>1)
+        {
+            return false;
+        }
     }
+    //std::cout << "stable!" << std::endl << res << std::endl;
     return true;
 }
 
@@ -386,7 +402,8 @@ double ResidualRadius(const T_Transform &contactTransforms, const T_Transform &g
             H(i-1, j-2) = -(double)(*(Hc->matrix[i-1][j-1]));
         }
     }
-    Eigen::Vector3d gravity(0,0,-9.81);
+    //Eigen::Vector3d gravity(0,0,-9.81);
+    Eigen::Vector3d gravity(0,-9.81,0);
     Eigen::Vector3d W = mass * acceleration - mass * gravity;
     Eigen::MatrixXd H1 = H.block(0,0,H.rows(),3);
     Eigen::MatrixXd H2 = H.block(0,3,H.rows(),3);

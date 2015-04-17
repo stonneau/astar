@@ -21,34 +21,68 @@ namespace
 void GroundEquilibriumTest(bool& error)
 {
     T_Transform contactTransforms, graspTransforms;
-    Eigen::Vector3d comLocation = Eigen::Vector3d(0,0,2);
+    Eigen::Vector3d comLocation = Eigen::Vector3d(0.5,0.5,0.5);
     Eigen::Matrix4d contactTransform1 = Eigen::Matrix4d::Identity();
-    contactTransform1.block<3,1>(0,3) = Eigen::Vector3d(0,-1,0);
+    contactTransform1.block<3,1>(0,3) = Eigen::Vector3d(0,0,1);
     Eigen::Matrix4d contactTransform2 = Eigen::Matrix4d::Identity();
-    contactTransform2.block<3,1>(0,3) = Eigen::Vector3d(0,1,0);
+    contactTransform2.block<3,1>(0,3) = Eigen::Vector3d(1,0,0);
+    Eigen::Matrix4d contactTransform3 = Eigen::Matrix4d::Identity();
+    contactTransform3.block<3,1>(0,3) = Eigen::Vector3d(1,0,1);
     contactTransforms.push_back(contactTransform1);contactTransforms.push_back(contactTransform2);
+    contactTransforms.push_back(contactTransform3);
     Eigen::VectorXd maxGraspingForces = Eigen::VectorXd::Zero(3);
     Eigen::Vector3d acceleration(0,0,0);
-    equilib::CheckEquilibrium( contactTransforms, graspTransforms, maxGraspingForces,acceleration, comLocation, 50, 1, 600);
+    bool loceror = !equilib::CheckEquilibrium( contactTransforms, graspTransforms, maxGraspingForces,acceleration, comLocation, 50, 1, 491);
+    if (loceror)
+    {
+        error = true;
+        std::cout << "Error in ground equilibrium tests" << std::endl;
+    }
+}
+
+void GroundEquilibriumTest2(bool& error)
+{
+    T_Transform contactTransforms, graspTransforms;
+    Eigen::Vector3d comLocation = Eigen::Vector3d(0.5,-0.5,0.5);
+    Eigen::Matrix4d contactTransform1 = Eigen::Matrix4d::Identity();
+    contactTransform1.block<3,1>(0,3) = Eigen::Vector3d(0,0,1);
+    Eigen::Matrix4d contactTransform2 = Eigen::Matrix4d::Identity();
+    contactTransform2.block<3,1>(0,3) = Eigen::Vector3d(1,0,0);
+    Eigen::Matrix4d contactTransform3 = Eigen::Matrix4d::Identity();
+    contactTransform3.block<3,1>(0,3) = Eigen::Vector3d(1,0,1);
+    contactTransforms.push_back(contactTransform1);contactTransforms.push_back(contactTransform2);
+    contactTransforms.push_back(contactTransform3);
+    Eigen::VectorXd maxGraspingForces = Eigen::VectorXd::Zero(3);
+    Eigen::Vector3d acceleration(0,0,0);
+    bool loceror = !equilib::CheckEquilibrium( contactTransforms, graspTransforms, maxGraspingForces,acceleration, comLocation, 50, 1, 491);
+    if (loceror)
+    {
+        error = true;
+        std::cout << "Error in ground equilibrium test 2" << std::endl;
+    }
 }
 
 void GroundEquilibriumFail(bool& error)
 {
 
     T_Transform contactTransforms, graspTransforms;
-    Eigen::Vector3d comLocation = Eigen::Vector3d(0,0,2);
+    Eigen::Vector3d comLocation = Eigen::Vector3d(0,0,0);
     Eigen::Matrix4d contactTransform1 = Eigen::Matrix4d::Identity();
-    contactTransform1.block<3,1>(0,3) = Eigen::Vector3d(0,-1,0);
+    contactTransform1.block<3,1>(0,3) = Eigen::Vector3d(0,0,1);
     Eigen::Matrix4d contactTransform2 = Eigen::Matrix4d::Identity();
-    contactTransform2.block<3,1>(0,3) = Eigen::Vector3d(0,1,0);
+    contactTransform2.block<3,1>(0,3) = Eigen::Vector3d(1,0,0);
+    Eigen::Matrix4d contactTransform3 = Eigen::Matrix4d::Identity();
+    contactTransform3.block<3,1>(0,3) = Eigen::Vector3d(1,0,1);
     contactTransforms.push_back(contactTransform1);contactTransforms.push_back(contactTransform2);
-
-    Eigen::Matrix4d graspTransform = Eigen::Matrix4d::Identity();
-    graspTransform.block<3,1>(0,3) = Eigen::Vector3d(1,-1,3);
-    graspTransforms.push_back(graspTransform);
-    Eigen::VectorXd maxGraspingForces = Eigen::Vector3d(0,0,0);
-    Eigen::Vector3d acceleration(-0,0,0);
-    equilib::CheckEquilibrium( contactTransforms, graspTransforms, maxGraspingForces,acceleration, comLocation, 50, 1, 600);
+    contactTransforms.push_back(contactTransform3);
+    Eigen::VectorXd maxGraspingForces = Eigen::VectorXd::Zero(3);
+    Eigen::Vector3d acceleration(0,0,0);
+    bool loceror = equilib::CheckEquilibrium( contactTransforms, graspTransforms, maxGraspingForces,acceleration, comLocation, 50, 1, 491);
+    if (loceror)
+    {
+        error = true;
+        std::cout << "Error in ground GroundEquilibriumFail tests" << std::endl;
+    }
 }
 }
 
@@ -57,6 +91,7 @@ int main(int argc, char *argv[])
 	std::cout << "performing tests... \n";
     bool error = false;
     GroundEquilibriumTest(error);
+    GroundEquilibriumTest2(error);
     GroundEquilibriumFail(error);
 	if(error)
 	{

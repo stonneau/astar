@@ -1,0 +1,5 @@
+MODEL = ../spider/model/mesh/roms/englobed.obj ../spider/model/mesh/roms/englobing.obj
+OBJECT = ../spider/scenes/truck_spider1wheel.obj
+PRMFIL = ../spider/outputs/test_plein.prm
+SIZE = 40 5 20
+VISIBILITY

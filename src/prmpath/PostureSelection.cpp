@@ -41,13 +41,14 @@ bool Stable(planner::State* state)
         if(contacts.empty() && graps.empty()) return false;
     }
     matrices::Vector3 acceleration(0,0,0);
-    matrices::Vector3 comLocation = state->value->currentPosition;
+    //matrices::Vector3 comLocation = state->value->currentPosition;
+    matrices::Vector3 comLocation = state->value->node->children[0]->children[0]->children[0]->children[0]->children[0]->children[0]->children[0]->position;
     matrices::VectorX maxGraspForces(3*graps.size());
     for(int i=0; i<graps.size()*3; ++i)
     {
         maxGraspForces(i)=600;
     }
-    return equilib::CheckEquilibrium(contacts, graps, maxGraspForces, acceleration, comLocation, 50, 1, 600);
+    return equilib::CheckEquilibrium(contacts, graps, maxGraspForces, acceleration, comLocation, 5, 1, 600);
 }
 
 /*
@@ -271,6 +272,8 @@ Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::
     double tmp_manip, tempweightedmanip;
     std::size_t found = limb->tag.find("leg");
     Eigen::Vector3d dir = direction;
+
+//std::cout << "direction" << dir << std::endl;
     //if(direction.y() < 0 ) dir = -direction;
     Eigen::Vector3d dirn = dir;
     /*if (found==std::string::npos)
@@ -296,9 +299,10 @@ Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::
                     if(effector->InContact(*oit,epsilon, normal, projection) && planner::SafeTargetDistance(limb,projection,0.9) )//&& NextIsInRange(limb, projection, rom, scenario.scenario->point_))
                     //if(planner::MinDistance(effectorCentroid, *oit, projection, normal) < epsilon && !planner::IsSelfColliding(&robot, limb) && !LimbColliding(limb, obstacles))
                     {
-                        tempweightedmanip = tmp_manip; // * dirn.dot(robot.currentRotation * normal);
-                        tempweightedmanip += 1 / CostMaintainContact(current_rom, next_rom, projection);
-                        tempweightedmanip *= dirn.dot(robot.currentRotation * normal);
+                        //tempweightedmanip = tmp_manip; // * dirn.dot(robot.currentRotation * normal);
+                        //tempweightedmanip = 1 / CostMaintainContact(current_rom, next_rom, projection);
+                        //tempweightedmanip = 1 / CostMaintainContact(current_rom, next_rom, projection);
+                        tempweightedmanip = dir.dot(robot.currentRotation * normal);
                         if(tempweightedmanip > bestManip)// && (planner::SafeTargetDistance(limb,projection,0.9)))
                         {
                             bestManip = tempweightedmanip;
@@ -316,6 +320,7 @@ Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::
     /*So we have our sample. Time to perform some IK to align pose*/
     if(res)
     {
+//std::cout << "normal" << normalVector << "\n" << robot.currentRotation * normalVector << std::endl;
         LoadSample(*res,limb);
         ik::VectorAlignmentConstraint constraint(normalVector);
         std::vector<ik::PartialDerivativeConstraint*> constraints;
@@ -521,6 +526,7 @@ namespace
 
     planner::State* Interpolate(planner::CompleteScenario& scenario, const State& previous, const Model* next, const Model* nextnext, const CT_Model& depth, std::vector<int>& nbContactsChange)
     {
+        Eigen::Vector3d y(0,1,0);
         nbContactsChange.clear();
         //std::cout << " Satate " <<  std::endl;
         // Create new state and move it to path location
@@ -539,9 +545,20 @@ namespace
         }
 
         int lIndex = 0;
+        bool stateStable = false;
         for(std::vector<Node*>::iterator lit = limbs.begin(); lit != limbs.end(); ++lit, ++lIndex)
         {
             bool maintainPreviousTarget = false;
+            stateStable = stateStable || Stable(state);
+            if(stateStable)
+            {
+                std::cout << "oWWWW YEAH" << std::endl;
+
+            }
+            else
+            {
+                //std::cout << "NOOOOOOOOOONNN" << std::endl;
+            }
             Eigen::Vector3d target, normal;
             Eigen::Vector3d direction = next->GetPosition() - previous.value->node->position;
             direction = direction.norm() == 0 ? Eigen::Vector3d(0,1,0) : direction;
@@ -613,7 +630,7 @@ namespace
                     //sphereNext = new Sphere(nextnext->GetOrientation() * scenario.limbRoms[lIndex].center_ + nextnext->GetPosition(), scenario.limbRoms[lIndex].radius_);
                 }
                 Sample* sample = GetPosturesInContact(*robot, *lit, scenario.limbSamples[lIndex],
-                                                      scenario.scenario->objects_, direction, target, normal, scenario, spheres, sphereCurrent);
+                                                      scenario.scenario->objects_, stateStable?  direction : y, target, normal, scenario, spheres, sphereCurrent);
                 if(sample)
                 {
                     state->contactLimbs.push_back(lIndex);
@@ -634,6 +651,7 @@ namespace
                 }
             }
         }
+        state->stable = stateStable;
         return state;
     }
 
@@ -838,7 +856,7 @@ planner::T_State planner::PostureSequence(planner::CompleteScenario& scenario, i
     planner::T_State res;
     State* current = &scenario.initstate;
     planner::Collider collider(scenario.scenario->objects_);
-    current->stable = false; //Stable(current);
+    current->stable = Stable(current);
     res.push_back(current);
     CT_Model path;
     if(scenario.path.size() >= 2)
@@ -890,7 +908,7 @@ planner::T_State planner::PostureSequence(planner::CompleteScenario& scenario, i
                 current = Interpolate(scenario, *old, *it, *it2, depth, nbContactsChange);
             }
         }
-        current->stable = false;
+        //current->stable = false;
         res.push_back(current);
     }
     std::cout << "posture selection end:" << tp.GetTime() << std::endl;

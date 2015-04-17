@@ -168,11 +168,11 @@ Matrix3 matrices::RotationMatrixFromNormal(const Vector3& normal)
         v2[i] -= dt*normal[i];
 
     v2.normalize();
-    Vector3 v3 = -normal.cross(v2);
+    Vector3 v3 = normal.cross(v2);
     Matrix3 res;
-    res.block(0,0,3,1) = v2;
-    res.block(0,1,3,1) = v3;
-    res.block(0,2,3,1) = normal;
+    res.block(0,0,3,1) = v3;
+    res.block(0,1,3,1) = normal;
+    res.block(0,2,3,1) = v2;
     return res;
 }
 

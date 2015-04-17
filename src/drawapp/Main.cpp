@@ -184,22 +184,22 @@ namespace
         }
     }
 
-    void DrawPoint(const Eigen::Vector3d& target)
+    void DrawPoint(const Eigen::Vector3d& target, float scale = 1)
     {
         dsSetColor(1,0,0);
         PQP_REAL p1 [3];
         PQP_REAL p2 [3];
         Eigen::Vector3d tmp(target);
-        tmp(2)+=0.1;
+        tmp(2)+=0.1 * scale;
         Vect3ToArray(p1,tmp);
-        tmp(2)-=0.2;
+        tmp(2)-=0.2* scale;
         Vect3ToArray(p2,tmp);
         dsDrawLineD(p1, p2);
 
-        tmp(2)+=0.1;
-        tmp(1)+=0.1;
+        tmp(2)+=0.1* scale;
+        tmp(1)+=0.1* scale;
         Vect3ToArray(p1,tmp);
-        tmp(1)-=0.2;
+        tmp(1)-=0.2* scale;
         Vect3ToArray(p2,tmp);
         dsDrawLineD(p1, p2);
         dsSetColor(0,0,1);
@@ -445,7 +445,7 @@ static void simLoop (int pause)
     DrawObjects();
     dsSetColorAlpha(0,0, 0.7,1);
     DrawNode(cScenario->robot->node);
-    DrawPoint(itompTransform * cScenario->robot->currentPosition);
+    DrawPoint(itompTransform * cScenario->robot->node->children[0]->children[0]->children[0]->children[0]->children[0]->children[0]->children[0]->position, 3);
     std::vector<Eigen::Vector3d>::iterator nit = states[current]->contactLimbPositionsNormals.begin();
     for(std::vector<Eigen::Vector3d>::iterator it = states[current]->contactLimbPositions.begin();
         it != states[current]->contactLimbPositions.end(); ++it, ++nit)
@@ -508,7 +508,8 @@ void start()
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/truck_test.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/race2.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/between.scen");
-    cScenario = planner::CompleteScenarioFromFile("../spider/scenario/truck_spider.scen");
+    cScenario = planner::CompleteScenarioFromFile("../spider/scenario/pen.scen");
+    //cScenario = planner::CompleteScenarioFromFile("../spider/scenario/truck_spider.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/race_climb.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/climbing.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/zoey.scen");
@@ -726,7 +727,7 @@ void command(int cmd)   /**  key control function; */
             current ++; if(states.size() <= current) current = states.size()-1;
             //cScenario->robot->SetConfiguration(cScenario->path[current]);
             cScenario->robot = states[current]->value;
-            std::cout << "state stable" << states[current]->stable << std::endl;
+            std::cout << "state stable" << (states[current]->stable ? 1 : 0) << std::endl;
             //currentSample = 0;
             //samples = planner::GetPosturesInContact(*cScenario->robot, cScenario->limbs[0], cScenario->limbSamples[0], cScenario->scenario->objects_ );
             break;
