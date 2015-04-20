@@ -1,0 +1,5 @@
+MODEL = ../spider/model/mesh/roms/englobedhand.obj ../spider/model/mesh/roms/englobinghand.obj
+OBJECT = ../spider/scenes/pen.obj
+PRMFILE = ../spider/outputs/testpentour.prm
+SIZ = 90 1 20
+VISIBILIT

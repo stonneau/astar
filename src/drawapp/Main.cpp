@@ -46,6 +46,7 @@ namespace
     bool solid = true;
     std::string outpath("../tests/testSerialization.txt");
     std::string outstatepath("../tests/states.txt");
+    std::string outstatecontactpath("../tests/statescontact.txt");
     std::string outfilename ("../tests/entrance.path");
     Eigen::Matrix3d itompTransform;
     int current = 0;
@@ -510,7 +511,7 @@ void start()
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/between.scen");
     //cScenario = planner::CompleteScenarioFromFile("../spider/scenario/pen.scen");
     //cScenario = planner::CompleteScenarioFromFile("../spider/scenario/pentour.scen");
-    cScenario = planner::CompleteScenarioFromFile("../spider/scenario/climbing.scen");
+    cScenario = planner::CompleteScenarioFromFile("../spider/scenario/climbing.scen", 0.001);
     //cScenario = planner::CompleteScenarioFromFile("../spider/scenario/truck_spider.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/race_climb.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/climbing.scen");
@@ -766,6 +767,11 @@ void command(int cmd)   /**  key control function; */
         case 'm' :
         {
             drawPOstures = ! drawPOstures;
+            break;
+        }
+        case 'M' :
+        {
+            planner::ExportContactStates(states, cScenario->limbs, outstatecontactpath);
             break;
         }
         case 'a' :

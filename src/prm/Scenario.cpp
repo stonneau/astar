@@ -23,7 +23,7 @@ using namespace planner;
 
 
 
-Scenario::Scenario(const std::string& filepath)
+Scenario::Scenario(const std::string& filepath, double scaleEnglobing)
 {
     ifstream myfile (filepath);
     string line;
@@ -47,7 +47,7 @@ Scenario::Scenario(const std::string& filepath)
 				line = line.substr(8);
 				std::string englobed = line.substr(0, line.find(" "));
 				std::string englobing = line.substr(line.find(" ") +1);
-				Object::T_Object modelobjs = ParseObj(englobed);
+                Object::T_Object modelobjs = ParseObj(englobed,false, scaleEnglobing);
                 planner::ParseObj(englobing, model_.englobing);
                 if(modelobjs.size() != 1)
 				{

@@ -5,6 +5,7 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <vector>
 
 
 #include "tools/Timer.h"
@@ -194,7 +195,7 @@ namespace
 
 
 
-CompleteScenario* planner::CompleteScenarioFromFile(const std::string& filename)
+planner::CompleteScenario* planner::CompleteScenarioFromFile(const std::string& filename, double scaleEnglobing)
 {
     CompleteScenario* cScenario = new CompleteScenario;
     cScenario->relocateEnglobing = false;
@@ -210,7 +211,7 @@ CompleteScenario* planner::CompleteScenarioFromFile(const std::string& filename)
             getline(myfile, line);
             if(line.find("PRMSCENARIO file=") != string::npos)
             {
-                cScenario->scenario = new planner::Scenario(ExtractQuotes(line));
+                cScenario->scenario = new planner::Scenario(ExtractQuotes(line), scaleEnglobing);
                 if(cScenario->scenario )
                 {
                     scenario = true;
@@ -476,6 +477,71 @@ bool planner::SaveStates(const T_State& states, const std::string& outfilename)
     }
     return false;
 }
+
+bool planner::ExportContactStates(const T_State& states, std::vector<planner::Node*>& limbs, const string &outfilename)
+{
+    // 0 : no contact : 1 : contact maintainance ; 2 : contact maintained
+    std::stringstream sstream;
+    planner::T_State::const_iterator it = states.begin();
+    planner::T_State::const_iterator it2 = states.begin();
+    std:vector<std::vector<int> > values;
+    int nbLimbs = limbs.size();
+    for(int i =0; i< nbLimbs; ++i)
+    {
+        std::vector<int> limbValues;
+        values.push_back(limbValues);
+    }
+    for(; it != states.end(); ++it)
+    {
+        for(int i =0; i< nbLimbs; ++i)
+        {
+            int value = 0;
+            Eigen::Vector3d targetprevious, target, normal, previousNormal;
+            if((*it)->InContact(i, target, normal))
+            {
+                ++value;
+                if(it != states.begin())
+                {
+                    it2 = it; --it2;
+                    if((*it2)->InContact(i, targetprevious, previousNormal) && (target - targetprevious).norm() < 0.01 )
+                    {
+                        ++value;
+                    }
+                }
+            }
+            values[i].push_back(value);
+        }
+    }
+    // first line denotes step number
+    sstream << " ";
+    for(int i = 0; i< states.size(); ++i)
+    {
+        sstream << "\t" << i;
+    }
+    sstream << " \n";
+    //then write values for each limbs
+    for(int i =0; i< nbLimbs; ++i)
+    {
+        sstream << limbs[i]->tag;
+        for(std::vector<int>::const_iterator cit = values[i].begin(); cit != values[i].end();
+            ++cit)
+        {
+            sstream << "\t" << (*cit) ;
+        }
+        sstream << " \n";
+    }
+
+    ofstream myfile;
+    myfile.open (outfilename.c_str());
+    if (myfile.is_open())
+    {
+        myfile << sstream.rdbuf();
+        myfile.close();
+        return true;
+    }
+    return false;
+}
+
 
 namespace
 {

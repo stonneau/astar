@@ -88,8 +88,9 @@ LIMB joint_name="joint_name"
 NBSAMPLES N=""
 INITCONTACTS 2 3
 */
-CompleteScenario* CompleteScenarioFromFile(const std::string& file);
+CompleteScenario* CompleteScenarioFromFile(const std::string& file, double scaleEnglobing = 1.);
 bool SaveStates(const T_State& states, const std::string& outfilename);
+bool ExportContactStates(const T_State& states, std::vector<planner::Node*>& limbs, const std::string& outfilename);
 T_State LoadStates(const std::string& infilename, const planner::Robot* model);
 
 } //namespace planner

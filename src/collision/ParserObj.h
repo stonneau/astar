@@ -22,7 +22,7 @@ namespace planner
 ///  \param filename path to the obj file to be loaded.
 ///  \param asOneObject if true obj file is considered one single object
 ///  \param return : a list of Object from the obj file.
-Object::T_Object ParseObj(const std::string&  /*filename*/, const bool asOneObject = false);
+Object::T_Object ParseObj(const std::string&  /*filename*/, const bool asOneObject = false, double scaleEnglobing = 1.);
 
 
 ///  \brief Loads a set of Object from an obj files and concatenates
@@ -32,6 +32,6 @@ Object::T_Object ParseObj(const std::string&  /*filename*/, const bool asOneObje
 ///  \param objects a T_Object at the end of which the new Object will be concatanated.
 ///  \param asOneObject if true obj file is considered one single object
 ///  \param return : a list of Object from the obj file.
-void ParseObj(const std::string& /*filename*/, Object::T_Object& /*objects*/, const bool asOneObject = false);
+void ParseObj(const std::string& /*filename*/, Object::T_Object& /*objects*/, const bool asOneObject = false, double scaleEnglobing = 1.);
 }//namespace planner;
 #endif //_CLASS_ParserObj

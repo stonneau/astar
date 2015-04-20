@@ -52,7 +52,7 @@ struct Scenario
 	/// OBJECT = path/to/objfile (contains any number of objects)
 	/// OBJECT = path/to/objfile (contains any number of objects) // this line can appear several times
 	/// PRMFILE = path/to/prmFile
-     Scenario(const std::string& filepath);
+     Scenario(const std::string& filepath, double scaleEnglobing = 1.);
     ~Scenario();
 
 	//bool SaveScenario(const std::string& filepath);

@@ -31,6 +31,7 @@ public:
 
 public:
     Model* operator()();
+    Model* operator()(std::vector<std::size_t>& limbs);
 
 public:
     const Model& model_;

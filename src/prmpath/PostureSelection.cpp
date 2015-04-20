@@ -299,10 +299,10 @@ Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::
                     if(effector->InContact(*oit,epsilon, normal, projection) && planner::SafeTargetDistance(limb,projection,0.9) )//&& NextIsInRange(limb, projection, rom, scenario.scenario->point_))
                     //if(planner::MinDistance(effectorCentroid, *oit, projection, normal) < epsilon && !planner::IsSelfColliding(&robot, limb) && !LimbColliding(limb, obstacles))
                     {
-                        //tempweightedmanip = tmp_manip; // * dirn.dot(robot.currentRotation * normal);
+                        tempweightedmanip = tmp_manip; // * dirn.dot(robot.currentRotation * normal);
+                        tempweightedmanip *= 1 / CostMaintainContact(current_rom, next_rom, projection);
                         //tempweightedmanip = 1 / CostMaintainContact(current_rom, next_rom, projection);
-                        //tempweightedmanip = 1 / CostMaintainContact(current_rom, next_rom, projection);
-                        tempweightedmanip = dir.dot(robot.currentRotation * normal);
+                        tempweightedmanip *= dir.dot(robot.currentRotation * normal);
                         if(tempweightedmanip > bestManip)// && (planner::SafeTargetDistance(limb,projection,0.9)))
                         {
                             bestManip = tempweightedmanip;

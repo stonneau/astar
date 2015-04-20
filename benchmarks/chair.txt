@@ -1,0 +1,6 @@
+MODEL = ../rocketboxmale/englobed1.obj ../rocketboxmale/cenglobing.obj
+OBJECT = ../tests/collision/chair.obj
+qs = ../tests/fullscenarios/zombi_room.prm
+PRMFILE = ../tests/climbingvisibillity.txt
+SIZ = 2
+VISIBILIT

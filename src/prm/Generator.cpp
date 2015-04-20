@@ -38,6 +38,15 @@ namespace
         double s = 0.5 * (a + b + c);
         return sqrt(s * (s-a) * (s-b) * (s-c));
     }
+
+    void copy(const std::vector<size_t>& from, std::vector<size_t>& to)
+    {
+        for(std::vector<size_t>::const_iterator cit = from.begin();
+            cit != from.end(); ++cit)
+        {
+            to.push_back(*cit);
+        }
+    }
 }
 
 using namespace planner;
@@ -62,6 +71,12 @@ Generator::~Generator()
 }
 
 Model* Generator::operator()()
+{
+   std::vector<std::size_t> limbs;
+   return this->operator ()(limbs);
+}
+
+Model* Generator::operator()(std::vector<std::size_t>& limbs)
 {
     // en v0, juste les positions
     int limit = 10000;
@@ -140,17 +155,18 @@ if(P.y() > -0.3)
                 if(dir.norm() == 0) break;
                 dir.normalize();
                 // add random direction and check for collision
-                configuration.SetPosition(configuration.GetPosition() + (double) rand() / (RAND_MAX) * dir);
+                //configuration.SetPosition(configuration.GetPosition() + (double) rand() / (RAND_MAX) * dir);
                 std::vector<size_t> collisions = configuration.EnglobingCollisionClimb(sampled.first, 0.3);
 //collisions = configuration.EnglobingCollisionGround(sampled.first);
                 int maxStep = 5;
 //while(collisions.size()>0 && maxStep >0)
-                while(collisions.size()>1)
+                while(collisions.size()>0)
 				{
 					if(!collider_.IsColliding(configuration.englobed))
 					{
-if(configuration.GetPosition().y() > 0 && configuration.GetPosition().y() < 5 && std::abs(configuration.GetPosition().z()) < 1.3 ) // && std::abs(configuration.GetPosition().x()) < 1)
+//if(configuration.GetPosition().y() > 0 && configuration.GetPosition().y() < 5 && std::abs(configuration.GetPosition().z()) < 1.3 ) // && std::abs(configuration.GetPosition().x()) < 1)
 //if(configuration.GetPosition().y() > -0.3 )
+                            copy(collisions, limbs);
                             return new Model(configuration);
 						break;
 					}
@@ -190,12 +206,13 @@ if(configuration.GetPosition().y() > 0 && configuration.GetPosition().y() < 5 &&
 
                 std::vector<size_t> collisions = configuration.EnglobingCollision(sampled.first);
 //while(collisions.size()>0)
-                while(collisions.size()>1) // || (configuration.GetPosition().y() > 3.7 && collisions.size()>0))
+                while(collisions.size()>0) // || (configuration.GetPosition().y() > 3.7 && collisions.size()>0))
                 {
 					if(!collider_.IsColliding(configuration.englobed))
 					{
-if(configuration.GetPosition().y() > 0  && configuration.GetPosition().y() < 5 && std::abs(configuration.GetPosition().z()) < 1.3 ) ; //&& std::abs(configuration.GetPosition().x()) < 1)
+//if(configuration.GetPosition().y() > 0  && configuration.GetPosition().y() < 5 && std::abs(configuration.GetPosition().z()) < 1.3 ) ; //&& std::abs(configuration.GetPosition().x()) < 1)
 //if(configuration.GetPosition().y() > -0.3)
+                            copy(collisions, limbs);
                             return new Model(configuration);
 						break;
 					}

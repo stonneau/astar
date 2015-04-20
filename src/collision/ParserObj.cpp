@@ -189,14 +189,14 @@ std::string ExtractObjName(const std::string& line)
 
 using namespace planner;
 
-Object::T_Object planner::ParseObj(const std::string& filename, const bool asOneObject)
+Object::T_Object planner::ParseObj(const std::string& filename, const bool asOneObject, double scaleEnglobing)
 {
     Object::T_Object objects;
-    ParseObj(filename, objects, asOneObject);
+    ParseObj(filename, objects, asOneObject, scaleEnglobing);
     return objects;
 }
 
-void planner::ParseObj(const std::string& filename, std::vector<Object*>& objects, const bool asOneObject)
+void planner::ParseObj(const std::string& filename, std::vector<Object*>& objects, const bool asOneObject, double scaleEnglobing)
 {
     ParserPImpl pImpl;
 	string line;
@@ -237,7 +237,7 @@ void planner::ParseObj(const std::string& filename, std::vector<Object*>& object
 			{
 				char x[255],y[255],z[255];
                 sscanf(line.c_str(),"v %s %s %s",x,y,z);
-                pImpl.points_.push_back(Vector3(strtod (x, NULL), strtod(y, NULL), strtod(z, NULL)));
+                pImpl.points_.push_back(scaleEnglobing * Vector3(strtod (x, NULL), strtod(y, NULL), strtod(z, NULL)));
 			}
 			if(line.find("vn ") == 0)
 			{
