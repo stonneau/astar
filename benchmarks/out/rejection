@@ -1,0 +1,21 @@
+scale 0.6
+
+scenario ../benchmarks/truck_front10000.scen
+good 4885
+bad 5115
+rejection rate 0.5115
+
+scenario ../benchmarks/between10000.scen
+good 5512
+bad 4488
+rejection rate 0.4488
+
+scenario ../benchmarks/chair10000.scen
+good 5241
+bad 4759
+rejection rate 0.4759
+
+scenario ../benchmarks/truck_spider.scen
+good 3274
+bad 6726
+rejection rate 0.6726

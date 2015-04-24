@@ -18,5 +18,5 @@ LIMB joint_name="MiddleLeftUpperLimb_z_joint" SPHERE="0.4332 -0.3516 -1.2047  0.
 LIMB joint_name="FrontRightUpperLimb_z_joint" SPHERE="1.3625 -0.4076 0.8238  0.3492"
 LIMB joint_name="MiddleRightUpperLimb_z_joint" SPHERE="0.4332 -0.3516 1.2047  0.3518"
 LIMB joint_name="BackRightUpperLimb_z_joint" SPHERE="0.2747 -0.4323 0.8910  0.3492"
-NBSAMPLES N="10"
+NBSAMPLES N="10000"
 INITCONTACTS 
