@@ -328,7 +328,7 @@ Sample* planner::GetPosturesInContact(Robot& robot, Node* limb, const sampling::
         ik::IKSolver solver;
         //solver.AddConstraint(ik::ForceManip);
         {
-            int limit = 100;
+            int limit = 10;
             //int limit2 = 100;
             while(limit > 0 && !solver.StepClamping(limb, position, position, constraints, true))
             {
@@ -594,7 +594,7 @@ namespace
                     state->contactLimbs.push_back(lIndex);
                     state->contactLimbPositions.push_back(target);
                     state->contactLimbPositionsNormals.push_back(normal);
-                    int limit = 50;
+                    int limit = 10;
                     //int limit2 = 100;
                     ik::IKSolver solver;
                     ik::VectorAlignmentConstraint constraint(normal);
@@ -646,7 +646,7 @@ namespace
                     state->contactLimbPositions.push_back(target);
                     state->contactLimbPositionsNormals.push_back(normal);
 
-                    int limit = 50;
+                    int limit = 10;
                     //int limit2 = 100;
                     ik::IKSolver solver;
                     ik::VectorAlignmentConstraint constraint(normal);

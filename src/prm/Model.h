@@ -80,6 +80,22 @@ struct Model
         return res;
     }
 
+    std::vector<size_t> EnglobingCollision(Object::T_Object& objs) // updates collision indexes
+    {
+        std::vector<size_t> res;
+        collisionIndexes.clear();
+        size_t id = 0;
+        for(Object::T_Object::iterator it = englobing.begin();
+            it != englobing.end(); ++it, ++id)
+        {
+            if((*it)->IsColliding(objs))
+            {
+                res.push_back(id);
+            }
+        }
+        return res;
+    }
+
     std::vector<size_t> EnglobingCollisionGround(Object* obj, double tolerance = 0.7) // updates collision indexes
     {
         Eigen::Vector3d normal(0,0.8,0);
@@ -107,6 +123,23 @@ struct Model
             it != englobing.end(); ++it, ++id)
         {
             if((*it)->IsColliding(obj,normal, tolerance))
+            {
+                res.push_back(id);
+            }
+        }
+        return res;
+    }
+
+    std::vector<size_t> EnglobingCollisionClimb(Object::T_Object& objs, double tolerance = 0.7) // updates collision indexes
+    {
+        Eigen::Vector3d normal(0,0.8,0);
+        std::vector<size_t> res;
+        collisionIndexes.clear();
+        size_t id = 0;
+        for(Object::T_Object::iterator it = englobing.begin();
+            it != englobing.end(); ++it, ++id)
+        {
+            if((*it)->IsColliding(objs,normal, tolerance))
             {
                 res.push_back(id);
             }

@@ -1,5 +1,5 @@
 MODEL = ../spider/model/mesh/roms/englobed.obj ../spider/model/mesh/roms/englobing.obj
 OBJECT = ../spider/scenes/truck_spider162.obj
-PRMFIL = ../spider/outputs/mardi16.prm
-SIZE = 2 5 20
+PRMFILE = ../tests/climbingvisibillity.txt
+SIZ = 2 5 20
 VISIBILIT

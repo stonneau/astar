@@ -156,7 +156,7 @@ if(P.y() > -0.3)
                 dir.normalize();
                 // add random direction and check for collision
                 //configuration.SetPosition(configuration.GetPosition() + (double) rand() / (RAND_MAX) * dir);
-                std::vector<size_t> collisions = configuration.EnglobingCollisionClimb(sampled.first, 0.3);
+                std::vector<size_t> collisions = configuration.EnglobingCollisionClimb(contactObjects_, 0.3);
 //collisions = configuration.EnglobingCollisionGround(sampled.first);
                 int maxStep = 5;
 //while(collisions.size()>0 && maxStep >0)
@@ -171,7 +171,7 @@ if(P.y() > -0.3)
 						break;
 					}
                     configuration.SetPosition(configuration.GetPosition() + (double) rand() / (RAND_MAX) / 8 * dir);
-                    collisions = configuration.EnglobingCollisionClimb(sampled.first, 0.3);
+                    collisions = configuration.EnglobingCollisionClimb(contactObjects_, 0.3);
 //collisions = configuration.EnglobingCollisionGround(sampled.first);
                     maxStep--;
                 }

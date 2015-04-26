@@ -68,7 +68,7 @@ bool HasContact(planner::Robot* robot, planner::CompleteScenario* cscenario, pla
         {
             for(planner::Object::T_Object::iterator oit = cscenario->scenario->objects_.begin(); oit != cscenario->scenario->objects_.end(); ++oit)
             {
-                if(effector->InContact(*oit,0.001, normal, projection))
+                if(effector->InContact(*oit,0.01, normal, projection))
                 {
                     return true;
                 }
@@ -88,10 +88,12 @@ double faisLeTafUnefois(const std::string& scenarioFile, std::vector<double>& re
     // get generator, from scenario
     planner::Generator generator(scenario.objects_, scenario.objects_, scenario.model_); // TODO MEME
     //#pragma omp parallel for
+    int nbtries (0);
     for(std::size_t i = 0; i< 10000; ++i)
     {
          std::vector<size_t> contactlimbs;
          planner::Model*  model = generator(contactlimbs);
+         nbtries += contactlimbs.size();
          //planner::Robot* rob = new planner::Robot(*(cscenario->robot));
          robot->SetPosition(model->GetPosition(), false);
          robot->SetRotation(model->GetOrientation(), true);
@@ -104,14 +106,17 @@ double faisLeTafUnefois(const std::string& scenarioFile, std::vector<double>& re
 
          int lIndex = 0;
          bool contact(false);
-         for(std::vector<planner::Node*>::iterator lit = limbs.begin(); lit != limbs.end() && !contact; ++lit, ++lIndex)
+         for(std::vector<std::size_t>::const_iterator itl = contactlimbs.begin(); itl != contactlimbs.end(); ++itl)
          {
-            if ( contactlimbs.front() == lIndex && HasContact(robot, cscenario, *lit, cscenario->limbSamples[lIndex]))
-            {
-                contact = true;
-            }
+            for(std::vector<planner::Node*>::iterator lit = limbs.begin(); lit != limbs.end() && !contact; ++lit, ++lIndex)
+             {
+                if ( contactlimbs.front() == lIndex && HasContact(robot, cscenario, *lit, cscenario->limbSamples[lIndex]))
+                {
+                    contact = true;
+                }
+             }
+            if(contact) {++good;} else {++bad;}
          }
-         if(contact) {++good;} else {++bad;}
          delete model;
     }
     std::cout << "scenario " << scenarioFile <<  std::endl;
@@ -119,6 +124,7 @@ double faisLeTafUnefois(const std::string& scenarioFile, std::vector<double>& re
     std::cout << "bad " << bad << std::endl;
     std::cout << "rejection rate " << bad /(good + bad) << std::endl;
     return  (bad /(good + bad));
+    delete cscenario;
 }
 
 }
@@ -129,16 +135,16 @@ int main(int argc, char *argv[])
     // human scenarios
     std::vector<std::string> targets;
     targets.push_back(scenarioPathHuman + "truck_front10000.scen");
-    targets.push_back(scenarioPathHuman + "between10000.scen");
-    targets.push_back(scenarioPathHuman + "chair10000.scen");
-    targets.push_back(scenarioPathHuman + "truck_spider.scen");
-    targets.push_back(scenarioPathHuman + "climbingspider.scen");
+    //targets.push_back(scenarioPathHuman + "between10000.scen");
+    //targets.push_back(scenarioPathHuman + "chair10000.scen");
+    //targets.push_back(scenarioPathHuman + "truck_spider.scen");
+    //targets.push_back(scenarioPathHuman + "climbingspider.scen");
 
     std::stringstream outstream;
 
     std::vector<double> rejection;
     double scale = 1.;
-    for(double scale = 0.6; scale <= 3; scale = scale + 0.2)
+    for(double scale = 2.8; scale <= 2.8; scale = scale + 0.2)
     {
         for(std::vector<std::string>::const_iterator sit = targets.begin(); sit != targets.end(); ++sit)
         {
