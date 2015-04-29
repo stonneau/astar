@@ -18,6 +18,7 @@
 #include "prmpath/ik/ObstacleAvoidanceConstraint.h"
 #include "prmpath/animation/StateInterpolation.h"
 #include "Timer.h"
+#include "retarget/Motion.h"
 
 #include <string>
 #include <iostream>
@@ -46,7 +47,6 @@ namespace
     bool solid = true;
     std::string outpath("../tests/testSerialization.txt");
     std::string outstatepath("../tests/states.txt");
-    std::string outstatecontactpath("../tests/statescontact.txt");
     std::string outfilename ("../tests/entrance.path");
     Eigen::Matrix3d itompTransform;
     int current = 0;
@@ -185,22 +185,22 @@ namespace
         }
     }
 
-    void DrawPoint(const Eigen::Vector3d& target, float scale = 1)
+    void DrawPoint(const Eigen::Vector3d& target)
     {
         dsSetColor(1,0,0);
         PQP_REAL p1 [3];
         PQP_REAL p2 [3];
         Eigen::Vector3d tmp(target);
-        tmp(2)+=0.1 * scale;
+        tmp(2)+=0.1;
         Vect3ToArray(p1,tmp);
-        tmp(2)-=0.2* scale;
+        tmp(2)-=0.2;
         Vect3ToArray(p2,tmp);
         dsDrawLineD(p1, p2);
 
-        tmp(2)+=0.1* scale;
-        tmp(1)+=0.1* scale;
+        tmp(2)+=0.1;
+        tmp(1)+=0.1;
         Vect3ToArray(p1,tmp);
-        tmp(1)-=0.2* scale;
+        tmp(1)-=0.2;
         Vect3ToArray(p2,tmp);
         dsDrawLineD(p1, p2);
         dsSetColor(0,0,1);
@@ -366,29 +366,6 @@ namespace
         }
     }
 
-    void PerformIkSteps(planner::CompleteScenario& scenario, planner::State* state, bool obs = false)
-    {
-        ik::IKSolver solver;
-        std::vector<Eigen::Vector3d>::iterator posit = state->contactLimbPositions.begin();
-        std::vector<Eigen::Vector3d>::iterator normit = state->contactLimbPositionsNormals.begin();
-        planner::Collider collider(scenario.scenario->objects_);
-        for(std::vector<int>::const_iterator cit = state->contactLimbs.begin();
-            cit != state->contactLimbs.end(); ++cit, ++posit, ++normit)
-        {
-            planner::Node* limb =  planner::GetChild(scenario.robot,scenario.limbs[*cit]->id);
-            ik::VectorAlignmentConstraint constraint(*normit);
-            ik::ObstacleAvoidanceConstraint obsconstraint(collider);
-            std::vector<ik::PartialDerivativeConstraint*> constraints;
-            if(!obs)
-                constraints.push_back(&constraint);
-            //constraints.push_back(&obsconstraint);
-            //solver.AddConstraint(ik::ForceManip);
-            {
-                solver.StepClamping(limb, *posit, *posit, constraints, true);
-            }
-        }
-    }
-
     void PerformIkStep(planner::CompleteScenario& scenario, planner::Node* limb, bool obs = false)
     {
         planner::State* state = states[current];
@@ -446,7 +423,7 @@ static void simLoop (int pause)
     DrawObjects();
     dsSetColorAlpha(0,0, 0.7,1);
     DrawNode(cScenario->robot->node);
-    DrawPoint(itompTransform * cScenario->robot->node->children[0]->children[0]->children[0]->children[0]->children[0]->children[0]->children[0]->position, 3);
+    DrawPoint(itompTransform * cScenario->robot->currentPosition);
     std::vector<Eigen::Vector3d>::iterator nit = states[current]->contactLimbPositionsNormals.begin();
     for(std::vector<Eigen::Vector3d>::iterator it = states[current]->contactLimbPositions.begin();
         it != states[current]->contactLimbPositions.end(); ++it, ++nit)
@@ -509,10 +486,7 @@ void start()
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/truck_test.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/race2.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/between.scen");
-    //cScenario = planner::CompleteScenarioFromFile("../spider/scenario/pen.scen");
-    //cScenario = planner::CompleteScenarioFromFile("../spider/scenario/pentour.scen");
-    cScenario = planner::CompleteScenarioFromFile("../spider/scenario/climbing.scen", 2);
-    //cScenario = planner::CompleteScenarioFromFile("../spider/scenario/truck_spider.scen");
+    cScenario = planner::CompleteScenarioFromFile("../rami/scenarios/statestest.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/race_climb.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/climbing.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/zoey.scen");
@@ -548,7 +522,24 @@ void start()
     samples = cScenario->limbSamples[0];
     std::cout << " SAMPLES" << samples.size() << std::endl;
     std::cout << "done creating nodes " << path.size() << std::endl;
-    states = planner::PostureSequence(*cScenario,3);
+    states = cScenario->states.empty() ? planner::PostureSequence(*cScenario,3)
+                                       : cScenario->states;
+    efort::Motion* motion = efort::LoadMotion("../rami/scenarios/statestest.scen");
+    std::size_t ifr = 0;
+    for(std::vector<efort::Frame>::const_iterator fit = motion->frames_.begin();
+        fit != motion->frames_.end(); ++fit, ++ifr)
+    {
+        std::cout << "frame number " << ifr << std::endl;
+        for(std::vector<efort::Contact>::const_iterator cit = fit->contacts_.begin();
+            cit != fit->contacts_.end(); ++cit)
+        {
+            const efort::Contact& ct = *cit;
+            std::cout << "\t contact limb " << ct.limbIndex_ << std::endl;
+            std::cout << "\t start " << ct.startFrame_ << std::endl;
+            std::cout << "\t end " << ct.endFrame_ << std::endl;
+            std::cout << "\t target " << ct.worldPosition_ << std::endl;
+        }
+    }
     std::cout << "done animating " << path.size() << std::endl;
     for(int i = 0; i< states.size(); ++i)
     {
@@ -730,7 +721,7 @@ void command(int cmd)   /**  key control function; */
             current ++; if(states.size() <= current) current = states.size()-1;
             //cScenario->robot->SetConfiguration(cScenario->path[current]);
             cScenario->robot = states[current]->value;
-            std::cout << "state stable" << (states[current]->stable ? 1 : 0) << std::endl;
+            std::cout << "state stable" << states[current]->stable << std::endl;
             //currentSample = 0;
             //samples = planner::GetPosturesInContact(*cScenario->robot, cScenario->limbs[0], cScenario->limbSamples[0], cScenario->scenario->objects_ );
             break;
@@ -752,7 +743,7 @@ void command(int cmd)   /**  key control function; */
         std::cout << " SAMPLES" << samples.size() << std::endl;
             if(samples.empty()) return;
             currentSample ++; if(samples.size() <= currentSample) currentSample = samples.size()-1;
-            planner::sampling::LoadSample(*(samples[currentSample]),planner::GetChild(cScenario->robot, "FrontRightUpperLimb_z_joint"));
+            planner::sampling::LoadSample(*(samples[currentSample]),planner::GetChild(cScenario->robot, "upper_right_arm_z_joint"));
             break;
         }
         break;
@@ -761,7 +752,7 @@ void command(int cmd)   /**  key control function; */
         std::cout << " SAMPLES" << samples.size() << std::endl;
             if(samples.empty()) return;
             currentSample --; if(currentSample < 0) currentSample = 0;
-            planner::sampling::LoadSample(*(samples[currentSample]),planner::GetChild(cScenario->robot, "FrontLeftUpperLimb_z_joint"));
+            planner::sampling::LoadSample(*(samples[currentSample]),planner::GetChild(cScenario->robot, "upper_right_arm_z_joint"));
             break;
         }
         case 'm' :
@@ -769,38 +760,33 @@ void command(int cmd)   /**  key control function; */
             drawPOstures = ! drawPOstures;
             break;
         }
-        case 'M' :
-        {
-            planner::ExportContactStates(states, cScenario->limbs, outstatecontactpath);
-            break;
-        }
         case 'a' :
-        planner::GetChild(cScenario->robot, "FrontRightUpperLimb_y_joint")->SetRotation(planner::GetChild(cScenario->robot,"FrontRightUpperLimb_y_joint")->value-0.1* dirIK);
+        planner::GetChild(cScenario->robot, "RightArm_z_joint")->SetRotation(planner::GetChild(cScenario->robot,"RightArm_z_joint")->value-0.1* dirIK);
         break;
         case 'z' :
-        planner::GetChild(cScenario->robot, "FrontRightLimb_joint")->SetRotation(planner::GetChild(cScenario->robot,"FrontRightLimb_joint")->value-0.1* dirIK);
+        planner::GetChild(cScenario->robot, "RightArm_y_joint")->SetRotation(planner::GetChild(cScenario->robot,"RightArm_y_joint")->value-0.1* dirIK);
         break;
         case 'e' :
-        planner::GetChild(cScenario->robot, "FrontRightLowerLimb_joint")->SetRotation(planner::GetChild(cScenario->robot,"FrontRightLowerLimb_joint")->value-0.1* dirIK);
+        planner::GetChild(cScenario->robot, "RightArm_x_joint")->SetRotation(planner::GetChild(cScenario->robot,"RightArm_x_joint")->value-0.1* dirIK);
         break;
         case 'r' :
-        planner::GetChild(cScenario->robot, "MiddleLeftLimb_joint")->SetRotation(planner::GetChild(cScenario->robot,"MiddleLeftLimb_joint")->value-0.1* dirIK);
+        planner::GetChild(cScenario->robot, "RightForeArm_y_joint")->SetRotation(planner::GetChild(cScenario->robot,"RightForeArm_y_joint")->value-0.1* dirIK);
         break;
         case 'A' :
-        planner::GetChild(cScenario->robot, "FrontLeftEffector_z_joint")->SetRotation(planner::GetChild(cScenario->robot,"FrontLeftEffector_z_joint")->value-0.1* dirIK);
+        planner::GetChild(cScenario->robot, "RightHand_z_joint")->SetRotation(planner::GetChild(cScenario->robot,"RightHand_z_joint")->value-0.1* dirIK);
         break;
         case 'Z' :
-        planner::GetChild(cScenario->robot, "FrontLeftEffector_y_joint")->SetRotation(planner::GetChild(cScenario->robot,"FrontLeftEffector_y_joint")->value-0.1* dirIK);
+        planner::GetChild(cScenario->robot, "RightHand_y_joint")->SetRotation(planner::GetChild(cScenario->robot,"RightHand_y_joint")->value-0.1* dirIK);
         break;
         case 'E' :
-        planner::GetChild(cScenario->robot, "FrontLeftEffector_x_joint")->SetRotation(planner::GetChild(cScenario->robot,"FrontLeftEffector_x_joint")->value-0.1* dirIK);
+        planner::GetChild(cScenario->robot, "RightHand_x_joint")->SetRotation(planner::GetChild(cScenario->robot,"RightHand_x_joint")->value-0.1* dirIK);
         break;
         case 'R' :
-            PerformIkStep(*cScenario, planner::GetChild(cScenario->robot, "upper_right_arm_z_joint"));
+            PerformIkStep(*cScenario, planner::GetChild(cScenario->robot, "RightShoulder_z_joint"));
         break;
 
         case 'u' :
-        planner::GetChild(cScenario->robot, "upper_left_arm_z_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_left_arm_z_joint")->value-0.1* dirIK);
+        planner::GetChild(cScenario->robot, "LeftShoulder1_z_joint")->SetRotation(planner::GetChild(cScenario->robot,"LeftShoulder1_z_joint")->value-0.1* dirIK);
         break;
         case 'i' :
         planner::GetChild(cScenario->robot, "upper_left_arm_y_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_left_arm_y_joint")->value-0.1* dirIK);
@@ -826,7 +812,7 @@ void command(int cmd)   /**  key control function; */
 
 
         case 'w' :
-        planner::GetChild(cScenario->robot, "upper_left_leg_z_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_left_leg_z_joint")->value-0.1* dirIK);
+        planner::GetChild(cScenario->robot, "LeftUpLeg_z_joint")->SetRotation(planner::GetChild(cScenario->robot,"LeftUpLeg_z_joint")->value-0.1* dirIK);
         break;
         case 'x' :
         planner::GetChild(cScenario->robot, "upper_left_leg_y_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_left_leg_y_joint")->value-0.1* dirIK);
@@ -852,7 +838,7 @@ void command(int cmd)   /**  key control function; */
 
 
         case 'h' :
-        planner::GetChild(cScenario->robot, "upper_right_leg_z_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_right_leg_z_joint")->value-0.1* dirIK);
+        planner::GetChild(cScenario->robot, "RightUpLeg_z_joint")->SetRotation(planner::GetChild(cScenario->robot,"RightUpLeg_z_joint")->value-0.1* dirIK);
         break;
         case 'j' :
         planner::GetChild(cScenario->robot, "upper_right_leg_y_joint")->SetRotation(planner::GetChild(cScenario->robot,"upper_right_leg_y_joint")->value-0.1* dirIK);

@@ -36,6 +36,7 @@ endif()
 
 add_subdirectory (src/prm)
 add_subdirectory (src/prmpath)
+add_subdirectory (src/retarget)
 add_subdirectory (src/collision)
 add_subdirectory (src/equilibrium)
 add_subdirectory (src/tests/equilibrium)

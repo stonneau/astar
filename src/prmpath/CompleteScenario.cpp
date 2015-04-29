@@ -201,7 +201,7 @@ planner::CompleteScenario* planner::CompleteScenarioFromFile(const std::string& 
     cScenario->relocateEnglobing = false;
     bool scenario = false; bool skeleton = false; bool contraints = false;
     bool from = false; bool to = false; bool limb = false; bool initstate = false;
-    bool samples = false;
+    bool samples = false; bool recordedstates=false;
     std::ifstream myfile (filename);
     if (myfile.is_open())
     {
@@ -239,7 +239,6 @@ planner::CompleteScenario* planner::CompleteScenarioFromFile(const std::string& 
             if(line.find("PATH_FROM matrix=") != string::npos && scenario)
             {
                 Eigen::Matrix4d res = ReadTransform(ExtractQuotes(line), from);
-                std::cout << " FROM \n" << res << std::endl;
                 cScenario->from = new Model((cScenario->scenario->model_));
                 cScenario->from->SetOrientation(res.block<3,3>(0,0));
                 cScenario->from->SetPosition(res.block<3,1>(0,3));
@@ -248,11 +247,15 @@ planner::CompleteScenario* planner::CompleteScenarioFromFile(const std::string& 
             if(line.find("PATH_TO matrix=") != string::npos && scenario)
             {
                 Eigen::Matrix4d res = ReadTransform(ExtractQuotes(line), to);
-                std::cout << " TO \n" << res << std::endl;
                 cScenario->to = new Model((cScenario->scenario->model_));
                 cScenario->to->SetOrientation(res.block<3,3>(0,0));
                 cScenario->to->SetPosition(res.block<3,1>(0,3));
                 to = !to;
+            }
+            if(line.find("STATES FILE=")!= string::npos)
+            {
+                cScenario->states =planner::LoadStates(ExtractQuotes(line), cScenario->robot);
+                recordedstates = true;
             }
             if(line.find("CONSTANT_ROTATION matrix=") != string::npos && cScenario->robot)
             {
@@ -315,7 +318,7 @@ cScenario->limbspeed.push_back(1); // TODO HAVE ACTUAL SPEED
     }
 
     std::cout << "cherche" << filename << std::endl;
-    if(scenario && skeleton && contraints && to && from && limb && samples )
+    if(scenario && skeleton && contraints && ((to && from) || recordedstates) && limb && samples )
     {
         // order correctly roms relativelty to limbs
         std::vector<std::string> limbnames;
@@ -325,11 +328,15 @@ cScenario->limbspeed.push_back(1); // TODO HAVE ACTUAL SPEED
             limbnames.push_back((*cit)->tag);
         }
         cScenario->scenario->model_.SortEnglobingByName(limbnames);
+
+        if(!recordedstates)
+        {
 Timer timer; timer.Start();
 std::cout << " path request timer" << std::endl;
         cScenario->path = cScenario->scenario->prm->GetPath(*(cScenario->from), *(cScenario->to), 10, true, true);
 std::cout << " path request end timer, time :" <<  timer.GetTime() << std::endl;
 timer.Stop();
+        }
         if(cScenario->path.empty())
         {
             cScenario->path.push_back(cScenario->from);

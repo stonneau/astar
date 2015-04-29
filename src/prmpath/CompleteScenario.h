@@ -72,6 +72,7 @@ struct CompleteScenario
     State initstate;
     SplinePath* spline;
     bool relocateEnglobing;
+    T_State states; // optional
 };
 
 /*

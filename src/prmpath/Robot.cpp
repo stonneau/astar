@@ -762,3 +762,34 @@ Eigen::Vector3d planner::GetEffectorCenter(Node* node)
     }
     return bary / res.size();
 }
+
+void AsConfigurationRec(planner::Node* node, Eigen::VectorXd& condiguration, std::size_t& cid)
+{
+    Eigen::Matrix3d rotation = Eigen::AngleAxisd(node->value, node->axis).matrix();
+    while(node->children.size() == 1 && node->children[0]->offset == Eigen::Vector3d::Zero())
+    {
+        node = node->children.front();
+        rotation *= Eigen::AngleAxisd(node->value, node->axis).matrix();
+    }
+    Eigen::Vector3d res = rotation.eulerAngles(2, 0, 1);
+    for(int i = 0 ; i<3; ++i)
+    {
+        condiguration(cid) = res[i];
+        ++cid;
+    }
+    for(std::vector<planner::Node*>::iterator it = node->children.begin();
+        it != node->children.end(); ++it)
+    {
+        AsConfigurationRec(*it,condiguration, cid);
+    }
+}
+
+Eigen::VectorXd planner::AsConfiguration(Robot* robot)
+{
+    std::size_t size = GetNumChildren(robot->node) + 3;
+    Eigen::VectorXd res(size);
+    res.block<3,1>(0,0) = robot->node->position;
+    std::size_t cid = 3;
+    AsConfigurationRec(robot->node->children.front(), res, cid);
+    return res;
+}

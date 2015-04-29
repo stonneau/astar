@@ -117,6 +117,7 @@ public:
 };
 
 int GetNumChildren(const Node* node);
+Eigen::VectorXd AsConfiguration(Robot* robot);
 Eigen::Vector3d GetEffectorCenter(Node* node);
 std::vector<Node*> GetEffectors(Node* node, bool onePerLimb=false);
 Node* GetChild(Node* node, const std::string& tag);
