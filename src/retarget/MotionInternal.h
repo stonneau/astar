@@ -1,16 +1,18 @@
 /**
-* \file Motion.h
-* \brief Structure describing the complete motion of a robot
+* \file MotionI.h
+* \brief Structure describing the complete MotionI of a robot
 * \author Steve T.
 * \version 0.1
 * \date 28/04/2015
 *
 */
-#ifndef _STRUCT_MOTION
-#define _STRUCT_MOTION
+#ifndef _STRUCT_RETARGETER
+#define _STRUCT_RETARGETER
 
 
 #include "collision/Object.h" // this needs to move out
+#include "prmpath/CompleteScenario.h"
+#include "prmpath/Robot.h"
 
 #include <string>
 
@@ -38,17 +40,17 @@ struct Frame
     std::vector<Contact> contacts_;
 };
 
-struct Motion
+struct MotionI
 {
     Frame Retarget(const std::size_t /*frameid*/) const; //tmp: waht for objs ?
-    Frame Retarget(const std::size_t /*frameid*/, const std::vector<Eigen::Vector3d>& /*target*/, planner::Object::T_Object& objects) const; //tmp: waht for objs ?
+    planner::Robot* Retarget(const std::size_t /*frameid*/, const std::vector<Eigen::Vector3d>& /*target*/, planner::Object::T_Object& objects) const; //tmp: waht for objs ?
 
     std::vector<Frame> frames_;
 private:
     std::auto_ptr<PImpl> pImpl_;
-    friend Motion* LoadMotion(const std::string& scenario);
+    friend MotionI* LoadMotionI(planner::CompleteScenario* scenario);
 };
 
-Motion* LoadMotion(const std::string& scenario);
+MotionI* LoadMotionI(planner::CompleteScenario* scenario);
 } //namespace efort
-#endif //_STRUCT_MOTION
+#endif //Retargeter

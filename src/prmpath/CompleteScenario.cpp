@@ -261,6 +261,8 @@ planner::CompleteScenario* planner::CompleteScenarioFromFile(const std::string& 
             {
                 Eigen::Matrix3d res = Read3Transform(ExtractQuotes(line));
                 cScenario->robot->SetConstantRotation(res);
+                std::cout << "ahb on" << std::endl << res << std::endl;
+                std::cout << "ahb on" << std::endl << cScenario->robot->constantRotation << std::endl;
             }
             if(line.find("LIMB") != string::npos && cScenario->robot)
             {

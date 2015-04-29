@@ -1,4 +1,4 @@
-#include "retarget/Motion.h"
+#include "retarget/MotionInternal.h"
 #include "prmpath/CompleteScenario.h"
 #include "prmpath/PostureSelection.h"
 
@@ -7,8 +7,8 @@
 
 struct efort::PImpl
 {
-    PImpl(const std::string& scenario)
-        : cScenario_(planner::CompleteScenarioFromFile(scenario))
+    PImpl(planner::CompleteScenario* cScenario)
+        : cScenario_(cScenario)
         , states_(cScenario_->states)
     {
         // init contact by limbs
@@ -21,33 +21,37 @@ struct efort::PImpl
 
     ~PImpl()
     {
-        delete cScenario_;
+        //delete cScenario_;
     }
     planner::CompleteScenario* cScenario_;
-    planner::T_State states_;
+    planner::T_State& states_;
     std::vector<std::vector<Contact> > contacts_;
 };
 
 using namespace efort;
 using namespace planner;
 
-Frame Motion::Retarget(const std::size_t frameid) const
+Frame MotionI::Retarget(const std::size_t frameid) const
 {
     // TODO
     Frame frame;
     return frame;
 }
 
-Frame Motion::Retarget(const std::size_t frameid, const std::vector<Eigen::Vector3d>& targets, Object::T_Object &objects) const
+planner::Robot* MotionI::Retarget(const std::size_t frameid, const std::vector<Eigen::Vector3d>& targets, Object::T_Object &objects) const
 {
     const Frame& cframe = frames_[frameid];
+    planner::Robot* robot = pImpl_->states_[frameid]->value;
     std::size_t id(0);
     for(std::vector<Contact>::const_iterator cit = cframe.contacts_.begin();
         cit !=cframe.contacts_.end(); ++cit, ++id)
     {
         // get corresponding robot
-        planner::Robot* robot = pImpl_->states_[frameid]->value;
-        Sphere sphereCurrent(robot->currentRotation * pImpl_->cScenario_->limbRoms[cit->limbIndex_].center_ + robot->currentPosition,
+
+        std::cout << "current Rotation" << std::endl << robot->currentRotation  << std::endl;
+        std::cout << "constantRotation Rotation" << std::endl << robot->constantRotation  << std::endl;
+
+        Sphere sphereCurrent(robot->currentRotation * robot->constantRotation.transpose() * pImpl_->cScenario_->limbRoms[cit->limbIndex_].center_ + robot->currentPosition,
                               pImpl_->cScenario_->limbRoms[cit->limbIndex_].radius_ * 1.5);
         if(Contains(sphereCurrent, targets[id]))
         {
@@ -56,8 +60,11 @@ Frame Motion::Retarget(const std::size_t frameid, const std::vector<Eigen::Vecto
         else
         {
             std::cout << "out of rage" << std::endl;
+            std::cout << "sphere pos " << std::endl << sphereCurrent.center_ << std::endl;
+            std::cout << "pos " << std::endl << targets[id] << std::endl;
         }
     }
+    return robot;
 }
 
 namespace
@@ -114,7 +121,7 @@ namespace
             sit_1 != pImpl->states_.end(); ++sit_1, ++numFrame)
         {
             Frame frame;
-            frame.configuration_ = planner::AsConfiguration((*sit_1)->value);
+            //frame.configuration_ = planner::AsConfiguration((*sit_1)->value);
             for(int i=0; i< pImpl->contacts_.size(); ++i)
             {
                 std::size_t id = contactids[numFrame][i];
@@ -131,9 +138,9 @@ namespace
 }
 
 
-Motion* efort::LoadMotion(const std::string& scenario)
+MotionI* efort::LoadMotionI(CompleteScenario *scenario)
 {
-    Motion* motion = new Motion;
+    MotionI* motion = new MotionI;
     motion->pImpl_.reset(new PImpl(scenario));
     motion->frames_ = FramesFromStates(motion->pImpl_.get());
     return motion;

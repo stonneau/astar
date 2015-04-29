@@ -17,8 +17,8 @@ if ( MSVC )
 endif ( MSVC )
 	
 set(SOURCES
-    Motion.h
-    Motion.cpp
+    Motion.h Motion.cpp
+    MotionInternal.h MotionInternal.cpp
     ${SRC_TOOLS_DIR}/MatrixDefs.h ${SRC_TOOLS_DIR}/MatrixDefs.cpp
     ${SRC_TOOLS_DIR}/MatrixDefsInternal.h
 )

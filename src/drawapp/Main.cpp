@@ -18,7 +18,7 @@
 #include "prmpath/ik/ObstacleAvoidanceConstraint.h"
 #include "prmpath/animation/StateInterpolation.h"
 #include "Timer.h"
-#include "retarget/Motion.h"
+#include "retarget/MotionInternal.h"
 
 #include <string>
 #include <iostream>
@@ -62,6 +62,8 @@ namespace
     Eigen::Vector3d directionManip = Eigen::Vector3d(0,0,1);
     bool optimize = true;
     std::vector<ik::PartialDerivativeConstraint*> constraints;
+    efort::MotionI* motion(0);
+    Eigen::Vector3d totalOffset(0,0,0);
 }
 /*Draw*/
 namespace
@@ -524,7 +526,7 @@ void start()
     std::cout << "done creating nodes " << path.size() << std::endl;
     states = cScenario->states.empty() ? planner::PostureSequence(*cScenario,3)
                                        : cScenario->states;
-    efort::Motion* motion = efort::LoadMotion("../rami/scenarios/statestest.scen");
+    motion = efort::LoadMotionI(cScenario);
     std::size_t ifr = 0;
     for(std::vector<efort::Frame>::const_iterator fit = motion->frames_.begin();
         fit != motion->frames_.end(); ++fit, ++ifr)
@@ -645,6 +647,18 @@ bool SavePath()
 	return true;
 }
 
+void Retarget(const Eigen::Vector3d& delta)
+{
+    totalOffset +=delta;
+    std::vector<Eigen::Vector3d> targets;
+    for(std::vector<Eigen::Vector3d>::const_iterator cit = states[current]->contactLimbPositions.begin();
+        cit != states[current]->contactLimbPositions.end(); ++cit)
+    {
+        targets.push_back(*cit + totalOffset);
+    }
+    states[current]->value = motion->Retarget(current, targets, cScenario->scenario->objects_);
+}
+
 void command(int cmd)   /**  key control function; */
 {
     //Eigen::Vector3d target = planner::GetChild(cScenario->robot, "torso_x_joint")->toWorldRotation* Eigen::Vector3d(0.5,0.5,0.5);
@@ -761,16 +775,28 @@ void command(int cmd)   /**  key control function; */
             break;
         }
         case 'a' :
-        planner::GetChild(cScenario->robot, "RightArm_z_joint")->SetRotation(planner::GetChild(cScenario->robot,"RightArm_z_joint")->value-0.1* dirIK);
+    {
+            cScenario->scenario->objects_[2]->SetPosition( cScenario->scenario->objects_[2]->GetPosition() + Eigen::Vector3d(0.1,0,0));
+            Retarget(Eigen::Vector3d(0.1,0,0));
         break;
+    }
         case 'z' :
-        planner::GetChild(cScenario->robot, "RightArm_y_joint")->SetRotation(planner::GetChild(cScenario->robot,"RightArm_y_joint")->value-0.1* dirIK);
+    {
+            cScenario->scenario->objects_[2]->SetPosition( cScenario->scenario->objects_[2]->GetPosition() - Eigen::Vector3d(0.1,0,0));
+            Retarget(Eigen::Vector3d(-0.1,0,0));
         break;
+    }
         case 'e' :
-        planner::GetChild(cScenario->robot, "RightArm_x_joint")->SetRotation(planner::GetChild(cScenario->robot,"RightArm_x_joint")->value-0.1* dirIK);
+    {
+            cScenario->scenario->objects_[2]->SetPosition( cScenario->scenario->objects_[2]->GetPosition() + Eigen::Vector3d(0,0.1,0));
+            Retarget(Eigen::Vector3d(0,0.1,0));
         break;
+    }
         case 'r' :
-        planner::GetChild(cScenario->robot, "RightForeArm_y_joint")->SetRotation(planner::GetChild(cScenario->robot,"RightForeArm_y_joint")->value-0.1* dirIK);
+    {
+            cScenario->scenario->objects_[2]->SetPosition( cScenario->scenario->objects_[2]->GetPosition() + Eigen::Vector3d(0,-0.1,0));
+            Retarget(Eigen::Vector3d(0,-0.1,0));
+    }
         break;
         case 'A' :
         planner::GetChild(cScenario->robot, "RightHand_z_joint")->SetRotation(planner::GetChild(cScenario->robot,"RightHand_z_joint")->value-0.1* dirIK);
