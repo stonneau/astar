@@ -68,22 +68,27 @@ namespace
         ik::IKSolver solver;//(0.001f, 0.001f,0.1f);
         ik::VectorAlignmentConstraint constraint(normal);
         std::vector<ik::PartialDerivativeConstraint*> constraints;
-        constraints.push_back(&constraint);
-        int limit = 30;
-        while(limit > 0 )
+        int limit = 1000;
+        int limit2 = 200;
+        while(limit > 0 && !solver.StepClamping(limb, target, normal, constraints, true))
         {
-            solver.StepClamping(limb, target, normal, constraints, true);
             limit--;
+        }
+        constraints.push_back(&constraint);
+        while(limit2 > 0 )
+        {
+            limit2--;
+            solver.StepClamping(limb, target, normal, constraints, true);
         }
     }
 }
 
-planner::State* MotionI::Retarget(const std::size_t frameid, const std::vector<Eigen::Vector3d>& targets, Object::T_Object &objects) const
+planner::State* MotionI::Retarget(planner::Robot* current, const std::size_t frameid, const std::vector<Eigen::Vector3d>& targets, Object::T_Object &objects) const
 {
     const Frame& cframe = frames_[frameid];
-    //planner::Robot* robot = new planner::Robot( *pImpl_->states_[frameid]->value);
-    planner::State* state = new planner::State();
     planner::Robot* robot = new planner::Robot( *pImpl_->states_[frameid]->value);
+    planner::State* state = new planner::State();
+    //planner::Robot* robot = new planner::Robot(*current);
     state->value = robot;
     std::size_t id(0);
     for(std::vector<Contact>::const_iterator cit = cframe.contacts_.begin();
@@ -99,10 +104,10 @@ planner::State* MotionI::Retarget(const std::size_t frameid, const std::vector<E
         {
             std::cout << "in range" << std::endl;
             SolveIk(limb, targets[id], cit->surfaceNormal_);
-            if(!LimbColliding(limb,objects,false))
+            //if(!LimbColliding(limb,objects,false))
             {
                 contactMaintained = true;
-                state->contactLimbPositions.push_back(cit->worldPosition_);
+                state->contactLimbPositions.push_back(targets[id]);
                 state->contactLimbPositionsNormals.push_back(cit->surfaceNormal_);
                 state->contactLimbs.push_back(cit->limbIndex_);
             }
@@ -126,9 +131,9 @@ planner::State* MotionI::Retarget(const std::size_t frameid, const std::vector<E
             {
                 nc = planner::GetCollisionFreePosture(*robot,limb, pImpl_->cScenario_->limbSamples[cit->limbIndex_],objects);
                 if(nc) planner::sampling::LoadSample(*nc, limb);
-                state->contactLimbPositions.push_back(cit->worldPosition_);
+                /*state->contactLimbPositions.push_back(cit->worldPosition_);
                 state->contactLimbPositionsNormals.push_back(cit->surfaceNormal_);
-                state->contactLimbs.push_back(cit->limbIndex_);
+                state->contactLimbs.push_back(cit->limbIndex_);*/
             }
         }
     }

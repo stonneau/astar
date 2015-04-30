@@ -659,16 +659,16 @@ void Retarget(const Eigen::Vector3d& delta)
 {
     totalOffset +=delta;
     std::vector<Eigen::Vector3d> targets;
-    for(std::vector<Eigen::Vector3d>::const_iterator cit = states[current]->contactLimbPositions.begin();
-        cit != states[current]->contactLimbPositions.end(); ++cit)
+    for(std::vector<Eigen::Vector3d>::const_iterator cit = cScenario->states[current]->contactLimbPositions.begin();
+        cit !=  cScenario->states[current]->contactLimbPositions.end(); ++cit)
     {
-        //targets.push_back(*cit + totalOffset);
-        targets.push_back(*cit);
+        targets.push_back(*cit + totalOffset);
+        //targets.push_back(*cit);
     }
     ///delete(states[current]);
     //states[current] = motion->Retarget(current, targets, cScenario->scenario->contactObjects_);
     //cScenario->robot = motion->Retarget(current, targets, cScenario->scenario->contactObjects_);
-    states[current] = motion->Retarget(current, targets, cScenario->scenario->objects_);
+    states[current] = motion->Retarget(cScenario->robot, current, targets, cScenario->scenario->objects_);
     cScenario->robot = states[current]->value;
     objectm->SetPosition(totalOffset);
     objectMotion.PushFrame(objectm);
@@ -801,25 +801,25 @@ void command(int cmd)   /**  key control function; */
         }
         case 'a' :
     {
-            cScenario->scenario->objects_[2]->SetPosition( cScenario->scenario->objects_[2]->GetPosition() + Eigen::Vector3d(0.1,0,0));
+            cScenario->scenario->objects_[0]->SetPosition( cScenario->scenario->objects_[0]->GetPosition() + Eigen::Vector3d(0.1,0,0));
             Retarget(Eigen::Vector3d(0.1,0,0));
         break;
     }
         case 'z' :
     {
-            cScenario->scenario->objects_[2]->SetPosition( cScenario->scenario->objects_[2]->GetPosition() - Eigen::Vector3d(0.1,0,0));
+            cScenario->scenario->objects_[0]->SetPosition( cScenario->scenario->objects_[0]->GetPosition() - Eigen::Vector3d(0.1,0,0));
             Retarget(Eigen::Vector3d(-0.1,0,0));
         break;
     }
         case 'e' :
     {
-            cScenario->scenario->objects_[2]->SetPosition( cScenario->scenario->objects_[2]->GetPosition() + Eigen::Vector3d(0,0.1,0));
+            cScenario->scenario->objects_[0]->SetPosition( cScenario->scenario->objects_[0]->GetPosition() + Eigen::Vector3d(0,0.1,0));
             Retarget(Eigen::Vector3d(0,0.1,0));
         break;
     }
         case 'r' :
     {
-            cScenario->scenario->objects_[2]->SetPosition( cScenario->scenario->objects_[2]->GetPosition() + Eigen::Vector3d(0,-0.1,0));
+            cScenario->scenario->objects_[0]->SetPosition( cScenario->scenario->objects_[0]->GetPosition() + Eigen::Vector3d(0,-0.1,0));
             Retarget(Eigen::Vector3d(0,-0.1,0));
     }
         break;
