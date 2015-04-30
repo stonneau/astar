@@ -64,7 +64,11 @@ namespace
     std::vector<ik::PartialDerivativeConstraint*> constraints;
     efort::MotionI* motion(0);
     Eigen::Vector3d totalOffset(0,0,0);
+    exporter::BVHExporter objectMotion;
+    exporter::BVHExporter retargeter;
+    planner::Robot* objectm(0);
 }
+
 /*Draw*/
 namespace
 {
@@ -527,6 +531,10 @@ void start()
     states = cScenario->states.empty() ? planner::PostureSequence(*cScenario,3)
                                        : cScenario->states;
     motion = efort::LoadMotionI(cScenario);
+    objectm = new planner::Robot(*cScenario->robot);
+    objectm->SetPosition(Eigen::Vector3d(0,0,0));
+    objectMotion.PushStructure(objectm);
+    retargeter.PushStructure(objectm);
     std::size_t ifr = 0;
     for(std::vector<efort::Frame>::const_iterator fit = motion->frames_.begin();
         fit != motion->frames_.end(); ++fit, ++ifr)
@@ -654,9 +662,23 @@ void Retarget(const Eigen::Vector3d& delta)
     for(std::vector<Eigen::Vector3d>::const_iterator cit = states[current]->contactLimbPositions.begin();
         cit != states[current]->contactLimbPositions.end(); ++cit)
     {
-        targets.push_back(*cit + totalOffset);
+        //targets.push_back(*cit + totalOffset);
+        targets.push_back(*cit);
     }
-    states[current]->value = motion->Retarget(current, targets, cScenario->scenario->objects_);
+    ///delete(states[current]);
+    //states[current] = motion->Retarget(current, targets, cScenario->scenario->contactObjects_);
+    //cScenario->robot = motion->Retarget(current, targets, cScenario->scenario->contactObjects_);
+    states[current] = motion->Retarget(current, targets, cScenario->scenario->objects_);
+    cScenario->robot = states[current]->value;
+    objectm->SetPosition(totalOffset);
+    objectMotion.PushFrame(objectm);
+    retargeter.PushFrame(cScenario->robot);
+}
+
+void SaveRetarget()
+{
+    objectMotion.Save("./objectmotion.bvh");
+    retargeter.Save("./retarget.bvh");
 }
 
 void command(int cmd)   /**  key control function; */
@@ -706,8 +728,11 @@ void command(int cmd)   /**  key control function; */
             planner::SavePrm(*(cScenario->scenario->prm), outpath);//, (AngleAxisd(M_PI, Vector3d::UnitZ()) * AngleAxisd(0.5*M_PI, Vector3d::UnitX())).matrix());
         break;
         case 'd' :
-            SavePath();
-        break;            
+            {
+                SavePath();
+                SaveRetarget();
+                break;
+            }
         case 'f' :
         {
             std::cout << "computing animation " << std::endl;

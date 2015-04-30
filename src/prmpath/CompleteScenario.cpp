@@ -202,6 +202,7 @@ planner::CompleteScenario* planner::CompleteScenarioFromFile(const std::string& 
     bool scenario = false; bool skeleton = false; bool contraints = false;
     bool from = false; bool to = false; bool limb = false; bool initstate = false;
     bool samples = false; bool recordedstates=false;
+    std::string statefilepath = "";
     std::ifstream myfile (filename);
     if (myfile.is_open())
     {
@@ -254,8 +255,8 @@ planner::CompleteScenario* planner::CompleteScenarioFromFile(const std::string& 
             }
             if(line.find("STATES FILE=")!= string::npos)
             {
-                cScenario->states =planner::LoadStates(ExtractQuotes(line), cScenario->robot);
                 recordedstates = true;
+                statefilepath = ExtractQuotes(line);
             }
             if(line.find("CONSTANT_ROTATION matrix=") != string::npos && cScenario->robot)
             {
@@ -338,6 +339,10 @@ std::cout << " path request timer" << std::endl;
         cScenario->path = cScenario->scenario->prm->GetPath(*(cScenario->from), *(cScenario->to), 10, true, true);
 std::cout << " path request end timer, time :" <<  timer.GetTime() << std::endl;
 timer.Stop();
+        }
+        else
+        {
+            cScenario->states =planner::LoadStates(statefilepath, cScenario->robot);
         }
         if(cScenario->path.empty())
         {

@@ -43,7 +43,7 @@ struct Frame
 struct MotionI
 {
     Frame Retarget(const std::size_t /*frameid*/) const; //tmp: waht for objs ?
-    planner::Robot* Retarget(const std::size_t /*frameid*/, const std::vector<Eigen::Vector3d>& /*target*/, planner::Object::T_Object& objects) const; //tmp: waht for objs ?
+    planner::State* Retarget(const std::size_t /*frameid*/, const std::vector<Eigen::Vector3d>& /*target*/, planner::Object::T_Object& objects) const; //tmp: waht for objs ?
 
     std::vector<Frame> frames_;
 private:

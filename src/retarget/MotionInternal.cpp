@@ -4,6 +4,8 @@
 
 #include "collision/Sphere.h"
 #include "prmpath/CompleteScenario.h"
+#include "prmpath/ik/IKSolver.h"
+#include "prmpath/ik/VectorAlignmentConstraint.h"
 
 struct efort::PImpl
 {
@@ -38,33 +40,99 @@ Frame MotionI::Retarget(const std::size_t frameid) const
     return frame;
 }
 
-planner::Robot* MotionI::Retarget(const std::size_t frameid, const std::vector<Eigen::Vector3d>& targets, Object::T_Object &objects) const
+namespace
+{
+    Object* GetEffector(Node* limb)
+    {
+        if(limb->children.size() != 0)
+        {
+            Object* res = GetEffector(limb->children[0]);
+            if(res) return res;
+        }
+        return limb->current;
+    }
+
+    bool LimbColliding(Node* limb, planner::Object::T_Object& obstacles, bool effector = true)
+    {
+        if( limb->current && ((effector || limb->current != GetEffector(limb)) && limb->current->IsColliding(obstacles)))
+        {
+                return true;
+        }
+        if(limb->children.size() == 0)
+            return false;
+        return LimbColliding(limb->children[0], obstacles);
+    }
+
+    void SolveIk(Node* limb, const Eigen::Vector3d& target, const Eigen::Vector3d& normal)
+    {
+        ik::IKSolver solver;//(0.001f, 0.001f,0.1f);
+        ik::VectorAlignmentConstraint constraint(normal);
+        std::vector<ik::PartialDerivativeConstraint*> constraints;
+        constraints.push_back(&constraint);
+        int limit = 30;
+        while(limit > 0 )
+        {
+            solver.StepClamping(limb, target, normal, constraints, true);
+            limit--;
+        }
+    }
+}
+
+planner::State* MotionI::Retarget(const std::size_t frameid, const std::vector<Eigen::Vector3d>& targets, Object::T_Object &objects) const
 {
     const Frame& cframe = frames_[frameid];
-    planner::Robot* robot = pImpl_->states_[frameid]->value;
+    //planner::Robot* robot = new planner::Robot( *pImpl_->states_[frameid]->value);
+    planner::State* state = new planner::State();
+    planner::Robot* robot = new planner::Robot( *pImpl_->states_[frameid]->value);
+    state->value = robot;
     std::size_t id(0);
     for(std::vector<Contact>::const_iterator cit = cframe.contacts_.begin();
         cit !=cframe.contacts_.end(); ++cit, ++id)
     {
         // get corresponding robot
 
-        std::cout << "current Rotation" << std::endl << robot->currentRotation  << std::endl;
-        std::cout << "constantRotation Rotation" << std::endl << robot->constantRotation  << std::endl;
-
+        Node* limb = planner::GetChild(robot,pImpl_->cScenario_->limbs[cit->limbIndex_]->id);
         Sphere sphereCurrent(robot->currentRotation * robot->constantRotation.transpose() * pImpl_->cScenario_->limbRoms[cit->limbIndex_].center_ + robot->currentPosition,
                               pImpl_->cScenario_->limbRoms[cit->limbIndex_].radius_ * 1.5);
+        bool contactMaintained(false);
         if(Contains(sphereCurrent, targets[id]))
         {
             std::cout << "in range" << std::endl;
+            SolveIk(limb, targets[id], cit->surfaceNormal_);
+            if(!LimbColliding(limb,objects,false))
+            {
+                contactMaintained = true;
+                state->contactLimbPositions.push_back(cit->worldPosition_);
+                state->contactLimbPositionsNormals.push_back(cit->surfaceNormal_);
+                state->contactLimbs.push_back(cit->limbIndex_);
+            }
         }
-        else
+        if(!contactMaintained)
         {
-            std::cout << "out of rage" << std::endl;
-            std::cout << "sphere pos " << std::endl << sphereCurrent.center_ << std::endl;
-            std::cout << "pos " << std::endl << targets[id] << std::endl;
+            Eigen::Vector3d position, normal;
+            std::cout << "out of rage " << limb->tag << std::endl;
+            std::vector<planner::Sphere*> dm;
+            planner::sampling::Sample* nc = planner::GetPosturesInContact(*robot, limb, pImpl_->cScenario_->limbSamples[cit->limbIndex_],objects,cit->surfaceNormal_,position, normal, *(pImpl_->cScenario_), dm);
+            if(nc)
+            {
+                std::cout << "trouve " << limb->tag << std::endl;
+                planner::sampling::LoadSample(*nc, limb);
+                SolveIk(limb, position, normal);
+                state->contactLimbPositions.push_back(position);
+                state->contactLimbPositionsNormals.push_back(normal);
+                state->contactLimbs.push_back(cit->limbIndex_);
+            }
+            else
+            {
+                nc = planner::GetCollisionFreePosture(*robot,limb, pImpl_->cScenario_->limbSamples[cit->limbIndex_],objects);
+                if(nc) planner::sampling::LoadSample(*nc, limb);
+                state->contactLimbPositions.push_back(cit->worldPosition_);
+                state->contactLimbPositionsNormals.push_back(cit->surfaceNormal_);
+                state->contactLimbs.push_back(cit->limbIndex_);
+            }
         }
     }
-    return robot;
+    return state;
 }
 
 namespace
