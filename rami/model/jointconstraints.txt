@@ -1,0 +1,2 @@
+
+rom joint1="RightUpLeg_z_joint" joint2="RightUpLeg_y_joint" joint3="RightUpLeg_x_joint" romfile ="../humandes/rightarm_itomp.rom"
