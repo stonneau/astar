@@ -1,0 +1,640 @@
+<?xml version="1.0"?>
+<robot xmlns:sensor="http://playerstage.sourceforge.net/gazebo/xmlschema/#sensor"
+       xmlns:controller="http://playerstage.sourceforge.net/gazebo/xmlschema/#controller"
+       xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
+       xmlns:xacro="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
+       name="rocketbox_male" >
+
+  <material name="Blue">
+    <color rgba="0.0 0.0 0.8 1.0"/>
+  </material>
+  <material name="Green">
+    <color rgba="0.0 0.8 0.0 1.0"/>
+  </material>
+  <material name="Grey">
+    <color rgba="0.7 0.7 0.7 1.0"/>
+  </material>
+  <material name="Grey2">
+    <color rgba="0.9 0.9 0.9 1.0"/>
+  </material>
+  <material name="Red">
+    <color rgba="0.8 0.0 0.0 1.0"/>
+  </material>
+  <material name="White">
+    <color rgba="1.0 1.0 1.0 1.0"/>
+  </material>
+  <material name="Black">
+    <color rgba="0.1 0.1 0.1 1.0"/>
+  </material>
+  <material name="LightGrey">
+    <color rgba="0.6 0.6 0.6 1.0"/>
+  </material>
+
+  <link name="root_link"/>
+  <link name="base_prismatic_dummy1">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="Blue"/>
+    </visual>
+  </link>
+  <link name="base_prismatic_dummy2">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="Blue"/>
+    </visual>
+  </link>
+  <link name="base_prismatic_dummy3">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="Blue"/>
+    </visual>
+  </link>
+  <link name="base_revolute_dummy1">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="Blue"/>
+    </visual>
+  </link>
+  <link name="base_revolute_dummy2">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="Blue"/>
+    </visual>
+  </link>
+  <joint name="base_prismatic_joint_x" type="prismatic">
+    <axis xyz="1 0 0"/>
+    <limit effort="10000" lower="-5.0" upper="5.0" velocity="0.6"/>
+    <safety_controller k_position="100" k_velocity="2000000" soft_lower_limit="-4.9" soft_upper_limit="4.9"/>
+    <calibration falling="0.00536"/>
+    <dynamics damping="20000.0"/>
+    <origin rpy="0 0 0" xyz="0 0 1.1713"/>
+    <parent link="root_link"/>
+    <child link="base_prismatic_dummy1"/>
+  </joint>
+  <joint name="base_prismatic_joint_y" type="prismatic">
+    <axis xyz="0 1 0"/>
+    <limit effort="10000" lower="-5.0" upper="5.0" velocity="0.6"/>
+    <safety_controller k_position="100" k_velocity="2000000" soft_lower_limit="-4.9" soft_upper_limit="4.9"/>
+    <calibration falling="0.00536"/>
+    <dynamics damping="20000.0"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="base_prismatic_dummy1"/>
+    <child link="base_prismatic_dummy2"/>
+  </joint>
+  <joint name="base_prismatic_joint_z" type="prismatic">
+    <axis xyz="0 0 1"/>
+    <limit effort="10000" lower="-10.0" upper="10.0" velocity="0.6"/>
+    <safety_controller k_position="100" k_velocity="2000000" soft_lower_limit="-10.0" soft_upper_limit="10.0"/>
+    <calibration falling="0.00536"/>
+    <dynamics damping="20000.0"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="base_prismatic_dummy2"/>
+    <child link="base_prismatic_dummy3"/>
+  </joint>
+  <joint name="base_revolute_joint_x" type="continuous">
+    <axis xyz="1 0 0"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="base_prismatic_dummy3"/>
+    <child link="base_revolute_dummy1"/>
+  </joint>
+  <joint name="base_revolute_joint_y" type="continuous">
+    <axis xyz="0 1 0"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="base_revolute_dummy1"/>
+    <child link="base_revolute_dummy2"/>
+  </joint>
+  <joint name="base_revolute_joint_z" type="continuous">
+    <axis xyz="0 0 1"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="base_revolute_dummy2"/>
+    <child link="pelvis_link"/>
+  </joint>  
+  <link name="pelvis_link">
+    <inertial>
+      <mass value="24.9873014159"/>
+      <inertia ixx="0.219399825" ixy="0.000000009184695" ixz="0.000000062599005" iyy="0.21939959375" iyz="-0.000000006475555" izz="0.22992248625"/>
+      <origin xyz="0 0 0"/>
+    </inertial>
+  </link>	  
+  
+  <joint name="RightUpLeg_z_joint" type="revolute">
+    <axis xyz="0 0 1"/>
+    <limit effort="15" lower="-0.7" upper="0.7" velocity="5"/>
+    <origin rpy="0 0 0" xyz="-8.94580 -8.66707 0.10165"/> 
+    <parent link="pelvis_link"/>
+    <child link="RightUpLeg_z_link"/>
+  </joint>
+  <joint name="RightUpLeg_y_joint" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="15" lower="-0.3" upper="0.3" velocity="5"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="RightUpLeg_z_link"/>
+    <child link="RightUpLeg_y_link"/>
+  </joint>
+  <joint name="RightUpLeg_x_joint" type="revolute">
+    <axis xyz="1 0 0"/>
+    <limit effort="15" lower="-1.0" upper="0" velocity="5"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="RightUpLeg_y_link"/>
+    <child link="RightUpLeg_x_link"/>
+  </joint>  
+
+  <link name="RightUpLeg_z_link"/>
+  <link name="RightUpLeg_y_link"/>
+  <link name="RightUpLeg_x_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../rocketboxmale/torso.obj"/>
+      </geometry>
+      <material name="Blue"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../rocketboxmale/torso.obj"/>
+      </geometry>
+    </collision>
+  </link>  
+  
+  <joint name="RightLeg_x_joint" type="revolute">
+    <axis xyz="1 0 0"/>
+    <limit effort="15" lower="-1.2" upper="1.2" velocity="5"/>
+    <origin rpy="0 0 0" xyz="0.00000 -44.42270  1.37270"/>
+    <parent link="RightUpLeg_x_link"/>
+    <child link="RightLeg_x_link"/>
+  </joint>
+
+  <link name="RightLeg_x_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../rocketboxmale/head.obj"/>
+      </geometry>
+      <material name="Blue"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../rocketboxmale/head.obj"/>
+      </geometry>
+    </collision>
+  </link>
+  
+  <joint name="RightFoot_z_joint" type="revolute">
+    <axis xyz="0 0 1"/>
+    <limit effort="15" lower="-1.2" upper="1.2" velocity="5"/>
+    <origin rpy="0 0 0" xyz="0.25355 -42.09240 -1.46059"/>
+    <parent link="RightLeg_x_link"/>
+    <child link="RightFoot_z_link"/>
+  </joint>
+  <joint name="RightFoot_y_joint" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="15" lower="-0.8" upper="0.8" velocity="5"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="RightFoot_z_link"/>
+    <child link="RightFoot_y_link"/>
+  </joint>
+  <joint name="RightFoot_x_joint" type="revolute">
+    <axis xyz="1 0 0"/>
+    <limit effort="15" lower="-1.57" upper="0.3" velocity="5"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="RightFoot_y_link"/>
+    <child link="RightFoot_x_link"/>
+  </joint>
+
+  <link name="RightFoot_z_link"/>
+  <link name="RightFoot_y_link"/>
+  <link name="RightFoot_x_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../rocketboxmale/head.obj"/>
+      </geometry>
+      <material name="Blue"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../rocketboxmale/head.obj"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="16.0164526852"/>
+      <inertia ixx="0.194835825625" ixy="-0.00000000913641" ixz="0.00000000531468" iyy="0.194835733125" iyz="-0.000000020301345" izz="0.06426014890625"/>
+      <origin xyz="0.0 0.00000001 0.18566523"/>
+    </inertial>
+  </link>
+  
+  <joint name="RightToes_z_joint" type="revolute">
+    <axis xyz="0 0 1"/>
+    <limit effort="15" lower="-1.2" upper="1.2" velocity="5"/>
+    <origin rpy="0 0 0" xyz="0.04000 -4.41509  8.49910"/>
+    <parent link="RightFoot_x_link"/>
+    <child link="RightToes_z_link"/>
+  </joint>
+  <joint name="RightToes_y_joint" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="15" lower="-0.8" upper="0.8" velocity="5"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="RightToes_z_link"/>
+    <child link="RightToes_y_link"/>
+  </joint>
+  <joint name="RightToes_x_joint" type="revolute">
+    <axis xyz="1 0 0"/>
+    <limit effort="15" lower="-1.57" upper="0.3" velocity="5"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="RightToes_y_link"/>
+    <child link="RightToes_x_link"/>
+  </joint>
+
+  <link name="RightToes_z_link"/>
+  <link name="RightToes_y_link"/>
+  <link name="RightToes_x_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../rocketboxmale/head.obj"/>
+      </geometry>
+      <material name="Blue"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../rocketboxmale/head.obj"/>
+      </geometry>
+    </collision>
+  </link>
+  
+  <joint name="RightFoot_endeffector_joint" type="revolute">
+    <axis xyz="0 0 1"/>
+    <limit effort="15" lower="-0.001" upper="0.001" velocity="5"/>
+    <origin rpy="0 0 0" xyz="-0.08000 -0.13745  9.77979"/>
+    <parent link="RightToes_x_link"/>
+    <child link="RightFoot_endeffector_link"/>
+  </joint>
+
+  <link name="RightFoot_endeffector_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="Blue"/>
+    </visual>
+  </link>
+  
+<link name="right_foot_cp_1_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="Blue"/>
+    </visual>
+    <inertial>
+      <mass value="0"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="0"/>
+      <origin xyz="0 0 0"/>
+    </inertial>
+  </link>
+  <link name="right_foot_cp_2_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="Blue"/>
+    </visual>
+    <inertial>
+      <mass value="0"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="0"/>
+      <origin xyz="0 0 0"/>
+    </inertial>
+  </link>
+  <link name="right_foot_cp_3_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="Blue"/>
+    </visual>
+    <inertial>
+      <mass value="0"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="0"/>
+      <origin xyz="0 0 0"/>
+    </inertial>
+  </link>
+  <link name="right_foot_cp_4_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="Blue"/>
+    </visual>
+    <inertial>
+      <mass value="0"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="0"/>
+      <origin xyz="0 0 0"/>
+    </inertial>
+  </link>
+  <joint name="right_foot_cp_1_joint" type="revolute">
+    <axis xyz="0 0 1"/>
+    <limit effort="15" lower="0" upper="0" velocity="5"/>
+    <origin rpy="0 0 0" xyz="0.10495 0.2684 -0.12195"/>
+    <parent link="RightToes_x_link"/>
+    <child link="right_foot_cp_1_link"/>
+  </joint>
+  <joint name="right_foot_cp_2_joint" type="revolute">
+    <axis xyz="0 0 1"/>
+    <limit effort="15" lower="0" upper="0" velocity="5"/>
+    <origin rpy="0 0 0" xyz="-0.06698 0.2684 -0.12195"/>
+    <parent link="RightToes_x_link"/>
+    <child link="right_foot_cp_2_link"/>
+  </joint>
+  <joint name="right_foot_cp_3_joint" type="revolute">
+    <axis xyz="0 0 1"/>
+    <limit effort="15" lower="0" upper="0" velocity="5"/>
+    <origin rpy="0 0 0" xyz="-0.06698 -0.08301 -0.12195"/>
+    <parent link="RightToes_x_link"/>
+    <child link="right_foot_cp_3_link"/>
+  </joint>
+  <joint name="right_foot_cp_4_joint" type="revolute">
+    <axis xyz="0 0 1"/>
+    <limit effort="15" lower="0" upper="0" velocity="5"/>
+    <origin rpy="0 0 0" xyz="0.10495 -0.08301 -0.12195"/>
+    <parent link="RightToes_x_link"/>
+    <child link="right_foot_cp_4_link"/>
+  </joint>
+  
+  <joint name="LeftUpLeg_z_joint" type="revolute">
+    <axis xyz="0 0 1"/>
+    <limit effort="15" lower="-0.7" upper="0.7" velocity="5"/>
+    <origin rpy="0 0 0" xyz="8.94580 -8.66707 0.10165"/> 
+    <parent link="pelvis_link"/>
+    <child link="LeftUpLeg_z_link"/>
+  </joint>
+  <joint name="LeftUpLeg_y_joint" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="15" lower="-0.3" upper="0.3" velocity="5"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="LeftUpLeg_z_link"/>
+    <child link="LeftUpLeg_y_link"/>
+  </joint>
+  <joint name="LeftUpLeg_x_joint" type="revolute">
+    <axis xyz="1 0 0"/>
+    <limit effort="15" lower="-1.0" upper="0" velocity="5"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="LeftUpLeg_y_link"/>
+    <child link="LeftUpLeg_x_link"/>
+  </joint>  
+
+  <link name="LeftUpLeg_z_link"/>
+  <link name="LeftUpLeg_y_link"/>
+  <link name="LeftUpLeg_x_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../rocketboxmale/torso.obj"/>
+      </geometry>
+      <material name="Blue"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../rocketboxmale/torso.obj"/>
+      </geometry>
+    </collision>
+  </link>  
+  
+  <joint name="LeftLeg_x_joint" type="revolute">
+    <axis xyz="1 0 0"/>
+    <limit effort="15" lower="-1.2" upper="1.2" velocity="5"/>
+    <origin rpy="0 0 0" xyz="0.00000 -44.42270  1.37270"/>
+    <parent link="LeftUpLeg_x_link"/>
+    <child link="LeftLeg_x_link"/>
+  </joint>
+
+  <link name="LeftLeg_x_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../rocketboxmale/head.obj"/>
+      </geometry>
+      <material name="Blue"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../rocketboxmale/head.obj"/>
+      </geometry>
+    </collision>
+  </link>
+  
+  <joint name="LeftFoot_z_joint" type="revolute">
+    <axis xyz="0 0 1"/>
+    <limit effort="15" lower="-1.2" upper="1.2" velocity="5"/>
+    <origin rpy="0 0 0" xyz="-0.25355 -42.09240 -1.46059"/>
+    <parent link="LeftLeg_x_link"/>
+    <child link="LeftFoot_z_link"/>
+  </joint>
+  <joint name="LeftFoot_y_joint" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="15" lower="-0.8" upper="0.8" velocity="5"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="LeftFoot_z_link"/>
+    <child link="LeftFoot_y_link"/>
+  </joint>
+  <joint name="LeftFoot_x_joint" type="revolute">
+    <axis xyz="1 0 0"/>
+    <limit effort="15" lower="-1.57" upper="0.3" velocity="5"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="LeftFoot_y_link"/>
+    <child link="LeftFoot_x_link"/>
+  </joint>
+
+  <link name="LeftFoot_z_link"/>
+  <link name="LeftFoot_y_link"/>
+  <link name="LeftFoot_x_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../rocketboxmale/head.obj"/>
+      </geometry>
+      <material name="Blue"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../rocketboxmale/head.obj"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="16.0164526852"/>
+      <inertia ixx="0.194835825625" ixy="-0.00000000913641" ixz="0.00000000531468" iyy="0.194835733125" iyz="-0.000000020301345" izz="0.06426014890625"/>
+      <origin xyz="0.0 0.00000001 0.18566523"/>
+    </inertial>
+  </link>
+  
+  <joint name="LeftToes_z_joint" type="revolute">
+    <axis xyz="0 0 1"/>
+    <limit effort="15" lower="-1.2" upper="1.2" velocity="5"/>
+    <origin rpy="0 0 0" xyz="-0.04000 -4.41509  8.49910"/>
+    <parent link="LeftFoot_x_link"/>
+    <child link="LeftToes_z_link"/>
+  </joint>
+  <joint name="LeftToes_y_joint" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="15" lower="-0.8" upper="0.8" velocity="5"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="LeftToes_z_link"/>
+    <child link="LeftToes_y_link"/>
+  </joint>
+  <joint name="LeftToes_x_joint" type="revolute">
+    <axis xyz="1 0 0"/>
+    <limit effort="15" lower="-1.57" upper="0.3" velocity="5"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="LeftToes_y_link"/>
+    <child link="LeftToes_x_link"/>
+  </joint>
+
+  <link name="LeftToes_z_link"/>
+  <link name="LeftToes_y_link"/>
+  <link name="LeftToes_x_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../rocketboxmale/head.obj"/>
+      </geometry>
+      <material name="Blue"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="../rocketboxmale/head.obj"/>
+      </geometry>
+    </collision>
+  </link>
+  
+  <joint name="LeftFoot_endeffector_joint" type="revolute">
+    <axis xyz="0 0 1"/>
+    <limit effort="15" lower="-0.001" upper="0.001" velocity="5"/>
+    <origin rpy="0 0 0" xyz="0.08000 -0.04745  9.77979"/>
+    <parent link="LeftToes_x_link"/>
+    <child link="LeftFoot_endeffector_link"/>
+  </joint>
+
+  <link name="LeftFoot_endeffector_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="Blue"/>
+    </visual>
+  </link>
+  
+<link name="Left_foot_cp_1_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="Blue"/>
+    </visual>
+    <inertial>
+      <mass value="0"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="0"/>
+      <origin xyz="0 0 0"/>
+    </inertial>
+  </link>
+  <link name="Left_foot_cp_2_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="Blue"/>
+    </visual>
+    <inertial>
+      <mass value="0"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="0"/>
+      <origin xyz="0 0 0"/>
+    </inertial>
+  </link>
+  <link name="Left_foot_cp_3_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="Blue"/>
+    </visual>
+    <inertial>
+      <mass value="0"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="0"/>
+      <origin xyz="0 0 0"/>
+    </inertial>
+  </link>
+  <link name="Left_foot_cp_4_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="Blue"/>
+    </visual>
+    <inertial>
+      <mass value="0"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="0"/>
+      <origin xyz="0 0 0"/>
+    </inertial>
+  </link>
+  <joint name="Left_foot_cp_1_joint" type="revolute">
+    <axis xyz="0 0 1"/>
+    <limit effort="15" lower="0" upper="0" velocity="5"/>
+    <origin rpy="0 0 0" xyz="0.10495 0.2684 -0.12195"/>
+    <parent link="LeftToes_x_link"/>
+    <child link="Left_foot_cp_1_link"/>
+  </joint>
+  <joint name="Left_foot_cp_2_joint" type="revolute">
+    <axis xyz="0 0 1"/>
+    <limit effort="15" lower="0" upper="0" velocity="5"/>
+    <origin rpy="0 0 0" xyz="-0.06698 0.2684 -0.12195"/>
+    <parent link="LeftToes_x_link"/>
+    <child link="Left_foot_cp_2_link"/>
+  </joint>
+  <joint name="Left_foot_cp_3_joint" type="revolute">
+    <axis xyz="0 0 1"/>
+    <limit effort="15" lower="0" upper="0" velocity="5"/>
+    <origin rpy="0 0 0" xyz="-0.06698 -0.08301 -0.12195"/>
+    <parent link="LeftToes_x_link"/>
+    <child link="Left_foot_cp_3_link"/>
+  </joint>
+  <joint name="Left_foot_cp_4_joint" type="revolute">
+    <axis xyz="0 0 1"/>
+    <limit effort="15" lower="0" upper="0" velocity="5"/>
+    <origin rpy="0 0 0" xyz="0.10495 -0.08301 -0.12195"/>
+    <parent link="LeftToes_x_link"/>
+    <child link="Left_foot_cp_4_link"/>
+  </joint>
+  
+</robot>
+

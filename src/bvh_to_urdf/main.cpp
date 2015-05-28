@@ -314,7 +314,10 @@ namespace
         ox = from_double(node->offset(0));
         oy = from_double(node->offset(1));
         oz = from_double(node->offset(2));
-        objects::create_obj_box(node->tag, node->offset);
+        std::string destobj("../rami/model/"+ node->tag);
+        Eigen::Vector3d off (0.001,0.001,0.001);
+        if(node->children.size()) off =  node->children[0]->offset;
+        objects::create_obj_box(destobj, off);
         switch(ax) {
             case x   : {offset = "0 0 0"; rotaxis = "1 0 0"; axisname = "x"; parent = node->tag + "_y_link"; son = node->tag + "_x_link"; break;}
             case y   : {offset = "0 0 0"; rotaxis = "0 1 0"; axisname = "y"; parent = node->tag + "_z_link"; son = node->tag + "_y_link"; break; }

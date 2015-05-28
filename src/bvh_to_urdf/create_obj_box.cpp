@@ -104,8 +104,9 @@ namespace
     T_Object createAndRotate(const Eigen::Vector3d& axis)
     {
         //compute rotation matrix around axis
-        Eigen::Matrix3d rotation;
-        matrices::GetRotationMatrix(Eigen::Vector3d(0,1,0), axis, rotation);
+        Eigen::Matrix3d rotation; // = matrices::Rotx3(M_PI);
+        matrices::GetRotationMatrix(axis, Eigen::Vector3d(0,1,0), rotation);
+        rotation = matrices::Rotx3(M_PI) * rotation;
 
         std::vector<Eigen::Vector3d> oPoints = get_points();
         std::vector<Eigen::Vector3d> oNnormals = get_normals();

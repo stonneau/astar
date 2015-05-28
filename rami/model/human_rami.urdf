@@ -270,7 +270,21 @@
       </joint>
       <link name="RightToesendsite_z_link"/>
       <link name="RightToesendsite_y_link"/>
-      <link name="RightToesendsite_x_link"/>
+      <link name="RightToesendsite_x_link">
+        <visual>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+            <mesh filename="../rami/model/RightToesendsite.obj"/>
+          </geometry>
+          <material name="Blue"/>
+        </visual>
+        <collision>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+            <mesh filename="../rami/model/RightToesendsite.obj"/>
+          </geometry>
+        </collision>
+      </link>
       <joint name="RightToesendsite_z_joint" type ="revolute">
           <axis xyz="0 0 1"/>
           <limit effort="10000" lower ="-3.14" upper="3.14" velocity ="0.6"/>
@@ -408,7 +422,21 @@
       </joint>
       <link name="headendsite_z_link"/>
       <link name="headendsite_y_link"/>
-      <link name="headendsite_x_link"/>
+      <link name="headendsite_x_link">
+        <visual>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+            <mesh filename="../rami/model/headendsite.obj"/>
+          </geometry>
+          <material name="Blue"/>
+        </visual>
+        <collision>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+            <mesh filename="../rami/model/headendsite.obj"/>
+          </geometry>
+        </collision>
+      </link>
       <joint name="headendsite_z_joint" type ="revolute">
           <axis xyz="0 0 1"/>
           <limit effort="10000" lower ="-3.14" upper="3.14" velocity ="0.6"/>
@@ -584,7 +612,21 @@
       </joint>
       <link name="LeftHandendsite_z_link"/>
       <link name="LeftHandendsite_y_link"/>
-      <link name="LeftHandendsite_x_link"/>
+      <link name="LeftHandendsite_x_link">
+        <visual>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+            <mesh filename="../rami/model/LeftHandendsite.obj"/>
+          </geometry>
+          <material name="Blue"/>
+        </visual>
+        <collision>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+            <mesh filename="../rami/model/LeftHandendsite.obj"/>
+          </geometry>
+        </collision>
+      </link>
       <joint name="LeftHandendsite_z_joint" type ="revolute">
           <axis xyz="0 0 1"/>
           <limit effort="10000" lower ="-3.14" upper="3.14" velocity ="0.6"/>
@@ -760,7 +802,21 @@
       </joint>
       <link name="RightHandendsite_z_link"/>
       <link name="RightHandendsite_y_link"/>
-      <link name="RightHandendsite_x_link"/>
+      <link name="RightHandendsite_x_link">
+        <visual>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+            <mesh filename="../rami/model/RightHandendsite.obj"/>
+          </geometry>
+          <material name="Blue"/>
+        </visual>
+        <collision>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+            <mesh filename="../rami/model/RightHandendsite.obj"/>
+          </geometry>
+        </collision>
+      </link>
       <joint name="RightHandendsite_z_joint" type ="revolute">
           <axis xyz="0 0 1"/>
           <limit effort="10000" lower ="-3.14" upper="3.14" velocity ="0.6"/>
@@ -936,7 +992,21 @@
       </joint>
       <link name="LeftToesendsite_z_link"/>
       <link name="LeftToesendsite_y_link"/>
-      <link name="LeftToesendsite_x_link"/>
+      <link name="LeftToesendsite_x_link">
+        <visual>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+            <mesh filename="../rami/model/LeftToesendsite.obj"/>
+          </geometry>
+          <material name="Blue"/>
+        </visual>
+        <collision>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+            <mesh filename="../rami/model/LeftToesendsite.obj"/>
+          </geometry>
+        </collision>
+      </link>
       <joint name="LeftToesendsite_z_joint" type ="revolute">
           <axis xyz="0 0 1"/>
           <limit effort="10000" lower ="-3.14" upper="3.14" velocity ="0.6"/>

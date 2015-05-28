@@ -416,6 +416,26 @@ namespace
     }
 }
 
+
+namespace
+{
+void DumpSkeletonRec(planner::Node* node, const std::string head)
+{
+    std::string obj = " "; if (node->current) obj += node->current->name_;
+    std::cout << head << "Node " << node->tag << obj << std::endl;
+    std::string nhead = head + "\t";
+    for(int i=0; i<node->children.size(); ++ i)
+    {
+        DumpSkeletonRec(node->children[i], nhead);
+    }
+}
+
+void DumpSkeleton(planner::Node* node)
+{
+    DumpSkeletonRec(node, "");
+}
+}
+
 static void simLoop (int pause)
 {
     DrawSpline();
@@ -554,6 +574,8 @@ void start()
     }
     savebvh ="../tests/test.path";
     itompexporter.Save(savebvh);
+
+    DumpSkeleton(cScenario->robot->node);
 }
 
 void WriteNodeLine(const Eigen::Matrix3d& rotation, const Eigen::Vector3d& position, std::stringstream& outstream)
