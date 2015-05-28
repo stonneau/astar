@@ -127,6 +127,22 @@ int planner::GetNumChildren(const Node* node)
     return tmp;
 }
 
+int planner::GetNumNodes(const Node* node)
+{
+    int tmp = 1;
+    bool ok =  node->tag.find("effector") != std::string::npos
+            || node->tag.find("foot_x") != std::string::npos;
+    //if(!ok)
+    {
+        for(std::vector<Node*>::const_iterator cit = node->children.begin();
+            cit != node->children.end(); ++cit)
+        {
+            tmp += planner::GetNumNodes(*cit);
+        }
+    }
+    return tmp;
+}
+
 namespace
 {
     void GetEffectorsRec(Node* node, std::vector<Node*>& effectors, bool onePerLimb)
@@ -146,12 +162,32 @@ namespace
             }
         }
     }
+
+    void AsVectorRec(Node* node, std::vector<Node*>& effectors)
+    {
+        effectors.push_back(node);
+        bool ok =  node->tag.find("effector") != std::string::npos
+                || node->tag.find("foot_x") != std::string::npos;
+        //if(ok) return;
+        for(std::vector<Node*>::iterator it = node->children.begin();
+            it != node->children.end(); ++it)
+        {
+            AsVectorRec(*it, effectors);
+        }
+    }
 }
 
 std::vector<Node*> planner::GetEffectors(Node* node, bool onePerLimb)
 {
     std::vector<Node*> effectors;
     GetEffectorsRec(node, effectors, onePerLimb);
+    return effectors;
+}
+
+std::vector<Node*> planner::AsVector(Node* node)
+{
+    std::vector<Node*> effectors;
+    AsVectorRec(node, effectors);
     return effectors;
 }
 
@@ -791,5 +827,30 @@ Eigen::VectorXd planner::AsConfiguration(Robot* robot)
     res.block<3,1>(0,0) = robot->node->position;
     std::size_t cid = 3;
     AsConfigurationRec(robot->node->children.front(), res, cid);
+    return res;
+}
+
+void AsPositionRec(planner::Node* node, Eigen::VectorXd& condiguration, std::size_t& cid)
+{
+    condiguration.block<3,1>(cid,0) = node->position;
+    cid += 3;
+    bool ok =  node->tag.find("effector") != std::string::npos
+            || node->tag.find("foot_x") != std::string::npos;
+    //if(!ok)
+    {
+        for(std::vector<Node*>::const_iterator cit = node->children.begin();
+            cit != node->children.end(); ++cit)
+        {
+            AsPositionRec(*cit, condiguration, cid);
+        }
+    }
+}
+
+Eigen::VectorXd planner::AsPosition(Node* robot)
+{
+    std::size_t size = GetNumNodes(robot) * 3;
+    Eigen::VectorXd res(size);
+    std::size_t cid = 0;
+    AsPositionRec(robot, res, cid);
     return res;
 }

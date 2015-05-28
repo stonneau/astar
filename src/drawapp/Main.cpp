@@ -57,6 +57,7 @@ namespace
     planner::sampling::T_Samples samples;
     planner::T_State states;
     ik::IKSolver ikSolver;
+    ik::IKSolver ikSolverPositionConstraints( 0.001f,  0.01f,  0.05f);
     Eigen::Vector3d target = Eigen::Vector3d(0.1,0.2, 0.5);
     Eigen::Vector3d axisAlign = Eigen::Vector3d(1,0,0);
     Eigen::Vector3d directionManip = Eigen::Vector3d(0,0,1);
@@ -67,6 +68,7 @@ namespace
     exporter::BVHExporter objectMotion;
     exporter::BVHExporter retargeter;
     planner::Robot* objectm(0);
+    Eigen::VectorXd targetIk;
 }
 
 /*Draw*/
@@ -399,6 +401,17 @@ namespace
         }
     }
 
+    void PerformIkFullBodyStep(planner::Node* limb)
+    {
+        planner::Node * tg = limb;
+        for(int i=0; i<9; ++i)
+        {
+            tg = tg->children[0];
+        }
+       ikSolverPositionConstraints.StepClamping(tg, targetIk);
+       //ikSolverPositionConstraints.StepClamping(planner::GetChild(cScenario->robot, "upper_right_arm_z_joint"), targetIk);
+    }
+
 }
 
 
@@ -421,6 +434,38 @@ namespace
         states.insert(states.begin()+current, s);
         current++;
     }
+}
+
+namespace
+{
+void InitFullClampling()
+{
+    std::cout << "DAFUQ " << std::endl;
+    planner::Robot* rob = cScenario->robot = states[current]->value;
+    /*for(int i =3; i < targetIk.rows(); i=i+3)
+    {
+        targetIk(i) +=0.1 * i;
+    }*/
+    //planner::Node* messup = planner::GetChild(cScenario->robot, "upper_right_arm_z_joint");
+    planner::Node * messup = rob->node;
+    for(int i=0; i<9; ++i)
+    {
+        messup = messup->children[0];
+    }
+    std::cout << "TAG " << messup->tag << messup->children.size() << std::endl;
+    planner::Node * messup2 = messup->children[1];
+    targetIk = planner::AsPosition(messup);
+    //targetIk = planner::AsPosition(planner::GetChild(cScenario->robot, "upper_right_arm_z_joint"));
+    //planner::sampling::Sample* save = new planner::sampling::Sample(messup);
+    //for(int i=0; i<6; ++i)
+    {
+        messup = messup->children[0];
+    }
+    messup->children[0]->value = -0.6;
+    messup2->children[0]->children[0]->value = 0.6;
+    messup->Update();
+    //planner::sampling::LoadSample(*save,planner::GetChild(cScenario->robot, "upper_right_arm_z_joint"));
+}
 }
 
 static void simLoop (int pause)
@@ -582,6 +627,8 @@ void start()
     }
     savebvh ="../tests/test.path";
     itompexporter.Save(savebvh);
+
+    InitFullClampling();
 }
 
 void WriteNodeLine(const Eigen::Matrix3d& rotation, const Eigen::Vector3d& position, std::stringstream& outstream)
@@ -824,8 +871,10 @@ void command(int cmd)   /**  key control function; */
     }
         break;
         case 'A' :
-        planner::GetChild(cScenario->robot, "RightHand_z_joint")->SetRotation(planner::GetChild(cScenario->robot,"RightHand_z_joint")->value-0.1* dirIK);
+    {
+        PerformIkFullBodyStep(cScenario->robot->node);
         break;
+    }
         case 'Z' :
         planner::GetChild(cScenario->robot, "RightHand_y_joint")->SetRotation(planner::GetChild(cScenario->robot,"RightHand_y_joint")->value-0.1* dirIK);
         break;

@@ -22,6 +22,7 @@ public:
 public:
     //true if target reached
     bool StepClamping(planner::Node* /*limb*/, const Eigen::Vector3d& /*target*/, const Eigen::Vector3d& /*direction*/, bool optimize = false) const;
+    bool StepClamping(planner::Node* /*limb*/, const Eigen::VectorXd& /*positionConstraints*/) const;
     bool StepClamping(planner::Node* /*limb*/, const Eigen::Vector3d& /*target*/, const Eigen::Vector3d& /*direction*/, const std::vector<PartialDerivativeConstraint*>& /*constraints*/, bool optimize = false) const;
     void AddConstraint(Constraint constraint);
 

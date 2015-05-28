@@ -194,6 +194,43 @@ bool IKSolver::StepClamping(planner::Node* limb, const Eigen::Vector3d& target, 
     return StepClamping(limb,target,direction, constraints_, optimize);
 }
 
+bool IKSolver::StepClamping(planner::Node* limb, const Eigen::VectorXd& positionConstraints) const
+{
+    bool ret = false;
+
+    Jacobian jacobian(limb, true);
+
+    //std::cout << "jacobienne " << std::endl << jacobian.GetJacobian() << std::endl;
+
+    //std::cout << "jacobienne Inverse" << std::endl << jacobian.GetJacobianInverse() << std::endl;
+
+    Eigen::VectorXd force = positionConstraints - planner::AsPosition(limb);
+    /*std::cout << "positionConstraints" << std::endl << positionConstraints;
+    std::cout << "curerntPosition" << std::endl << force << std::endl << "  " << force.norm();*/
+
+    if(force.norm () < treshold_) // reached treshold
+    {
+        return true;
+    }
+    MatrixXd J = jacobian.GetJacobian(); int colsJ = J.cols(); int rowsJ = J.rows();
+    VectorXd dX = force;
+    dX.normalize();
+    dX*=stepsize_;
+    VectorXd velocities = jacobian.GetJacobianInverse() * dX;
+
+    //std::cout << "velocities " << std::endl << velocities << std::endl;
+
+    for(int i =0; i < colsJ; ++ i)
+    {
+        Node * dof = planner::GetChild(limb, i + limb->id);
+        double nval = dof->value + velocities(i);
+        dof->value = (nval);
+    }
+
+    limb->Update();
+    return ret;
+}
+
 void IKSolver::AddConstraint(Constraint constraint)
 {
     switch(constraint)

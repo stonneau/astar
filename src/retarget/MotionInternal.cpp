@@ -7,6 +7,8 @@
 #include "prmpath/ik/IKSolver.h"
 #include "prmpath/ik/VectorAlignmentConstraint.h"
 
+#include <omp.h>
+
 struct efort::PImpl
 {
     PImpl(planner::CompleteScenario* cScenario)
@@ -81,6 +83,15 @@ namespace
             solver.StepClamping(limb, target, normal, constraints, true);
         }
     }
+
+    //std::vector<planner::State*> propagate()
+
+    // false if joint limits or obstacle not respected
+    bool ComputeState(const Eigen::VectorXd& configuration, planner::State* state)
+    {
+        return false;
+    }
+
 }
 
 planner::State* MotionI::Retarget(planner::Robot* current, const std::size_t frameid, const std::vector<Eigen::Vector3d>& targets, Object::T_Object &objects) const
@@ -90,6 +101,7 @@ planner::State* MotionI::Retarget(planner::Robot* current, const std::size_t fra
     planner::State* state = new planner::State();
     //planner::Robot* robot = new planner::Robot(*current);
     state->value = robot;
+    std::vector<Contact> modifiedContacts_;
     std::size_t id(0);
     for(std::vector<Contact>::const_iterator cit = cframe.contacts_.begin();
         cit !=cframe.contacts_.end(); ++cit, ++id)
@@ -117,7 +129,9 @@ planner::State* MotionI::Retarget(planner::Robot* current, const std::size_t fra
             Eigen::Vector3d position, normal;
             std::cout << "out of rage " << limb->tag << std::endl;
             std::vector<planner::Sphere*> dm;
-            planner::sampling::Sample* nc = planner::GetPosturesInContact(*robot, limb, pImpl_->cScenario_->limbSamples[cit->limbIndex_],objects,cit->surfaceNormal_,position, normal, *(pImpl_->cScenario_), dm);
+            planner::sampling::Sample* nc =
+                    planner::GetPosturesInContact(*robot, limb, pImpl_->cScenario_->limbSamples[cit->limbIndex_],
+                                                  objects,cit->surfaceNormal_,position, normal, *(pImpl_->cScenario_), dm);
             if(nc)
             {
                 std::cout << "trouve " << limb->tag << std::endl;
@@ -138,6 +152,52 @@ planner::State* MotionI::Retarget(planner::Robot* current, const std::size_t fra
         }
     }
     return state;
+}
+
+namespace
+{
+    std::vector< std::pair<int, int> > invalidIntervals(const std::vector<bool> invalidFrames)
+    {
+        std::vector< std::pair<int, int> >  res;
+        int first = -1;
+        for(int i =0; i < invalidFrames.size(); ++i)
+        {
+            if(invalidFrames[i] && first >= 0)
+            {
+                res.push_back(std::make_pair(first, i-1));
+                first = -1;
+            }
+            else if(first == -1)
+            {
+                first = i;
+            }
+        }
+    }
+}
+
+std::vector<planner::State*> MotionI::Retarget(planner::Robot* current,
+                                               const std::vector<Eigen::VectorXd>& frameConfigurations,
+                                               planner::Object::T_Object& objects) const
+{
+    std::vector<planner::State*> res;
+    std::vector<bool> invalidFrames;
+    res.resize(frames_.size());
+    invalidFrames.resize(frames_.size());
+    #pragma omp parallel for
+    //load configurations
+    for(int i=0; i< frames_.size(); ++i)
+    {
+        State * s = new State();
+        invalidFrames[i] = ComputeState(frameConfigurations[i], s);
+        res[i] = s;
+    }
+
+    //find invalid frames
+
+    //replan for each frame sequence invalidated
+
+    //load into res
+    return res;
 }
 
 namespace

@@ -12,7 +12,7 @@ class Node;
 class Jacobian {
 
 public:
-     Jacobian(planner::Node *root);
+     Jacobian(planner::Node *root, bool full=false); // full is true if constraints will exist on all joint positions
 	~Jacobian();
 
 private:
@@ -23,7 +23,7 @@ public:
     void  SetJacobian(const Eigen::MatrixXd& jacobian);
     void  ComputeAll(planner::Node *root); // recomputes jacobian
 	void  ComputeAll(); // recomputes everything but the jacobian
-    void  ComputeJacobian(planner::Node *root);
+    void  ComputeJacobian(planner::Node *root, bool full=false);
     const Eigen::MatrixXd& GetNullspace();
     const Eigen::MatrixXd& GetJacobian();
     const Eigen::MatrixXd& GetJacobianInverse();
@@ -36,6 +36,7 @@ public:
 
 private:
 	void ComputeSVD();
+    void OnePositionJacobian(planner::Node* root, planner::Node* position, int i);
 
 private:
 	bool computeInverse_;

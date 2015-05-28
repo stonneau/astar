@@ -8,9 +8,9 @@ using namespace planner;
 using namespace matrices;
 using namespace Eigen;
 
-Jacobian::Jacobian(Node* root)
+Jacobian::Jacobian(Node* root, bool full)
 {
-    ComputeJacobian(root);
+    ComputeJacobian(root, full);
 }
 
 Jacobian::~Jacobian()
@@ -45,33 +45,50 @@ namespace
     }
 }
 
-void Jacobian::ComputeJacobian(Node* root)
+//#include <iostream>
+
+void Jacobian::ComputeJacobian(Node* root, bool full)
 {
-    Eigen::Matrix4d toRootCoordinates = Eigen::Matrix4d::Identity();
+    /*Eigen::Matrix4d toRootCoordinates = Eigen::Matrix4d::Identity();
     toRootCoordinates.block<3,3>(0,0) = root->toLocalRotation;
     toRootCoordinates.block<3,1>(0,3) = -root->position;
     Eigen::Matrix4d toWorldCoordinates = toRootCoordinates;
-    toWorldCoordinates.inverse();
+    toWorldCoordinates.inverse();*/
 	Invalidate();
-    int dim = planner::GetNumChildren(root);
-    std::vector<Node*> effectors = planner::GetEffectors(root, true);
+    int dim = full ? planner::GetNumNodes(root)  :  planner::GetNumChildren(root);
+    std::vector<Node*> effectors = full ? planner::AsVector(root) : planner::GetEffectors(root, true);
     jacobian_ = MatrixX(3 * effectors.size(), dim);
+    jacobian_.setZero(3 * effectors.size(),dim);
     // Traverse this to find all end effectors
     for(int i=0; i!=effectors.size(); ++i)
     {
         Node* nodeEffector = effectors[i];
         Node* currentNode = nodeEffector;
         Eigen::Vector3d effectorPos = nodeEffector->position;
-        do
+        while(currentNode->id != root->id)
         {
             currentNode = currentNode->parent;
             Eigen::Vector3d siMinuspj = effectorPos -
                     currentNode->position; //);
             Eigen::Vector3d vj = ComputeRotationAxis(currentNode, root);//root->toLocalRotation * currentNode->axis; // ComputeRotationAxis(currentNode); //currentNode->toWorldRotation * currentNode->axis;
+            //std::cout << "cross product " << std::endl << vj.cross(siMinuspj) << std::endl;
             jacobian_.block<3,1>(3*i,currentNode->id - root->id) = vj.cross(siMinuspj);
         }
-        while(currentNode->id != root->id);
     }
+}
+
+void OnePositionJacobian(planner::Node* root, planner::Node* position, int i)
+{
+    /*Node* currentNode = position;
+    Eigen::Vector3d effectorPos = nodeEffector->position;
+    while(currentNode->id != root->id)
+    {
+        currentNode = currentNode->parent;
+        Eigen::Vector3d siMinuspj = effectorPos -
+                currentNode->position; //);
+        Eigen::Vector3d vj = ComputeRotationAxis(currentNode, root);//root->toLocalRotation * currentNode->axis; // ComputeRotationAxis(currentNode); //currentNode->toWorldRotation * currentNode->axis;
+        jacobian_.block<3,1>(3*i,currentNode->id - root->id) = vj.cross(siMinuspj);
+    }*/
 }
 
 void Jacobian::GetEllipsoidAxes(Eigen::Vector3d &u1, Eigen::Vector3d &u2, Eigen::Vector3d &u3)
