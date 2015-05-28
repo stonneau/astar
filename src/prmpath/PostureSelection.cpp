@@ -2,7 +2,7 @@
 #include "tools/MatrixDefs.h"
 #include "ik/IKSolver.h"
 #include "ik/VectorAlignmentConstraint.h"
-#include "equilibrium/DynamicStability.h"
+//#include "equilibrium/DynamicStability.h"
 #include "collision/Collider.h"
 #include "smoothing/smooth.h"
 #include "tools/Timer.h"
@@ -20,7 +20,8 @@ namespace //equilibirum stuff
 
 bool Stable(planner::State* state)
 {
-    equilib::T_Transform contacts;
+    return false;
+    /*equilib::T_Transform contacts;
     equilib::T_Transform graps;
     std::vector<Eigen::Vector3d>::iterator posit = state->contactLimbPositions.begin();
     std::vector<Eigen::Vector3d>::iterator normit = state->contactLimbPositionsNormals.begin();
@@ -48,7 +49,7 @@ bool Stable(planner::State* state)
     {
         maxGraspForces(i)=600;
     }
-    return equilib::CheckEquilibrium(contacts, graps, maxGraspForces, acceleration, comLocation, 5, 1, 600);
+    return equilib::CheckEquilibrium(contacts, graps, maxGraspForces, acceleration, comLocation, 5, 1, 600);*/
 }
 
 /*
