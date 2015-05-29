@@ -148,7 +148,7 @@ namespace
     void GetEffectorsRec(Node* node, std::vector<Node*>& effectors, bool onePerLimb)
     {
         bool ok = (node->children.empty() && !onePerLimb) || node->tag.find("effector") != std::string::npos
-                || node->tag.find("foot_x") != std::string::npos;
+                || node->tag.find("foot_x") != std::string::npos || node->tag.find("endsite") != std::string::npos;
         if(ok)
         {
             effectors.push_back(node);

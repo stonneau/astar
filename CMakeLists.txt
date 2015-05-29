@@ -32,6 +32,7 @@ if(OPENMP_FOUND)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 endif()
 
+add_subdirectory (src/bvh_to_urdf)
 add_subdirectory (src/prm)
 add_subdirectory (src/prmpath)
 add_subdirectory (src/retarget)

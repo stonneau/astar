@@ -537,7 +537,8 @@ void start()
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/truck_test.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/race2.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/between.scen");
-    cScenario = planner::CompleteScenarioFromFile("../rami/scenarios/statestest.scen");
+    cScenario = planner::CompleteScenarioFromFile("../rami/scenarios/rami.scen");
+    //cScenario = planner::CompleteScenarioFromFile("../rami/scenarios/statestest.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/race_climb.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/climbing.scen");
     //cScenario = planner::CompleteScenarioFromFile("../humandes/fullscenarios/zoey.scen");
@@ -628,7 +629,7 @@ void start()
     savebvh ="../tests/test.path";
     itompexporter.Save(savebvh);
 
-    InitFullClampling();
+    //InitFullClampling();
 }
 
 void WriteNodeLine(const Eigen::Matrix3d& rotation, const Eigen::Vector3d& position, std::stringstream& outstream)
@@ -728,6 +729,15 @@ void SaveRetarget()
     retargeter.Save("./retarget.bvh");
 }
 
+void DumpIds(planner::Node* current)
+{
+    std::cout << current->tag << "  " << current->id << std::endl;
+    for(int i =0; i < current->children.size(); ++i)
+    {
+        DumpIds(current->children[i]);
+    }
+}
+
 void command(int cmd)   /**  key control function; */
 {
     //Eigen::Vector3d target = planner::GetChild(cScenario->robot, "torso_x_joint")->toWorldRotation* Eigen::Vector3d(0.5,0.5,0.5);
@@ -807,7 +817,7 @@ void command(int cmd)   /**  key control function; */
             current ++; if(states.size() <= current) current = states.size()-1;
             //cScenario->robot->SetConfiguration(cScenario->path[current]);
             cScenario->robot = states[current]->value;
-            std::cout << "state stable" << states[current]->stable << std::endl;
+            DumpIds(states[current]->value->node);
             //currentSample = 0;
             //samples = planner::GetPosturesInContact(*cScenario->robot, cScenario->limbs[0], cScenario->limbSamples[0], cScenario->scenario->objects_ );
             break;

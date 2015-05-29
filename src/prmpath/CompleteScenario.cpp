@@ -628,7 +628,10 @@ namespace
         }
         // todo read balance
         // read robot rotation and position
-        res->value->currentRotation = readmatrix3(values, c_id); c_id += 9;
+        res->value->currentRotation = readmatrix3(values, c_id);
+        c_id += 9;
+
+        std::cout << "rotation \n " << res->value->currentRotation << std::endl;
         res->value->SetPosition(readvector(values, c_id)); c_id += 3;
         LoadNodeRec(res->value->node,values, c_id);
         res->value->node->Update();
