@@ -12,6 +12,7 @@
 #include <Eigen/Dense>
 
 #include "create_obj_box.h"
+#include "generate_contacts.h"
 #include "MatrixDefs.h"
 
 struct Node
@@ -486,7 +487,7 @@ int main(int argc, char *argv[])
 {
     if(argc < 3 )
 	{
-        std::cout << "usage is 'bvhfilename' 'urdffilename' " << std::endl;
+        std::cout << "usage is 'bvhfilename' 'urdffilename' 'scenariopath' " << std::endl;
 		return -1;
 	}
 
@@ -495,7 +496,8 @@ int main(int argc, char *argv[])
     std::stack<Node*> stack;
     std::string bvhpath = argv[1];
     std::string urdfpath = argv[2];
-    std::string scale = (argc > 3)  ? (argv[3]) : (std::string ("1"));
+    std::string scenariopath = argv[3];
+    std::string scale = (argc > 4)  ? (argv[4]) : (std::string ("1"));
     double s = StrToD(scale);
     std::ifstream myfile (bvhpath);
     // first parse bvh and get structure
@@ -546,5 +548,7 @@ int main(int argc, char *argv[])
         std::cout << "Can not open outfile " << states << std::endl;
         return false;
     }
+    //generate contacts
+    gen_contacts::GenerateContacts(scenariopath, states);
     return 0;
 }
