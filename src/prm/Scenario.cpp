@@ -60,7 +60,8 @@ Scenario::Scenario(const std::string& filepath, double scaleEnglobing)
 			}
 			else if(line.find("OBJECT = ") == 0)
 			{
-                ParseObj(line.substr(9), objects_);
+                ParseObj(line.substr(9), objects_, objDictionnary);
+                objects_.clear();
 			}
             else if(line.find("OBJECTCONTACT = ") == 0)
             {

@@ -13,6 +13,7 @@
 
 #include "prm/SimplePRM.h"
 #include "collision/Object.h"
+#include "collision/ObjectDictionary.h"
 
 #include <exception>
 #include <string>
@@ -62,6 +63,7 @@ struct Scenario
     Object* point_;
 	Model model_;
 	SimplePRM* prm;
+    ObjectDictionary objDictionnary;
 };
 
 } //namespace planner

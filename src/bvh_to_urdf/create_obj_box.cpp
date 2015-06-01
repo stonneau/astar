@@ -107,6 +107,8 @@ namespace
         Eigen::Matrix3d rotation; // = matrices::Rotx3(M_PI);
         Eigen::Vector3d nAxis = axis;
         nAxis.normalize();
+        /*weird magic rotations that fit the object. To be honest
+        I don't really know why I need the additional pi rotation*/
         matrices::GetRotationMatrix(nAxis, Eigen::Vector3d(0,1,0), rotation);
         double isX = std::abs(nAxis.dot(Eigen::Vector3d(1,0,0)));
         double isZ = std::abs(nAxis.dot(Eigen::Vector3d(0,0,1)));

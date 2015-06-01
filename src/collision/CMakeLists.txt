@@ -17,6 +17,8 @@ endif ( MSVC )
 set(SOURCES
     ParserObj.h
     ParserObj.cpp
+    ObjectDictionary.h
+    ObjectDictionary.cpp
     Object.h
     Object.cpp
     Sphere.h

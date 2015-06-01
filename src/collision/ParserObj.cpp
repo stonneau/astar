@@ -134,10 +134,11 @@ namespace planner
 	struct ParserPImpl
 	{
 
-        ParserPImpl()
+        ParserPImpl(planner::ObjectDictionary& dic)
             : modelOn_(false)
             , currentModel_(0)
             , currentIndex_(-1)
+            , dic_(dic)
         {
             // NOTHING
         }
@@ -152,22 +153,27 @@ namespace planner
             if(ndonnees >= 3 && ndonnees <=4) // only triangles or quad
             {
                 PQP_REAL points [4][3];
+                ObjectTri objtri;
                 for(int i=0; i< ndonnees; ++i)
                 {
                     long int idx = (strtol(termes[i*3].c_str(),NULL, 10)) - 1;
                     Vector3toArray(points_[(int)idx], points[i]);
+                    dic_.objectsLinkedToVertex[idx].push_back(dic_.dic.size());
+                    objtri.points[i] = idx;
                 }
                 currentModel_->AddTri(points[0], points[1], points[2], ++currentIndex_);
+                dic_.dic.back().triangles_.push_back(objtri);
                 if(ndonnees == 4)
                 {
                     currentModel_->AddTri(points[0], points[2], points[3], ++currentIndex_);
                 }
                 long int idx = (strtol(termes[2].c_str(),NULL, 10)) - 1;
                 currentNormals_.push_back(normals_[idx]);
+                dic_.dic.back().normals_.push_back(currentNormals_.back());
             }
         }
 
-		T_Vector3 points_;
+        T_Vector3 points_;
 		T_Vector3 normals_;
         T_Vector3 currentNormals_;
         std::vector<T_Vector3> objectnormals;
@@ -175,6 +181,9 @@ namespace planner
         bool modelOn_;
         PQP_Model* currentModel_;
         long int currentIndex_;
+
+        //dictionnary
+        planner::ObjectDictionary& dic_;
 	};
 }
 
@@ -196,24 +205,32 @@ Object::T_Object planner::ParseObj(const std::string& filename, const bool asOne
     return objects;
 }
 
+
 void planner::ParseObj(const std::string& filename, std::vector<Object*>& objects, const bool asOneObject, double scaleEnglobing)
 {
-    ParserPImpl pImpl;
-	string line;
-	ifstream myfile (filename);
-	std::vector<std::string> lines;
+    ObjectDictionary dic;
+    ParseObj(filename, objects,dic,asOneObject,scaleEnglobing);
+}
+
+void planner::ParseObj(const std::string& filename, std::vector<Object*>& objects, ObjectDictionary& dic, const bool asOneObject, double scaleEnglobing)
+{
+    ParserPImpl pImpl(dic);
+    string line;
+    ifstream myfile (filename);
+    std::vector<std::string> lines;
     std::vector<std::string> names;
     bool firstInit = false;
     std::string current_name = "foo";
-	if (myfile.is_open())
-	{
-		while ( myfile.good() )
-		{
-			getline (myfile, line);
+    if (myfile.is_open())
+    {
+        while ( myfile.good() )
+        {
+            getline (myfile, line);
             // new model
             if((line.find("o ") == 0 || line.find("g ") == 0) && (!asOneObject || !firstInit))
             {
                 PQP_Model* m = new PQP_Model;
+                dic.dic.push_back(ObjectData());
                 if(pImpl.modelOn_)
                 {
                     // TODO ADD MATRIX !
@@ -233,23 +250,25 @@ void planner::ParseObj(const std::string& filename, std::vector<Object*>& object
                 pImpl.currentModel_ = m;
                 pImpl.currentModel_->BeginModel();
             }
-			if(line.find("v ") == 0)
-			{
-				char x[255],y[255],z[255];
+            if(line.find("v ") == 0)
+            {
+                char x[255],y[255],z[255];
                 sscanf(line.c_str(),"v %s %s %s",x,y,z);
                 pImpl.points_.push_back(scaleEnglobing * Vector3(strtod (x, NULL), strtod(y, NULL), strtod(z, NULL)));
-			}
-			if(line.find("vn ") == 0)
-			{
-				char x[255],y[255],z[255];
+                dic.points.push_back(pImpl.points_.back());
+                dic.objectsLinkedToVertex.push_back(std::vector<std::size_t>());
+            }
+            if(line.find("vn ") == 0)
+            {
+                char x[255],y[255],z[255];
                 sscanf(line.c_str(),"vn %s %s %s",x,y,z);
                 pImpl.normals_.push_back(Vector3(strtod (x, NULL), strtod(y, NULL), strtod(z, NULL)));
-			}
-			if(line.find("f ") == 0)
+            }
+            if(line.find("f ") == 0)
             {
                 pImpl.CreatePQPObstacle(line);
-			}
-		}
+            }
+        }
         myfile.close();
         if(pImpl.modelOn_)
         {
@@ -267,7 +286,7 @@ void planner::ParseObj(const std::string& filename, std::vector<Object*>& object
         {
             objects.push_back(new Object(*it, pImpl.objectnormals[i], names[i]));
         }
-	}
+    }
     else
     {
         std::cout << "file not found:" << filename << std::endl;
