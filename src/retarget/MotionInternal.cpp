@@ -279,4 +279,41 @@ MotionI* efort::LoadMotionI(CompleteScenario *scenario)
     return motion;
 }
 
+namespace
+{
+    void newContact(std::vector<Contact>& contacts, const Contact& currentContact)
+    {
+        for(std::vector<Contact>::const_iterator cit = contacts.begin();
+            cit != contacts.end();++cit)
+        {
+            if(currentContact.equals(*cit)) return;
+        }
+        contacts.push_back(currentContact);
+    }
+}
+
+void efort::DumpMotion(const MotionI* motion)
+{
+    std::vector<Contact> contacts;
+    for(std::vector<Frame>::const_iterator fit = motion->frames_.begin();
+        fit != motion->frames_.end(); ++fit)
+    {
+        for(std::vector<Contact>::const_iterator cit = (*fit).contacts_.begin();
+            cit != (*fit).contacts_.end();++cit)
+        {
+            newContact(contacts,*cit);
+        }
+    }
+    for(std::vector<Contact>::const_iterator cit = contacts.begin();
+        cit != contacts.end();++cit)
+    {
+        std::cout << "Contact" << std::endl;
+        std::cout << "\t limb" << cit->limbIndex_ << std::endl;
+        std::cout << "\t startFrame" << cit->startFrame_ << std::endl;
+        std::cout << "\t endFrame_" << cit->endFrame_ << std::endl;
+        std::cout << "\t worldPosition_ \n" << cit->worldPosition_ << std::endl;
+        std::cout << "\t " << std::endl;
+    }
+}
+
 

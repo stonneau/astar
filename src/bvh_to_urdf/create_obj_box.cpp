@@ -105,9 +105,19 @@ namespace
     {
         //compute rotation matrix around axis
         Eigen::Matrix3d rotation; // = matrices::Rotx3(M_PI);
-        matrices::GetRotationMatrix(axis, Eigen::Vector3d(0,1,0), rotation);
-        rotation = matrices::Rotx3(M_PI) * rotation;
-
+        Eigen::Vector3d nAxis = axis;
+        nAxis.normalize();
+        matrices::GetRotationMatrix(nAxis, Eigen::Vector3d(0,1,0), rotation);
+        double isX = std::abs(nAxis.dot(Eigen::Vector3d(1,0,0)));
+        double isZ = std::abs(nAxis.dot(Eigen::Vector3d(0,0,1)));
+        if(isX > isZ)
+        {
+            rotation = matrices::Rotx3(M_PI) * rotation;
+        }
+        else
+        {
+            rotation = matrices::Rotz3(M_PI) * rotation;
+        }
         std::vector<Eigen::Vector3d> oPoints = get_points();
         std::vector<Eigen::Vector3d> oNnormals = get_normals();
         std::vector<Eigen::Vector3d> points, normals;

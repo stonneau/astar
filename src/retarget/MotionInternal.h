@@ -32,6 +32,12 @@ struct Contact
     Eigen::Vector3d surfaceNormal_;
     std::size_t objectId_;
     std::size_t triangleId_;
+
+    bool equals(const Contact& other) const
+    {
+        return limbIndex_ == other.limbIndex_ && startFrame_ == other.startFrame_
+                && endFrame_ == other.endFrame_;
+    }
 };
 
 struct Frame
@@ -53,5 +59,6 @@ private:
 };
 
 MotionI* LoadMotionI(planner::CompleteScenario* scenario);
+void DumpMotion(const MotionI* motion);
 } //namespace efort
 #endif //Retargeter

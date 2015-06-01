@@ -577,12 +577,13 @@ void start()
     states = cScenario->states.empty() ? planner::PostureSequence(*cScenario,3)
                                        : cScenario->states;
     motion = efort::LoadMotionI(cScenario);
+    efort::DumpMotion(motion);
     objectm = new planner::Robot(*cScenario->robot);
     objectm->SetPosition(Eigen::Vector3d(0,0,0));
     objectMotion.PushStructure(objectm);
     retargeter.PushStructure(objectm);
     std::size_t ifr = 0;
-    for(std::vector<efort::Frame>::const_iterator fit = motion->frames_.begin();
+    /*for(std::vector<efort::Frame>::const_iterator fit = motion->frames_.begin();
         fit != motion->frames_.end(); ++fit, ++ifr)
     {
         std::cout << "frame number " << ifr << std::endl;
@@ -595,7 +596,7 @@ void start()
             std::cout << "\t end " << ct.endFrame_ << std::endl;
             std::cout << "\t target " << ct.worldPosition_ << std::endl;
         }
-    }
+    }*/
     std::cout << "done animating " << path.size() << std::endl;
     for(int i = 0; i< states.size(); ++i)
     {
@@ -628,6 +629,7 @@ void start()
     }
     savebvh ="../tests/test.path";
     itompexporter.Save(savebvh);
+
 
     //InitFullClampling();
 }
@@ -839,7 +841,7 @@ void command(int cmd)   /**  key control function; */
         std::cout << " SAMPLES" << samples.size() << std::endl;
             if(samples.empty()) return;
             currentSample ++; if(samples.size() <= currentSample) currentSample = samples.size()-1;
-            planner::sampling::LoadSample(*(samples[currentSample]),planner::GetChild(cScenario->robot, "upper_right_arm_z_joint"));
+            planner::sampling::LoadSample(*(samples[currentSample]),planner::GetChild(cScenario->robot, "RightArm_z_joint"));
             break;
         }
         break;
@@ -848,7 +850,7 @@ void command(int cmd)   /**  key control function; */
         std::cout << " SAMPLES" << samples.size() << std::endl;
             if(samples.empty()) return;
             currentSample --; if(currentSample < 0) currentSample = 0;
-            planner::sampling::LoadSample(*(samples[currentSample]),planner::GetChild(cScenario->robot, "upper_right_arm_z_joint"));
+            planner::sampling::LoadSample(*(samples[currentSample]),planner::GetChild(cScenario->robot, "RightArm_z_joint"));
             break;
         }
         case 'm' :
@@ -858,25 +860,25 @@ void command(int cmd)   /**  key control function; */
         }
         case 'a' :
     {
-            cScenario->scenario->objects_[0]->SetPosition( cScenario->scenario->objects_[0]->GetPosition() + Eigen::Vector3d(0.1,0,0));
+            cScenario->scenario->objects_[1]->SetPosition( cScenario->scenario->objects_[1]->GetPosition() + Eigen::Vector3d(0.1,0,0));
             Retarget(Eigen::Vector3d(0.1,0,0));
         break;
     }
         case 'z' :
     {
-            cScenario->scenario->objects_[0]->SetPosition( cScenario->scenario->objects_[0]->GetPosition() - Eigen::Vector3d(0.1,0,0));
+            cScenario->scenario->objects_[1]->SetPosition( cScenario->scenario->objects_[1]->GetPosition() - Eigen::Vector3d(0.1,0,0));
             Retarget(Eigen::Vector3d(-0.1,0,0));
         break;
     }
         case 'e' :
     {
-            cScenario->scenario->objects_[0]->SetPosition( cScenario->scenario->objects_[0]->GetPosition() + Eigen::Vector3d(0,0.1,0));
+            cScenario->scenario->objects_[1]->SetPosition( cScenario->scenario->objects_[1]->GetPosition() + Eigen::Vector3d(0,0.1,0));
             Retarget(Eigen::Vector3d(0,0.1,0));
         break;
     }
         case 'r' :
     {
-            cScenario->scenario->objects_[0]->SetPosition( cScenario->scenario->objects_[0]->GetPosition() + Eigen::Vector3d(0,-0.1,0));
+            cScenario->scenario->objects_[1]->SetPosition( cScenario->scenario->objects_[1]->GetPosition() + Eigen::Vector3d(0,-0.1,0));
             Retarget(Eigen::Vector3d(0,-0.1,0));
     }
         break;
