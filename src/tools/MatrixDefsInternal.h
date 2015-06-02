@@ -4,8 +4,6 @@
 #ifndef _MATRIXDEFSINTERNAL
 #define _MATRIXDEFSINTERNAL
 
-#include <iostream>
-
 namespace matrices
 {
 
@@ -20,10 +18,7 @@ template<typename _Matrix_Type_>
 void PseudoInverseDLS(_Matrix_Type_& pinvmat,  numeric lambda)
 {
 	Eigen::JacobiSVD<_Matrix_Type_> svd(pinvmat, Eigen::ComputeFullU | Eigen::ComputeFullV);
-	VectorX m_sigma = svd.singularValues();
-
-    std::cout << " SIGMA \n" << m_sigma << std::endl;
-
+    VectorX m_sigma = svd.singularValues();
 // temp computation foireuse pour lambda
 // REF: must apply numerical filtering for the operation of robotic manipulators through kinematically singular ...
 	bool found = false; int i = m_sigma.rows() -1;
