@@ -8,7 +8,8 @@ using namespace planner;
 using namespace matrices;
 using namespace Eigen;
 
-Jacobian::Jacobian(Node* root, bool full)
+Jacobian::Jacobian(Node* root, double lambdaInv, bool full)
+    : lambdaInv_(lambdaInv)
 {
     ComputeJacobian(root, full);
 }
@@ -45,8 +46,6 @@ namespace
     }
 }
 
-//#include <iostream>
-
 void Jacobian::ComputeJacobian(Node* root, bool full)
 {
     /*Eigen::Matrix4d toRootCoordinates = Eigen::Matrix4d::Identity();
@@ -65,13 +64,13 @@ void Jacobian::ComputeJacobian(Node* root, bool full)
         Node* nodeEffector = effectors[i];
         Node* currentNode = nodeEffector;
         Eigen::Vector3d effectorPos = nodeEffector->position;
+
         while(currentNode->id != root->id)
         {
             currentNode = currentNode->parent;
             Eigen::Vector3d siMinuspj = effectorPos -
                     currentNode->position; //);
             Eigen::Vector3d vj = ComputeRotationAxis(currentNode, root);//root->toLocalRotation * currentNode->axis; // ComputeRotationAxis(currentNode); //currentNode->toWorldRotation * currentNode->axis;
-            //std::cout << "cross product " << std::endl << vj.cross(siMinuspj) << std::endl;
             jacobian_.block<3,1>(3*i,currentNode->id - root->id) = vj.cross(siMinuspj);
         }
     }
@@ -139,7 +138,7 @@ const MatrixX& Jacobian::GetJacobianInverse()
 	{
 		computeInverse_ = false;
 		jacobianInverse_ = jacobian_;
-		PseudoInverseDLS(jacobianInverse_, 1.f); // tmp while figuring out how to chose lambda
+        PseudoInverseDLS(jacobianInverse_, lambdaInv_); // tmp while figuring out how to chose lambda
 	}
 	return jacobianInverse_;
 }

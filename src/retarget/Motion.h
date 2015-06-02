@@ -9,11 +9,6 @@
 #ifndef _STRUCT_MOTION
 #define _STRUCT_MOTION
 
-
-#include "collision/Object.h" // this needs to move out
-
-#include <string>
-
 #include <Eigen/Dense>
 #include <memory>
 
@@ -30,6 +25,12 @@ struct Contact
     Eigen::Vector3d surfaceNormal_;
     std::size_t objectId_;
     std::size_t triangleId_;
+
+    bool equals(const Contact& other) const
+    {
+        return limbIndex_ == other.limbIndex_ && startFrame_ == other.startFrame_
+                && endFrame_ == other.endFrame_;
+    }
 };
 
 struct Frame
@@ -38,11 +39,11 @@ struct Frame
     std::vector<Contact> contacts_;
 };
 
+typedef std::vector<std::pair<std::size_t, Eigen::Vector3d> > T_PointReplacement;
+
 struct Motion
 {
-    Frame Retarget(const std::size_t /*frameid*/) const; //tmp: waht for objs ?
-    Frame Retarget(const std::size_t /*frameid*/, const std::vector<Eigen::Vector3d>& /*target*/, planner::Object::T_Object& objects) const; //tmp: waht for objs ?
-    std::vector<Frame> Retarget(const std::vector<Eigen::VectorXd>& frameConfigurations, planner::Object::T_Object& objects) const;
+    Eigen::VectorXd Retarget(const std::size_t frameid, const Eigen::VectorXd& frameConfiguration, const T_PointReplacement& objectModifications) const;
 
     std::vector<Frame> frames_;
 private:

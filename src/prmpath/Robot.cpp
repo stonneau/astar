@@ -165,10 +165,18 @@ namespace
 
     void AsVectorRec(Node* node, std::vector<Node*>& effectors)
     {
+        Eigen::Vector3d zero = Eigen::Vector3d::Zero();
+        if(node->offset != zero)
+        {
+            while(node->children.size() == 1 && node->children[0]->offset ==zero)
+            {
+                node = node->children[0];
+            }
+        }
         effectors.push_back(node);
-        bool ok =  node->tag.find("effector") != std::string::npos
+       /* bool ok =  node->tag.find("effector") != std::string::npos
                 || node->tag.find("foot_x") != std::string::npos;
-        //if(ok) return;
+        //if(ok) return;*/
         for(std::vector<Node*>::iterator it = node->children.begin();
             it != node->children.end(); ++it)
         {
@@ -187,7 +195,15 @@ std::vector<Node*> planner::GetEffectors(Node* node, bool onePerLimb)
 std::vector<Node*> planner::AsVector(Node* node)
 {
     std::vector<Node*> effectors;
-    AsVectorRec(node, effectors);
+    for(int i =0; i < 2; ++i)
+    {
+        node = node->children[0]; // removing rotation
+    }
+    for(std::vector<Node*>::iterator it = node->children.begin();
+        it != node->children.end(); ++it)
+    {
+        AsVectorRec(*it, effectors);
+    }
     return effectors;
 }
 
@@ -832,10 +848,13 @@ Eigen::VectorXd planner::AsConfiguration(Robot* robot)
 
 void AsPositionRec(planner::Node* node, Eigen::VectorXd& condiguration, std::size_t& cid)
 {
-    condiguration.block<3,1>(cid,0) = node->position;
-    cid += 3;
-    bool ok =  node->tag.find("effector") != std::string::npos
-            || node->tag.find("foot_x") != std::string::npos;
+    if(node->offset != Eigen::Vector3d::Zero())
+    {
+        condiguration.block<3,1>(cid,0) = node->position;
+        cid += 3;
+    }
+    /*bool ok =  node->tag.find("effector") != std::string::npos
+            || node->tag.find("foot_x") != std::string::npos;*/
     //if(!ok)
     {
         for(std::vector<Node*>::const_iterator cit = node->children.begin();
@@ -852,5 +871,5 @@ Eigen::VectorXd planner::AsPosition(Node* robot)
     Eigen::VectorXd res(size);
     std::size_t cid = 0;
     AsPositionRec(robot, res, cid);
-    return res;
+    return res.block(0,0,cid,1);
 }

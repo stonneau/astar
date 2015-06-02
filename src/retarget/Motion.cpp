@@ -4,6 +4,9 @@
 
 #include "collision/Sphere.h"
 #include "prmpath/CompleteScenario.h"
+#include "prmpath/ik/IKSolver.h"
+#include "prmpath/ik/VectorAlignmentConstraint.h"
+
 
 struct efort::PImpl
 {
@@ -31,34 +34,122 @@ struct efort::PImpl
 using namespace efort;
 using namespace planner;
 
-Frame Motion::Retarget(const std::size_t frameid) const
+namespace
 {
-    // TODO
-    Frame frame;
-    return frame;
+    Object* GetEffector(Node* limb)
+    {
+        if(limb->children.size() != 0)
+        {
+            Object* res = GetEffector(limb->children[0]);
+            if(res) return res;
+        }
+        return limb->current;
+    }
+
+    bool LimbColliding(Node* limb, planner::Object::T_Object& obstacles, bool effector = true)
+    {
+        if( limb->current && ((effector || limb->current != GetEffector(limb)) && limb->current->IsColliding(obstacles)))
+        {
+                return true;
+        }
+        if(limb->children.size() == 0)
+            return false;
+        return LimbColliding(limb->children[0], obstacles);
+    }
+
+    void SolveIk(Node* limb, const Eigen::Vector3d& target, const Eigen::Vector3d& normal)
+    {
+        ik::IKSolver solver;//(0.001f, 0.001f,0.1f);
+        ik::VectorAlignmentConstraint constraint(normal);
+        std::vector<ik::PartialDerivativeConstraint*> constraints;
+        int limit = 1000;
+        int limit2 = 200;
+        while(limit > 0 && !solver.StepClamping(limb, target, normal, constraints, true))
+        {
+            limit--;
+        }
+        constraints.push_back(&constraint);
+        while(limit2 > 0 )
+        {
+            limit2--;
+            solver.StepClamping(limb, target, normal, constraints, true);
+        }
+    }
+
+    //std::vector<planner::State*> propagate()
+
+    // false if joint limits or obstacle not respected
+    bool ComputeState(const Eigen::VectorXd& configuration, planner::State* state)
+    {
+        return false;
+    }
+
 }
 
-Frame Motion::Retarget(const std::size_t frameid, const std::vector<Eigen::Vector3d>& targets, Object::T_Object &objects) const
+/*planner::State* Motion::Retarget(const std::size_t frameid, const Eigen::VectorXd& frameConfiguration, const T_PointReplacement& objectModifications)
+//(const std::size_t frameid, const std::vector<Eigen::Vector3d>& targets, Object::T_Object &objects) const
 {
+    std::vector<Eigen::Vector3d> targets = GetTargets();
     const Frame& cframe = frames_[frameid];
+    planner::Robot* robot = new planner::Robot( *pImpl_->states_[frameid]->value);
+    planner::State* state = new planner::State();
+    state->value = robot;
     std::size_t id(0);
     for(std::vector<Contact>::const_iterator cit = cframe.contacts_.begin();
         cit !=cframe.contacts_.end(); ++cit, ++id)
     {
         // get corresponding robot
-        planner::Robot* robot = pImpl_->states_[frameid]->value;
-        Sphere sphereCurrent(robot->currentRotation * pImpl_->cScenario_->limbRoms[cit->limbIndex_].center_ + robot->currentPosition,
+
+        Node* limb = planner::GetChild(robot,pImpl_->cScenario_->limbs[cit->limbIndex_]->id);
+        Sphere sphereCurrent(robot->currentRotation * robot->constantRotation.transpose() * pImpl_->cScenario_->limbRoms[cit->limbIndex_].center_ + robot->currentPosition,
                               pImpl_->cScenario_->limbRoms[cit->limbIndex_].radius_ * 1.5);
+        bool contactMaintained(false);
         if(Contains(sphereCurrent, targets[id]))
         {
             std::cout << "in range" << std::endl;
+            SolveIk(limb, targets[id], cit->surfaceNormal_);
+            //if(!LimbColliding(limb,objects,false))
+            {
+                contactMaintained = true;
+                state->contactLimbPositions.push_back(targets[id]);
+                state->contactLimbPositionsNormals.push_back(cit->surfaceNormal_);
+                state->contactLimbs.push_back(cit->limbIndex_);
+            }
         }
-        else
+        if(!contactMaintained)
         {
-            std::cout << "out of rage" << std::endl;
+            Eigen::Vector3d position, normal;
+            std::cout << "out of rage " << limb->tag << std::endl;
+            std::vector<planner::Sphere*> dm;
+            planner::sampling::Sample* nc =
+                    planner::GetPosturesInContact(*robot, limb, pImpl_->cScenario_->limbSamples[cit->limbIndex_],
+                                                  objects,cit->surfaceNormal_,position, normal, *(pImpl_->cScenario_), dm);
+            if(nc)
+            {
+                std::cout << "trouve " << limb->tag << std::endl;
+                planner::sampling::LoadSample(*nc, limb);
+                SolveIk(limb, position, normal);
+                state->contactLimbPositions.push_back(position);
+                state->contactLimbPositionsNormals.push_back(normal);
+                state->contactLimbs.push_back(cit->limbIndex_);
+            }
+            else
+            {
+                nc = planner::GetCollisionFreePosture(*robot,limb, pImpl_->cScenario_->limbSamples[cit->limbIndex_],objects);
+                if(nc) planner::sampling::LoadSample(*nc, limb);
+            }
         }
     }
+    return state;
 }
+*/
+
+Eigen::VectorXd Motion::Retarget(const std::size_t frameid, const Eigen::VectorXd& frameConfiguration, const T_PointReplacement& objectModifications) const
+{
+    Eigen::VectorXd res;
+    return res;
+}
+
 
 namespace
 {
@@ -114,7 +205,7 @@ namespace
             sit_1 != pImpl->states_.end(); ++sit_1, ++numFrame)
         {
             Frame frame;
-            frame.configuration_ = planner::AsConfiguration((*sit_1)->value);
+            //frame.configuration_ = planner::AsConfiguration((*sit_1)->value);
             for(int i=0; i< pImpl->contacts_.size(); ++i)
             {
                 std::size_t id = contactids[numFrame][i];
@@ -129,7 +220,6 @@ namespace
         return res;
     }
 }
-
 
 Motion* efort::LoadMotion(const std::string& scenario)
 {

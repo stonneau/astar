@@ -12,7 +12,7 @@ class Node;
 class Jacobian {
 
 public:
-     Jacobian(planner::Node *root, bool full=false); // full is true if constraints will exist on all joint positions
+     Jacobian(planner::Node *root, double lambdaInv = 1.0, bool full=false); // full is true if constraints will exist on all joint positions
 	~Jacobian();
 
 private:
@@ -55,5 +55,6 @@ private:
     Eigen::MatrixXd Identitymin_;
     Eigen::JacobiSVD<Eigen::MatrixXd> svd_;
     Eigen::JacobiSVD<Eigen::MatrixXd> svdProduct_;
+    const double lambdaInv_;
 };
 #endif //_CLASS_JACOBIAN

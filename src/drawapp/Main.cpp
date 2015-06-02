@@ -403,11 +403,11 @@ namespace
 
     void PerformIkFullBodyStep(planner::Node* limb)
     {
-        planner::Node * tg = limb;
-        for(int i=0; i<9; ++i)
+        planner::Node * tg = limb->children[0];
+        /*for(int i=0; i<9; ++i)
         {
             tg = tg->children[0];
-        }
+        }*/
        ikSolverPositionConstraints.StepClamping(tg, targetIk);
        //ikSolverPositionConstraints.StepClamping(planner::GetChild(cScenario->robot, "upper_right_arm_z_joint"), targetIk);
     }
@@ -447,23 +447,28 @@ void InitFullClampling()
         targetIk(i) +=0.1 * i;
     }*/
     //planner::Node* messup = planner::GetChild(cScenario->robot, "upper_right_arm_z_joint");
-    planner::Node * messup = rob->node;
-    for(int i=0; i<9; ++i)
+    planner::Node * messup = rob->node->children[0];
+    /*for(int i=0; i<9; ++i)
     {
         messup = messup->children[0];
-    }
+    }*/
     std::cout << "TAG " << messup->tag << messup->children.size() << std::endl;
-    planner::Node * messup2 = messup->children[1];
+    //planner::Node * messup2 = messup->children[1];
+
     targetIk = planner::AsPosition(messup);
+    for(int i =18; i < 27; i=i+3)
+    {
+        targetIk(i) +=0.1;
+    }
     //targetIk = planner::AsPosition(planner::GetChild(cScenario->robot, "upper_right_arm_z_joint"));
     //planner::sampling::Sample* save = new planner::sampling::Sample(messup);
     //for(int i=0; i<6; ++i)
-    {
+    /*{
         messup = messup->children[0];
-    }
-    messup->children[0]->value = -0.6;
-    messup2->children[0]->children[0]->value = 0.6;
-    messup->Update();
+    }*/
+   // messup->children[0]->value = -0.6;
+    //messup2->children[0]->children[0]->value = 0.6;
+   // messup->Update();
     //planner::sampling::LoadSample(*save,planner::GetChild(cScenario->robot, "upper_right_arm_z_joint"));
 }
 }
@@ -631,7 +636,7 @@ void start()
     itompexporter.Save(savebvh);
 
 
-    //InitFullClampling();
+    InitFullClampling();
 }
 
 void WriteNodeLine(const Eigen::Matrix3d& rotation, const Eigen::Vector3d& position, std::stringstream& outstream)
