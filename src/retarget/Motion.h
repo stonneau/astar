@@ -14,8 +14,12 @@
 
 namespace efort
 {
+/// \class PImpl
+/// \brief private implementation of Motion class hiding internal object representation.
 struct PImpl;
 
+/// \class Contact
+/// \brief Characterization of a contact.
 struct Contact
 {
     int limbIndex_;
@@ -23,8 +27,8 @@ struct Contact
     int endFrame_;
     Eigen::Vector3d worldPosition_;
     Eigen::Vector3d surfaceNormal_;
-    std::size_t objectId_;
-    std::size_t triangleId_;
+    //std::size_t objectId_;
+    //std::size_t triangleId_;
 
     bool equals(const Contact& other) const
     {
@@ -33,6 +37,9 @@ struct Contact
     }
 };
 
+/// \class Frame
+/// \brief Characterization of a frame, to which is associated a configuration (list of all angle values
+/// of all joints), and a set of contacts, related to a limb.
 struct Frame
 {
     Eigen::VectorXd configuration_;
@@ -41,9 +48,23 @@ struct Frame
 
 typedef std::vector<std::pair<std::size_t, Eigen::Vector3d> > T_PointReplacement;
 
+/// \class Motion
+/// \brief Stores a complete motion for a character. Initialized with a configuration file.
+/// used to perform retargeting given environment modification.
+/// of all joints), and a set of contacts, related to a limb.
 struct Motion
 {
-    Eigen::VectorXd Retarget(const std::size_t frameid, const Eigen::VectorXd& frameConfiguration, const T_PointReplacement& objectModifications) const;
+    ///  \brief Performs motion retargeting at a give frame.
+    /// Given the joint positions, performs generalized IK to recompute joint angles.
+    /// Given environment modifications, performs contact retargetting if necessary.
+    /// Reasons are: invalid configuration, contact is out of range.
+    ///  \param frameid : considered frame number
+    ///  \param framePositions : 3d location of each joint of the character, computed by
+    /// relationship descriptors.
+    /// \param objectModifications : std::vector of pair indicating for a given vertice id, its new location
+    /// As first version, PQP object is recreated and retargetting is performed based on this new list.
+    ///  \param return : The updated 3d joint location of each joint after retargetting if necessary.
+    Eigen::VectorXd Retarget(const std::size_t frameid, const Eigen::VectorXd& framePositions, const T_PointReplacement& objectModifications) const;
 
     std::vector<Frame> frames_;
 private:
@@ -51,6 +72,8 @@ private:
     friend Motion* LoadMotion(const std::string& scenario);
 };
 
+/// \brief Loads a motion object from a given configuration file.
+/// Said file contains all information about character joint limits, Range Of Motion, obj file loaded.
 Motion* LoadMotion(const std::string& scenario);
 } //namespace efort
 #endif //_STRUCT_MOTION

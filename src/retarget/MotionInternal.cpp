@@ -70,8 +70,8 @@ namespace
         ik::IKSolver solver;//(0.001f, 0.001f,0.1f);
         ik::VectorAlignmentConstraint constraint(normal);
         std::vector<ik::PartialDerivativeConstraint*> constraints;
-        int limit = 2;
-        int limit2 = 2;
+        int limit = 0;
+        int limit2 = 0;
         while(limit > 0 && !solver.StepClamping(limb, target, normal, constraints, true))
         {
             limit--;

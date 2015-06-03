@@ -36,8 +36,8 @@ typedef std::vector<std::pair<std::size_t, Eigen::Vector3d> > T_PointReplacement
 
 struct ObjectDictionary
 {
-    planner::Object::T_Object recreate();
-    planner::Object::T_Object recreate(const T_PointReplacement& replacement);
+    planner::Object::T_Object recreate(const T_PointReplacement& replacement, const Object::T_Object &objects
+                                       , std::vector<std::size_t>& newObjectIds) const;
     std::vector<Eigen::Vector3d> points;
     std::vector<std::vector<std::size_t> > objectsLinkedToVertex;
     Dictionary dic;

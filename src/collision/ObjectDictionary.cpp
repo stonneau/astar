@@ -47,10 +47,9 @@ planner::Object* CreateObject(const ObjectData& data, const std::vector<Eigen::V
     return new planner::Object(m,data.normals_, data.name);
 }
 
-planner::Object::T_Object planner::ObjectDictionary::recreate(const T_PointReplacement &replacement)
+planner::Object::T_Object planner::ObjectDictionary::recreate(const T_PointReplacement &replacement, const planner::Object::T_Object& objects, std::vector<std::size_t>& newObjectIds) const
 {
     Object::T_Object res;
-    std::vector<size_t> modifiedObjects;
     // collect modified objects
     for(T_PointReplacement::const_iterator cit = replacement.begin();
         cit!=replacement.end(); ++cit)
@@ -59,23 +58,24 @@ planner::Object::T_Object planner::ObjectDictionary::recreate(const T_PointRepla
         for(std::vector<std::size_t>::const_iterator lit = linkedObjects.begin();
             lit != linkedObjects.end(); ++lit)
         {
-            if(std::find(modifiedObjects.begin(), modifiedObjects.end(), *lit) != modifiedObjects.end())
+            if(std::find(newObjectIds.begin(), newObjectIds.end(), *lit) == newObjectIds.end())
             {
-                modifiedObjects.push_back(*lit);
+                newObjectIds.push_back(*lit);
             }
         }
     }
 
-    for(std::vector<std::size_t>::const_iterator lit = modifiedObjects.begin();
-        lit != modifiedObjects.end(); ++lit)
+    for(std::size_t lit = 0; lit < objects.size(); ++lit)
     {
-        res.push_back(CreateObject(dic[*lit],points,replacement));
+        if(std::find(newObjectIds.begin(), newObjectIds.end(), lit) != newObjectIds.end())
+        {
+            res.push_back(CreateObject(dic[lit],points,replacement));
+        }
+        else
+        {
+            res.push_back(objects[lit]);
+        }
     }
     return res;
 }
 
-planner::Object::T_Object planner::ObjectDictionary::recreate()
-{
-    T_PointReplacement replacement;
-    return recreate(replacement);
-}
